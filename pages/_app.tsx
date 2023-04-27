@@ -6,7 +6,7 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import { CssBaseline, CssVarsProvider } from '@mui/joy';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import '../styles/GithubMarkdown.css';
+import '../styles/global.css';
 import { Brand } from '@/lib/brand';
 import { createEmotionCache, theme } from '@/lib/theme';
 

@@ -1,40 +1,24 @@
-import * as React from 'react';
-import Head from 'next/head';
-import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
-import { AppProps } from 'next/app';
-import { CacheProvider, EmotionCache } from '@emotion/react';
-import { CssBaseline, CssVarsProvider } from '@mui/joy';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-import '../styles/global.css';
-import { Brand } from '@/lib/brand';
-import { createEmotionCache, theme } from '@/lib/theme';
+import { appWithTranslation } from 'next-i18next';
+import type { AppProps } from 'next/app';
+import { Inter } from 'next/font/google';
+import '@/styles/globals.css';
 
+const inter = Inter({ subsets: ['latin'] });
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
+function App({ Component, pageProps }: AppProps<{}>) {
+  const queryClient = new QueryClient();
 
-export interface MyAppProps extends AppProps {
-  emotionCache?: EmotionCache;
-}
-
-export default function MyApp({ Component, emotionCache = clientSideEmotionCache, pageProps }: MyAppProps) {
-  const [queryClient] = React.useState(() => new QueryClient());
-  return <>
-    <CacheProvider value={emotionCache}>
-      <Head>
-        <title>{Brand.Title.Common}</title>
-        <meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no' />
-      </Head>
-      {/* Rect-query provider */}
+  return (
+    <div className={inter.className}>
+      <Toaster />
       <QueryClientProvider client={queryClient}>
-        <CssVarsProvider defaultMode='light' theme={theme}>
-          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
-          <Component {...pageProps} />
-        </CssVarsProvider>
+        <Component {...pageProps} />
       </QueryClientProvider>
-    </CacheProvider>
-    <VercelAnalytics debug={false} />
-  </>;
+    </div>
+  );
 }
+
+export default appWithTranslation(App);

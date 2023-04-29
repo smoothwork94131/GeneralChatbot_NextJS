@@ -1,19 +1,47 @@
 import { FC, useEffect } from 'react';
-import { Flex, Space } from '@mantine/core';
+import { Flex, Menu } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
-import { ROLE_GROUP } from '@/utils/app/const';
 import { RoleGroup } from '@/types/role';
-
+import { IconCaretDown } from '@tabler/icons-react';
 interface  Props {
     handleSelectRole: (index: number) => void;
     roleGroup: RoleGroup[]
-    selectedRole: RoleGroup,
+    selectedRole: RoleGroup;
+    isMobile: boolean;
+    handleShowSidebar: ()=>void;
 }
-const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole}) => {
+const RoleHome: FC<Props> = ({handleSelectRole, handleShowSidebar,roleGroup, selectedRole,isMobile}) => {
+    
     useEffect(() => {
-        
+
     });
     return (
+        isMobile?
+        <div>
+            <Menu openDelay={100} closeDelay={400}>
+                <Menu.Target>
+                    <Flex
+                        align="center"
+                    >
+                        <div>{selectedRole.name}</div>
+                        <IconCaretDown size={20}/>
+                    </Flex>
+                </Menu.Target>
+                <Menu.Dropdown>
+                    {
+                        roleGroup.map((item, index) =>
+                            <RoleMenu
+                                key={index}
+                                index={index}
+                                name={item.name}
+                                handleSelectRole={handleSelectRole}
+                                selectedRole={selectedRole}
+                            />
+                        )
+                    }
+                </Menu.Dropdown>
+            </Menu>
+        </div>:
         <Flex>
             {
                 roleGroup.map((item, index) =>
@@ -23,7 +51,6 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole}) => {
                         name={item.name}
                         handleSelectRole={handleSelectRole}
                         selectedRole={selectedRole}
-                        
                     />
                 )
             }
@@ -31,13 +58,22 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole}) => {
     )
 }
 
-interface TabInfo {
+interface RoleInfo {
     name: string,
     index: number,
     handleSelectRole: (index: number) =>void;
     selectedRole:RoleGroup
 }
-export const RoleTab = ({index, name, selectedRole, handleSelectRole}: TabInfo) => {
+
+
+export const RoleMenu = ({index, name, selectedRole, handleSelectRole}: RoleInfo) => {
+    return (
+        <Menu.Item  onClick={() => {handleSelectRole(index)}}>
+            {name}
+        </Menu.Item>
+    )
+}
+export const RoleTab = ({index, name, selectedRole, handleSelectRole}: RoleInfo) => {
     return (
         <div 
             className={`m-2 p-1 text-center cursor-pointer border-b-2 border-solid border-orange-${selectedRole.name == name?'600':'200'} hover:border-orange-600`}
@@ -61,4 +97,5 @@ export const RoleTab = ({index, name, selectedRole, handleSelectRole}: TabInfo) 
         </div>
     )
 }
+
 export default RoleHome;

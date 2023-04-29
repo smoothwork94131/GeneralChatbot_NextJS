@@ -17,7 +17,8 @@ const ChatInput:FC<Props> = ({ onSend }) => {
         setContent(value);
     };
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if(e.key == "Enter") {
+        if(e.key == "Enter" && !e.shiftKey) {
+            e.preventDefault();
             handleSend();
         }
     };
@@ -31,19 +32,15 @@ const ChatInput:FC<Props> = ({ onSend }) => {
     return (
         <div>
             <Flex
-                gap="xl"
                 justify="flex-start"
+                gap="xs"
             >
-                <div className='w-[70px]'>
+                <div className='w-[50px] pt-[10px]'>
                     <Image maw={30} mx="auto" radius="sd" src="icons/avatar_user.png" alt="chatgpt avatar" />
                 </div>
                 <Textarea
-                    className='w-full overflow-hidden min-h-[400px]'
-                    rightSection={
-                        <div className='cursor-pointer'>
-                            <IconSend size="1rem" className='display-block opacity-[0.5]' />
-                        </div>
-                    }
+                    className='w-full overflow-hidden'
+                    autosize
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     minRows={1} required

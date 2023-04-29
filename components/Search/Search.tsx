@@ -1,8 +1,13 @@
 import { Input } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-const Search = () =>{
+import { FC } from 'react';
+interface Props{
+    
+}
+const Search:FC<Props> = ({}) =>{
     return (
         <div className='pt-1'>
+            
             <Input
                 placeholder="Search"
                 rightSection={
@@ -11,6 +16,7 @@ const Search = () =>{
                     </div>
                 }
             />
+            
         </div>
     )
 }

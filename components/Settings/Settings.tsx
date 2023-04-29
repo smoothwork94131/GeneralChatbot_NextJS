@@ -4,7 +4,10 @@ import { IconLogout, IconMoon, IconStar, IconSun, IconTrash, IconUrgent, IconWor
 import SettingButton from './SettingButton';
 import HomeContext from '@/pages/index.context';
 
-const Settings: FC = () =>{
+interface Props {
+    isMobile: boolean;
+}
+const Settings:FC<Props> = ({isMobile}) =>{
     const {
         state: { colorScheme, lightMode },
         dispatch: homeDispatch,
@@ -21,7 +24,8 @@ const Settings: FC = () =>{
         });
     }
     return (
-        <div className='max-h-[300px] p-2 space-y-2 border-t-[1px] border-solid border-gray-400 m-t-1'>
+        <div className={
+                `${!isMobile?'p-2 space-y-2 border-t-[1px] border-solid border-gray-400 m-t-1':''}`}>
             <Flex
                 mih={50}
                 justify="flex-start"

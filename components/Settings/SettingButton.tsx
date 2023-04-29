@@ -8,7 +8,7 @@ interface Props {
 const SettingButton:FC<Props> = ({ text, icon, onClick }) => {
     return (
         <button
-            className="flex w-full cursor-pointer select-none items-center gap-3 rounded-md py-3 px-3 text-[14px] leading-3 text-black transition-colors duration-200 hover:bg-gray-300"
+            className="flex w-full cursor-pointer select-none items-center gap-3 rounded-md py-2 px-2 text-[14px] leading-3 text-black transition-colors duration-200 hover:bg-gray-300"
             onClick={onClick}
         >
             <div className='text-gray-500'>{icon}</div>

@@ -10,3 +10,11 @@ export interface Conversation {
     prompt: string;
     temperature: number;
 }
+
+export interface ChatBody {
+    model: string;
+    messages: Message[];
+    key: string;
+    prompt: string;
+    temperature: number;
+}

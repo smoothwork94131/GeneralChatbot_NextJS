@@ -11,9 +11,8 @@ export interface OpenaiInitialState {
     selectedRole: RoleGroup;
     selectedUtility: Utility;
     roleGroup: RoleGroup[]
-    selectedUtilityGroup: UtilitiesGroup[];
-    translateFrom: string
-    translateTo: string
+    selectedUtilityGroup: UtilitiesGroup[]; 
+    showSidebar: boolean;
 }
 export const initialState: OpenaiInitialState = {
     apiKey: '',
@@ -26,7 +25,6 @@ export const initialState: OpenaiInitialState = {
     selectedUtility: ROLE_GROUP[0].utilities_group[0].utilities[0],
     roleGroup: ROLE_GROUP,
     selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
-    translateFrom: 'Spanish',
-    translateTo: 'English'
+    showSidebar: true
 };
   

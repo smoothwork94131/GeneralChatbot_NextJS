@@ -1,5 +1,5 @@
-import { FC, useContext, useState } from 'react';
-import { Popover, Burger, Flex,  Image } from '@mantine/core';
+import { FC, useContext, useState   } from 'react';
+import { Popover, Burger, Flex, Header, Avatar, ColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Settings from '../Settings';
 import HomeContext from '@/pages/index.context';
@@ -8,13 +8,13 @@ import Role from '../Role';
 
 interface Props {
     handleShowSidebar: ()=>void;
+    openedSidebar: boolean,
     isMobile: boolean
 }
-const Header:FC<Props> = ({handleShowSidebar, isMobile}) => {
-    const [opened, { close, open }] = useDisclosure(false);
+const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile}) => {
     const [pop_open, setPopOpen] = useState(false);
     const {
-        state: { colorScheme },
+        state: {  },
     } = useContext(HomeContext) ;
 
     const {
@@ -23,38 +23,45 @@ const Header:FC<Props> = ({handleShowSidebar, isMobile}) => {
     } = useContext(OpenaiContext);
 
     return (
-        <div className={`p-2 pr-5 ${colorScheme =='dark'?'bg-zinc-700':'bg-gray-200'}`} >
+        
             <Flex
                 justify="space-between"
+                align='center'
             >
                 <Flex
                     align='center'
                     gap="sm"
                 >
-                    <Burger opened={false} onClick={handleShowSidebar}/>
+                    <Burger 
+                        opened={openedSidebar} 
+                        onClick={handleShowSidebar}
+                        mr="0"
+                        color='#858C94'
+                    />
                     <Role 
                         isMobile={isMobile}
                         handleSelectRole = {handleSelectRole}
                         roleGroup = {roleGroup}
                         selectedRole = {selectedRole}
-                        handleShowSidebar={handleShowSidebar}
                     />
                 </Flex>
-                
                 <Popover width={230} position="bottom" withArrow shadow="md"  opened={pop_open} >
                     <Popover.Target>
-                        <Image maw={30}  
+                        <Avatar 
                             onMouseEnter={()=>setPopOpen(true)} onMouseLeave={()=>setPopOpen(false)}
-                            radius="md" src="icons/avatar.png" alt="avatar" />
+                            src="icons/avatar.png" alt="avatar" 
+                            size={30}
+                            mt={5}
+                            mr={15}/>
                     </Popover.Target>
                     <Popover.Dropdown className='p-0'>
                         <Settings 
-                            isMobile={isMobile}
+                            isMobile={openedSidebar}
                         />
                     </Popover.Dropdown>
                 </Popover>
             </Flex>
-        </div>
+
     )
 }
-export default Header;
+export default OpenAiHeader;

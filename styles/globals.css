@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.mantine-lriu2q {
+    width: 80%;
+}

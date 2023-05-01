@@ -14,7 +14,7 @@ interface Props {
 
 const Sidebar: FC<Props> = ({isMobile, handleShowSidebar}) =>{
     const {
-        state: { selectedUtilityGroup, selectedUtility, showSidebar },
+        state: { selectedUtilityGroup, selectedUtility },
         handleSelectUtility,
     } = useContext(OpenaiContext);
     
@@ -23,26 +23,28 @@ const Sidebar: FC<Props> = ({isMobile, handleShowSidebar}) =>{
     } = useContext(HomeContext);
 
     return (
-        showSidebar?
-            <div className={`p-2 pt-2 flex flex-col w-[300px]  z-10 h-screen 
-                    ${colorScheme =="light"?'bg-[#F8F4F4]':'bg-[#1A1B1E]'}
-                    ${showSidebar?'block':'hidden'}
-                    ${isMobile?`fixed w-[270px]`:''}`
+
+        <div className={`p-2 pt-2 flex flex-col h-screen 
+                    ${colorScheme =="light"?'bg-[#F8F4F4]':'bg-[#1A1B1E]'}`
                 }
             >
-            {
-                showSidebar && isMobile?
+            {/* {
+                isMobile?
                 <Flex
                     align='center'
                     gap={'xs'}
+                    justify={'flex-start'}
                 >
                     <Search 
                     />
-                    <IconArrowLeft size={24} onClick={handleShowSidebar}/>
+                    <IconArrowLeft size={24} onClick={handleShowSidebar} color='#858C94'/>
                 </Flex>:
+                
                 <Search 
                 />
-            }
+            } */}
+            <Search 
+                />
             <Utils 
                 selectedUtilityGroup = { selectedUtilityGroup }
                 handleSelectUtility = {handleSelectUtility}
@@ -52,9 +54,8 @@ const Sidebar: FC<Props> = ({isMobile, handleShowSidebar}) =>{
                 !isMobile?
                 <Settings isMobile={isMobile}/>:<></>
             }
-            
-        </div>:
-        <></>
+        </div>
+
         
     )
 }

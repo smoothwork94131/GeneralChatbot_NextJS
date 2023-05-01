@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Flex, Space, Image } from '@mantine/core';
 import ChatInput from './ChatInput';
 import { Utility } from '@/types/role';
+import { ChatBody } from '@/types/chat';
 
 interface Props {
     selectedUtility: Utility;
@@ -9,7 +10,6 @@ interface Props {
 }
 
 const handleSend = async(message: string) => {
-   
     /*
     const controller = new AbortController();
     const chatBody: ChatBody = {
@@ -20,13 +20,15 @@ const handleSend = async(message: string) => {
             tokenLimit: 4000
         },
         messages: [
-            {role: 'user', content: message}
+            {role: 'user', content: message},
+            {role: 'assistant', content: message}
         ],
         key: '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',
-        prompt: updatedConversation.prompt,
-        temperature: updatedConversation.temperature,
+        prompt: "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+        temperature: 1,
     };
-
+    
+    const body = JSON.stringify(chatBody);
     const response = await fetch("api/chat", {
         method: 'POST',
         headers: {
@@ -35,7 +37,13 @@ const handleSend = async(message: string) => {
         signal: controller.signal,
         body,
     });
+    if (response.ok) {
+        const data = response.body;
+        const reader = data?.getReader();
+        const decoder = new TextDecoder();
+    }
     */
+
 }
 const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue}) =>{
     const componentUtilityInputs = () => {
@@ -44,7 +52,7 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 <input.component
                     key={input_key}
                     data={input.options}
-                    searchable={true}
+                    // searchable={true}
                     defaultValue={input.value}
                     className={input.style}
                     onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}

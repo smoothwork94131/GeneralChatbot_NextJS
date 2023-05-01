@@ -4,7 +4,6 @@ import {
     useState
 } from 'react';
 import { Flex, Image } from '@mantine/core';
-import { Input } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { Textarea } from '@mantine/core';
 interface Props {
@@ -44,6 +43,9 @@ const ChatInput:FC<Props> = ({ onSend }) => {
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     minRows={1} required
+                    rightSection={
+                        <IconSend size="1rem" style={{ display: 'block', opacity: 0.5 }} />
+                    }
                 />
             </Flex>
         </div>

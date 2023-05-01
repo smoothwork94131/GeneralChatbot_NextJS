@@ -2,29 +2,37 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { initialState, OpenaiInitialState } from './openai.state';
 import OpenaiContext from './openai.context';
 import  SideBar  from '@/components/Sidebar';
+import { useContext } from 'react';
 import  Chat  from '@/components/Chat';
-import { Flex } from '@mantine/core';
+import { AppShell, Header, Navbar } from '@mantine/core';
 import { ROLE_GROUP } from '@/utils/app/const';
 import { useEffect, useState } from 'react';
-import Header from '@/components/Header';
+import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
+import HomeContext from '@/pages/index.context';
 interface Props {
 
 }
 const OpenAi = ({
     
 }: Props) => {
-
+    
     const [isMobile, setIsMobile] = useState(false);
+    const [openedSidebar, setOpenedSiebar] = useState(false);
+
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
     });
     const {
         state: {
-            selectedRole, showSidebar
+            selectedRole
         },
         dispatch,
     } = contextValue;
+
+    const {
+        state: { colorScheme },
+    } = useContext(HomeContext) ;
 
     const handleSelectRole = (index: number) => {
         const updatedRole = ROLE_GROUP.filter(
@@ -55,6 +63,7 @@ const OpenAi = ({
                 value: updatedUtility[updatedUtility?.length - 1] 
             })    
         }
+        setOpenedSiebar(false);
     };
     useEffect(()=>{
         window.addEventListener('resize', function(){
@@ -65,24 +74,12 @@ const OpenAi = ({
     const responseWindow = () => {
         if(window.innerWidth < MOBILE_LIMIT_WIDTH) {
             setIsMobile(true);
-            dispatch({
-                field: 'showSidebar',
-                value: false
-            })
         } else {
             setIsMobile(false);
-            dispatch({
-                field: 'showSidebar',
-                value: true
-            })
         }
     }
     const handleShowSidebar = () => {
-        dispatch({
-            field: 'showSidebar',
-            value: !showSidebar
-        })
-        
+        setOpenedSiebar(!openedSidebar);
     };
 
     return (
@@ -93,30 +90,43 @@ const OpenAi = ({
                 handleSelectUtility       
             }}
         >
-            <Flex
-                justify="flex-start"
-                align="flex-start"
-                direction="row"
-                gap="md"
-            >
-                <SideBar
+            <AppShell
+                navbarOffsetBreakpoint="sm"
+                asideOffsetBreakpoint="sm"
+                header = {
+                    isMobile?
+                    <Header height={{ base: 40}} bg={
+                        colorScheme == 'light'?'#EFEFEF':''}
+                        zIndex={10000000000000}
+                    >
+                        <OpenAiHeader 
+                            handleShowSidebar={handleShowSidebar}
+                            openedSidebar={openedSidebar}
+                            isMobile={isMobile}
+                        />
+                    </Header>:<></>
+                }
+                navbar={
+                    <Navbar
+                        hiddenBreakpoint="sm" hidden={!openedSidebar} 
+                        width={{ sm: openedSidebar ? 300 : 300 }}
+                        sx={{
+                            overflow: "hidden",
+                            transition: "width 1000ms ease, min-width 1000ms ease"
+                        }}
+                    >
+                        <SideBar
+                            handleShowSidebar={handleShowSidebar}
+                            isMobile = {openedSidebar}
+                        />
+                    </Navbar>
+                }
+            >  
+                <Chat 
                     handleShowSidebar={handleShowSidebar}
                     isMobile = {isMobile}
-                />
-                <div>
-                    {
-                        isMobile?
-                        <Header 
-                            handleShowSidebar={handleShowSidebar}
-                            isMobile={isMobile}
-                        />:<></>
-                    }
-                    <Chat 
-                        handleShowSidebar={handleShowSidebar}
-                        isMobile = {isMobile}
-                    />    
-                </div>
-            </Flex>    
+                />    
+            </AppShell>
         </OpenaiContext.Provider>
     )
 };

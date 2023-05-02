@@ -1,3 +1,4 @@
+import { OpenAIModel } from './openai';
 export type Role = 'assistant' | 'user';
 export interface Message {
     role: Role;
@@ -12,7 +13,7 @@ export interface Conversation {
 }
 
 export interface ChatBody {
-    model: string;
+    model: OpenAIModel;
     messages: Message[];
     key: string;
     prompt: string;

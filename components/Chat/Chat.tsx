@@ -8,7 +8,7 @@ interface Props {
 }
 const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
     const {
-        state: { roleGroup, selectedUtility, selectedRole, showSidebar },
+        state: { roleGroup, selectedUtility, selectedRole},
         handleSelectRole,
         dispatch: openaiDispatch
     } = useContext(OpenaiContext);
@@ -22,8 +22,7 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
         });
     };
     return (
-        <div className={`p-7 pt-2 flex flex-col w-100 h-screen w-full z-0 
-            ${isMobile && showSidebar?'opacity-[0.2]':''}`}   
+        <div className={`pl-3 flex flex-col h-screen w-full z-0`}   
         >
             {
                 !isMobile?
@@ -31,9 +30,8 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
                     handleSelectRole = {handleSelectRole}
                     roleGroup = {roleGroup}
                     selectedRole = {selectedRole}
-                    handleShowSidebar={handleShowSidebar}
                     isMobile = {isMobile}
-                />:<></>   
+                />:<></>
             }
             
             <ChatMessage 

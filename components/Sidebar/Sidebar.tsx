@@ -1,48 +1,65 @@
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useContext} from 'react';
 import Search from '@/components/Search';
 import Utils from '@/components/Utils';
 import Settings from '@/components/Settings';
 import OpenaiContext from '@/pages/api/openai/openai.context';
-import HomeContext from '@/pages/index.context';
-import { IconArrowLeft} from '@tabler/icons-react';
-import { Flex } from '@mantine/core';
+import { useDisclosure } from "@mantine/hooks";
+import { Navbar,
+    createStyles,
+    Flex
+ } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
+
 
 interface Props {
     isMobile: boolean
     handleShowSidebar:() => void;
+    openedSidebar: boolean;
+    className?:string;
 }
 
-const Sidebar: FC<Props> = ({isMobile, handleShowSidebar}) =>{
+const useStyles = createStyles<string, { collapsed?: boolean }>(
+    (theme, params, getRef) => {
+        console.log(params);
+      return {
+        navbar: {
+          position: "sticky",
+          top: 0,
+          width: params?.collapsed ? 81 : 264,
+          transition: params?.collapsed ? "width 0.1s linear" : "none",
+        },
+      };
+    }
+);
+const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
     const {
-        state: { selectedUtilityGroup, selectedUtility, showSidebar },
+        state: { selectedUtilityGroup, selectedUtility },
         handleSelectUtility,
     } = useContext(OpenaiContext);
-    
-    const {
-        state: { colorScheme },
-    } = useContext(HomeContext);
+    const [collapsed, handlers] = useDisclosure(false);
+    const { classes, cx } = useStyles({ collapsed });
 
     return (
-        showSidebar?
-            <div className={`p-2 pt-2 flex flex-col w-[300px]  z-10 h-screen 
-                    ${colorScheme =="light"?'bg-[#F8F4F4]':'bg-[#1A1B1E]'}
-                    ${showSidebar?'block':'hidden'}
-                    ${isMobile?`fixed w-[270px]`:''}`
-                }
-            >
+        <Navbar 
+            p="md"
+            pt="lg"
+            className={cx(classes.navbar, className)}
+        >
             {
-                showSidebar && isMobile?
+                isMobile?
                 <Flex
                     align='center'
-                    gap={'xs'}
+                    gap='md'
+                    mt={5}
                 >
-                    <Search 
+                    <Search />
+                    <IconArrowLeft 
+                        onClick={handleShowSidebar}
                     />
-                    <IconArrowLeft size={24} onClick={handleShowSidebar}/>
                 </Flex>:
-                <Search 
-                />
+                <Search />
             }
+            
             <Utils 
                 selectedUtilityGroup = { selectedUtilityGroup }
                 handleSelectUtility = {handleSelectUtility}
@@ -52,9 +69,8 @@ const Sidebar: FC<Props> = ({isMobile, handleShowSidebar}) =>{
                 !isMobile?
                 <Settings isMobile={isMobile}/>:<></>
             }
-            
-        </div>:
-        <></>
+        </Navbar>
+
         
     )
 }

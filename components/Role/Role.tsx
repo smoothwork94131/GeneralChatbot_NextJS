@@ -8,27 +8,26 @@ interface  Props {
     roleGroup: RoleGroup[]
     selectedRole: RoleGroup;
     isMobile: boolean;
-    handleShowSidebar: ()=>void;
 }
-const RoleHome: FC<Props> = ({handleSelectRole, handleShowSidebar,roleGroup, selectedRole,isMobile}) => {
+const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}) => {
     
     useEffect(() => {
-
+        
     });
     return (
         isMobile?
         <div>
-            <Menu openDelay={100} closeDelay={400}>
+            <Menu openDelay={100} closeDelay={400} zIndex={1000}>
                 <Menu.Target>
                     <Flex
                         align="center"
                     >
-                        <div>{selectedRole.name}</div>
-                        <IconCaretDown size={20}/>
+                        <div className='font-bold text-lg'>{selectedRole.name}</div>
+                        <IconCaretDown size={20} color='#858C94'/>
                     </Flex>
                 </Menu.Target>
                 <Menu.Dropdown>
-                    {
+                    {   
                         roleGroup.map((item, index) =>
                             <RoleMenu
                                 key={index}
@@ -76,11 +75,11 @@ export const RoleMenu = ({index, name, selectedRole, handleSelectRole}: RoleInfo
 export const RoleTab = ({index, name, selectedRole, handleSelectRole}: RoleInfo) => {
     return (
         <div 
-            className={`m-2 p-1 text-center cursor-pointer border-b-2 border-solid border-orange-${selectedRole.name == name?'600':'200'} hover:border-orange-600`}
+            className={`ml-2 p-1 text-center cursor-pointer border-b-2 border-solid border-orange-${selectedRole.name == name?600:200} hover:border-orange-600`}
             onClick={() => {handleSelectRole(index)}}
             >
             <Flex 
-                className='p-[10px]' 
+                className='p-[10px] pt-0' 
                 gap="xs"
                 justify="flex-start"
                 align="center"

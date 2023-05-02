@@ -1,13 +1,19 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import { UtilitiesGroup, Utility } from '@/types/role';
-import { NavLink, Space } from '@mantine/core';
+import { NavLink, Space, ColorScheme } from '@mantine/core';
+import HomeContext from '@/pages/index.context';
 interface  Props {
     handleSelectUtility: (group_index: number, utility_index: number) => void;
     selectedUtilityGroup: UtilitiesGroup[]
-    selectedUtility: Utility
+    selectedUtility: Utility,
+    
 }
-const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup}) =>{
-    return (
+const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUtility}) =>{
+    const {
+        state: { colorScheme },
+    } = useContext(HomeContext) ;
+    
+    return(
         <div className='flex-grow overflow-auto z-100'>
             <Space h="md" />
             {
@@ -30,7 +36,11 @@ const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup}) =>{
                                 }
                                 onClick={() => handleSelectUtility(group_index, utility_index)}
                                 color="#DBE8FF"
-                                className='text-gray-500'
+                                className={`text-gray-500 
+                                    ${selectedUtility.name == utility_item.name && colorScheme=='dark'?'bg-gray-700':''}
+                                    ${selectedUtility.name == utility_item.name && colorScheme=='light'?'bg-[#DBE8FF]':''}
+                                    `
+                                }
                             ></NavLink>
                         )
                         :<></>

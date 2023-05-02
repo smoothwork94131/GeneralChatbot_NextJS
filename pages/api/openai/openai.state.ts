@@ -12,7 +12,6 @@ export interface OpenaiInitialState {
     selectedUtility: Utility;
     roleGroup: RoleGroup[]
     selectedUtilityGroup: UtilitiesGroup[]; 
-    showSidebar: boolean;
 }
 export const initialState: OpenaiInitialState = {
     apiKey: '',
@@ -25,6 +24,5 @@ export const initialState: OpenaiInitialState = {
     selectedUtility: ROLE_GROUP[0].utilities_group[0].utilities[0],
     roleGroup: ROLE_GROUP,
     selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
-    showSidebar: true
 };
   

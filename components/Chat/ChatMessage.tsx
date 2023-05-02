@@ -44,7 +44,7 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 <input.component
                     key={input_key}
                     data={input.options}
-                    searchable={true}
+                    searchable={true.toString()}
                     defaultValue={input.value}
                     className={input.style}
                     onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}

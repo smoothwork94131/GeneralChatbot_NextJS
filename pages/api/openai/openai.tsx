@@ -5,10 +5,8 @@ import { useContext } from 'react';
 import  Chat  from '@/components/Chat';
 import { 
     AppShell, 
-    Header, 
     Drawer,
     MediaQuery,
-    Space
 } from '@mantine/core';
 import { ROLE_GROUP } from '@/utils/app/const';
 import { 
@@ -19,8 +17,8 @@ import {
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
-import HomeContext from '@/pages/index.context';
 import dynamic from "next/dynamic";
+import { useMediaQuery } from "@mantine/hooks";
 
 interface Props {
 
@@ -29,8 +27,8 @@ const OpenAi = ({
     
 }: Props) => {
     
-    const [isMobile, setIsMobile] = useState(false);
     const [openedSidebar, setOpenedSiebar] = useState(false);
+    const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
 
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
@@ -42,9 +40,6 @@ const OpenAi = ({
         dispatch,
     } = contextValue;
 
-    const {
-        state: { colorScheme },
-    } = useContext(HomeContext) ;
 
     const handleSelectRole = (index: number) => {
         const updatedRole = ROLE_GROUP.filter(
@@ -77,19 +72,7 @@ const OpenAi = ({
         }
         setOpenedSiebar(false);
     };
-    useEffect(()=>{
-        window.addEventListener('resize', function(){
-            responseWindow();
-        });
-        responseWindow();
-    },[])
-    const responseWindow = () => {
-        if(window.innerWidth < MOBILE_LIMIT_WIDTH) {
-            setIsMobile(true);
-        } else {
-            setIsMobile(false);
-        }
-    }
+    
     const handleShowSidebar = () => {
         setOpenedSiebar(!openedSidebar);
     };
@@ -107,15 +90,11 @@ const OpenAi = ({
                 asideOffsetBreakpoint="sm"
                 header = {
                     isMobile?
-                    <Header height={{ base: 40}} 
-                        zIndex={10000}
-                    >
-                        <OpenAiHeader 
-                            handleShowSidebar={handleShowSidebar}
-                            openedSidebar={openedSidebar}
-                            isMobile={isMobile}
-                        />
-                    </Header>:<></>
+                    <OpenAiHeader 
+                        handleShowSidebar={handleShowSidebar}
+                        openedSidebar={openedSidebar}
+                        isMobile={isMobile}
+                    />:<></>
                 }
                 navbar={
                     <>
@@ -162,7 +141,7 @@ const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: 
         router.events.off("routeChangeStart", handleShowSidebar);
       };
     }, [handleShowSidebar, router.events]);
-  
+    
     return (
       <Drawer
         opened={opened}
@@ -171,7 +150,6 @@ const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: 
         withCloseButton={false}
         sx={{ position: "relative" }}
       >
-        <Space h="20px"/>
         <Sidebar 
             handleShowSidebar={handleShowSidebar}
             isMobile={true} 

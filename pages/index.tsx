@@ -1,4 +1,4 @@
-import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
+import { MantineProvider, ColorSchemeProvider, MantineThemeOverride } from '@mantine/core';
 import { initialState, HomeInitialState } from './index.state';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import OpenAi from './api/openai';
@@ -13,6 +13,10 @@ export default function Home() {
       }
   } = contextValue;
   
+  const myTheme: MantineThemeOverride = {
+    colorScheme: colorScheme,
+  };
+
   return (
     <HomeContext.Provider
       value = {{
@@ -20,7 +24,7 @@ export default function Home() {
       }}
     >
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={()=>{}}>
-          <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
+          <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
             <OpenAi 
             />
           </MantineProvider>

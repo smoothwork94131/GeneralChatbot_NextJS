@@ -32,10 +32,9 @@ const ChatInput:FC<Props> = ({ onSend }) => {
         <Flex
             justify="flex-start"
             gap="xs"
-            pl={10}
             align='center'
         >  
-                <Image maw={30} mx="auto" radius="sd" src="icons/avatar_user.png" alt="chatgpt avatar" />
+            <Image maw={30} radius="sd" src="icons/avatar_user.png" alt="chatgpt avatar" />
             <Textarea
                 className='w-full overflow-hidden'
                 autosize
@@ -43,7 +42,7 @@ const ChatInput:FC<Props> = ({ onSend }) => {
                 onKeyDown={handleKeyDown}
                 minRows={1} required
                 rightSection={
-                    <IconSend size="1rem" style={{ display: 'block', opacity: 0.5 }} />
+                    <IconSend size="1rem" className="opacity-[0.5] display-block" />
                 }
             />
         </Flex>

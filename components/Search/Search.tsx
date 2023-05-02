@@ -9,9 +9,10 @@ const Search:FC<Props> = ({}) =>{
         <Input
             placeholder="Search"
             rightSection={
-                <IconSearch size="1rem" style={{ display: 'block', opacity: 0.5 }} />
+                <IconSearch size="1rem" className="opacity-[0.5]"/>
             }
-            width={250}
+            
+            className="w-full"
         />
     )
 }

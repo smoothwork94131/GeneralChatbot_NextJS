@@ -4,7 +4,7 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
-    colorScheme: 'dark',
-    lightMode: 'dark'
+    colorScheme: 'light',
+    lightMode: 'light'
 };
   

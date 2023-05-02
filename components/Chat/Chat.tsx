@@ -1,4 +1,5 @@
 import { useContext, FC } from 'react';
+import { Box } from '@mantine/core';
 import  Role  from "@/components/Role";
 import ChatMessage from './ChatMessage';
 import OpenaiContext from '@/pages/api/openai/openai.context';
@@ -22,7 +23,15 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
         });
     };
     return (
-        <div className={`pl-3 flex flex-col h-screen w-full z-0`}   
+        <Box  
+            sx={(theme) =>({
+                paddingLeft: theme.spacing.md,
+                flex: 'display',
+                height: '100%',
+                width: '100%',
+                zIndex: 0,
+                flexDirection: 'column'
+            })}
         >
             {
                 !isMobile?
@@ -38,7 +47,7 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
                 selectedUtility={selectedUtility}
                 handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
             />
-        </div>
+        </Box>
     )
 }
 export default Chat;

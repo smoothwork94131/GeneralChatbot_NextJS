@@ -1,5 +1,11 @@
 import { FC } from 'react';
-import { Flex, Space, Image, Text } from '@mantine/core';
+import { 
+    Flex, 
+    Space, 
+    Image, 
+    Text,
+    Box
+} from '@mantine/core';
 import ChatInput from './ChatInput';
 import { Utility } from '@/types/role';
 
@@ -66,16 +72,30 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
         } else {
             value = e.target.value;
         }
-        
         handleChangeUtilityInputsValue(index, value);
     }
     return (
-        <div className='h-full flex flex-col'>
+        <Box 
+            sx={(theme) => ({
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column'
+            })}
+        >
             <Space h="md"/>
-            <Text fz="28px" fw={700}>
+            <Text 
+                sx={(theme) => ({
+                    fontSize: theme.fontSizes.lg,
+                    fontWeight: 600
+                })}
+            >
                 {selectedUtility.name}
             </Text>
-            <Text fz='md'>
+            <Text 
+                sx={(theme) => ({
+                    fontSize: theme.fontSizes.sm,
+                })}
+            >
                 {selectedUtility.summary}
             </Text>
             <Space h="md"/>
@@ -84,13 +104,13 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 <Flex
                     gap="xs"
                     align='center'
-                    pl={50}
+                    sx={(theme) => ({
+                        paddingLeft: theme.spacing.xl,
+                    })}
                 >
-                    
                     {
                         componentUtilityInputs()
                     }
-                    
                 </Flex>
                 :<></>
             }
@@ -99,22 +119,28 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 onSend={(message) => handleSend(message)}
             />
             <Space h="md"/>
-            <div className='flex-grow overflow-auto'>
+            <Flex
+                sx={(theme) => ({
+                    flexGrow: 1,
+                })}
+            >
+                    
                 <Flex
-                    justify="flex-start"
-                    pl={10}
-                    pr={2}
                 >
-                    <Image maw={30} mx="auto" radius="sd" src="icons/avatar_gpt.png" alt="chatgpt avatar" />
-                    <div className='flex-grow overflow-auto'>
+                    <Image maw={30} src="icons/avatar_gpt.png" alt="chatgpt avatar" />
+                    <Box>
                         
-                    </div>
+                    </Box>
                 </Flex>    
-            </div>
-            <Text fz="12px" ta="center" px={3} pt={2}>
+            </Flex>
+            <Text ta="center"
+                sx={(theme) => ({
+                    fontSize: theme.fontSizes.xs
+                })}    
+            >
                 ChatGPT Mar 23 version. Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
             </Text>
-        </div>
+        </Box>
     )
 }
 export default ChatMessage;

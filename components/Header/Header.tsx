@@ -1,7 +1,11 @@
 import { FC, useContext } from 'react';
-import { Burger, Flex, Avatar, Menu } from '@mantine/core';
+import { 
+    Burger, 
+    Avatar, 
+    Menu, 
+    Box, 
+    Group } from '@mantine/core';
 import Settings from '../Settings';
-import HomeContext from '@/pages/index.context';
 import OpenaiContext from '@/pages/api/openai/openai.context';
 import Role from '../Role';
 
@@ -10,30 +14,31 @@ interface Props {
     openedSidebar: boolean,
     isMobile: boolean
 }
+
 const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile}) => {
-    const {
-        state: {  },
-    } = useContext(HomeContext) ;
     const {
         state: { roleGroup, selectedRole },
         handleSelectRole,
     } = useContext(OpenaiContext);
 
+    
     return (
-        
-            <Flex
-                justify="space-between"
-                align='center'
-            >
-                <Flex
-                    align='center'
-                    gap="sm"
-                >
+        <Box
+            component="header"
+            sx={(theme) => ({
+              padding: `${theme.spacing.md} ${theme.spacing.md}`,
+              borderBottom: `1px solid ${theme.colorScheme == 'dark'? theme.colors.gray[8]: theme.colors.gray[1]}`
+            })}
+        >
+            <Group position="apart">
+                <Group>
                     <Burger 
                         opened={openedSidebar} 
                         onClick={handleShowSidebar}
-                        mr="0"
-                        color='#858C94'
+                        size="sm"
+                        sx={(theme) => ({
+                            color: theme.colors.gray[7]
+                        })}
                     />
                     <Role 
                         isMobile={isMobile}
@@ -41,24 +46,22 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile}) =>
                         roleGroup = {roleGroup}
                         selectedRole = {selectedRole}
                     />
-                </Flex>
-              
-                <Menu shadow="md" width={200}>
-                    <Menu.Target>
-                        <Avatar 
-                           
-                            src="icons/avatar.png" alt="avatar" 
-                            size={30}
-                            mt={5}
-                            mr={15}
+                </Group>
+                <Group>
+                    <Menu shadow="md" width={200}>
+                        <Menu.Target>
+                            <Avatar 
+                                src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=255&q=80" alt="avatar" 
+                                size='md' radius="xl"
+                            />
+                        </Menu.Target>
+                        <Settings 
+                            isMobile={isMobile}
                         />
-                    </Menu.Target>
-                    <Settings 
-                        isMobile={isMobile}
-                    />
-                </Menu>
-            </Flex>
-
+                    </Menu>
+                </Group>
+            </Group>
+        </Box>
     )
 }
 export default OpenAiHeader;

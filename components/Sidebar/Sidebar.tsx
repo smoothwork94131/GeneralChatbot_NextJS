@@ -4,12 +4,13 @@ import Utils from '@/components/Utils';
 import Settings from '@/components/Settings';
 import OpenaiContext from '@/pages/api/openai/openai.context';
 import { useDisclosure } from "@mantine/hooks";
-import { Navbar,
+import { 
+    Navbar,
     createStyles,
+    Text,
     Flex
  } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-
 
 interface Props {
     isMobile: boolean
@@ -28,6 +29,11 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
           width: params?.collapsed ? 81 : 264,
           transition: params?.collapsed ? "width 0.1s linear" : "none",
         },
+        footer: {
+            paddingTop: theme.spacing.xs,
+            marginTop: theme.spacing.md,
+            borderTop: `1px solid ${theme.colors.gray[2]}`,
+        },
       };
     }
 );
@@ -38,28 +44,31 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
     } = useContext(OpenaiContext);
     const [collapsed, handlers] = useDisclosure(false);
     const { classes, cx } = useStyles({ collapsed });
-
     return (
         <Navbar 
-            p="md"
-            pt="lg"
+            sx={(theme) => ({
+                padding: theme.spacing.sm
+            })}
             className={cx(classes.navbar, className)}
         >
+           
             {
                 isMobile?
-                <Flex
+                <Flex 
+                    gap='sm'
                     align='center'
-                    gap='md'
-                    mt={5}
                 >
                     <Search />
-                    <IconArrowLeft 
-                        onClick={handleShowSidebar}
-                    />
+                    <Text sx={(theme) => ({
+                            color: theme.colors.gray[7]
+                        })}>
+                        <IconArrowLeft 
+                            onClick={handleShowSidebar}  
+                        />        
+                    </Text>
                 </Flex>:
                 <Search />
             }
-            
             <Utils 
                 selectedUtilityGroup = { selectedUtilityGroup }
                 handleSelectUtility = {handleSelectUtility}
@@ -70,8 +79,6 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
                 <Settings isMobile={isMobile}/>:<></>
             }
         </Navbar>
-
-        
     )
 }
 export default Sidebar; 

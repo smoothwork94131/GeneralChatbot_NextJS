@@ -1,7 +1,6 @@
 import { FC, useContext } from 'react';
-import { Flex, Menu } from '@mantine/core';
+import { Flex, Menu, NavLink  } from '@mantine/core';
 import { IconLogout, IconMoon, IconStar, IconSun, IconTrash, IconUrgent, IconWorld } from '@tabler/icons-react';
-import SettingButton from './SettingButton';
 import HomeContext from '@/pages/index.context';
 
 interface Props {
@@ -56,44 +55,46 @@ const Settings:FC<Props> = ({isMobile}) =>{
                 Log out
             </Menu.Item>
         </Menu.Dropdown>:
-        <div className={
-                `${!isMobile?'p-2 space-y-2 border-t-[1px] border-solid border-gray-400 m-t-1':''}`}>
-            <Flex
-                mih={50}
-                justify="flex-start"
-                align="flex-start"
-                direction="column"
-                wrap="wrap"
-            >
-                <SettingButton 
-                    icon={<IconStar />}
-                    text="Favourited charts"
-                    onClick={()=>{}}
-                />
-                <SettingButton 
-                    icon={<IconTrash />}
-                    text=" Clear Conversation"
-                    onClick={()=>{}}
-                />
-                <SettingButton 
-                    icon={
-                        colorScheme == "dark"?<IconSun />:<IconMoon />
-                    }
-                    text={`${colorScheme == "dark"?"Light":"Dark"}`}
-                    onClick={handleColorScheme}
-                />
-                <SettingButton 
-                    icon={<IconWorld />}
-                    text="Updates & FAQ"
-                    onClick={()=>{}}
-                />
-                <SettingButton 
-                    icon={<IconLogout />}
-                    text=" Log out"
-                    onClick={()=>{}}
-                />
-            </Flex> 
-        </div>
+        <Flex
+            mih={50}
+            justify="flex-start"
+            align="flex-start"
+            direction="column"
+            wrap="wrap"
+            sx={(theme)=>({
+                borderTop: `1px solid ${theme.colorScheme == 'dark'? theme.colors.gray[8]: theme.colors.gray[1]}`,
+                paddingTop: theme.spacing.md
+            })}
+        >
+
+            <NavLink
+                label="Favourited charts"
+                icon={<IconStar size="1rem" stroke={1.5} />}
+                variant="subtle"            
+            />
+
+            <NavLink
+                label="Clear Conversation"
+                icon={<IconTrash size="1rem" stroke={1.5} />}
+                variant="subtle"            
+            />
+            <NavLink
+                label={`${colorScheme == "dark"?"Light":"Dark"}`}
+                icon={colorScheme == "dark"?<IconSun size="1rem" stroke={1.5} />:<IconMoon size="1rem" stroke={1.5}/>}
+                variant="subtle"          
+                onClick={handleColorScheme}  
+            />
+            <NavLink
+                label="Updates & FAQ"
+                icon={<IconWorld size="1rem" stroke={1.5} />}
+                variant="subtle"            
+            />
+            <NavLink
+                label="Log out"
+                icon={<IconLogout size="1rem" stroke={1.5} />}
+                variant="subtle"            
+            />
+        </Flex> 
     )
 }
 

@@ -1,15 +1,27 @@
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { initialState, OpenaiInitialState } from './openai.state';
 import OpenaiContext from './openai.context';
-import  SideBar  from '@/components/Sidebar';
 import { useContext } from 'react';
 import  Chat  from '@/components/Chat';
-import { AppShell, Header, Navbar } from '@mantine/core';
+import { 
+    AppShell, 
+    Header, 
+    Drawer,
+    MediaQuery,
+    Space
+} from '@mantine/core';
 import { ROLE_GROUP } from '@/utils/app/const';
-import { useEffect, useState } from 'react';
+import { 
+    useEffect, 
+    useState, 
+    FC
+ } from 'react';
+import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import HomeContext from '@/pages/index.context';
+import dynamic from "next/dynamic";
+
 interface Props {
 
 }
@@ -95,9 +107,8 @@ const OpenAi = ({
                 asideOffsetBreakpoint="sm"
                 header = {
                     isMobile?
-                    <Header height={{ base: 40}} bg={
-                        colorScheme == 'light'?'#EFEFEF':''}
-                        zIndex={10000000000000}
+                    <Header height={{ base: 40}} 
+                        zIndex={10000}
                     >
                         <OpenAiHeader 
                             handleShowSidebar={handleShowSidebar}
@@ -107,19 +118,23 @@ const OpenAi = ({
                     </Header>:<></>
                 }
                 navbar={
-                    <Navbar
-                        hiddenBreakpoint="sm" hidden={!openedSidebar} 
-                        width={{ sm: openedSidebar ? 300 : 300 }}
-                        sx={{
-                            overflow: "hidden",
-                            transition: "width 1000ms ease, min-width 1000ms ease"
-                        }}
-                    >
-                        <SideBar
-                            handleShowSidebar={handleShowSidebar}
-                            isMobile = {openedSidebar}
-                        />
-                    </Navbar>
+                    <>
+                        <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                            <Sidebar
+                                handleShowSidebar={handleShowSidebar}
+                                isMobile = {isMobile}
+                                openedSidebar={openedSidebar}
+                            />
+                        </MediaQuery>
+                        <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                            <DrawerNav 
+                                opened={openedSidebar} 
+                                handleShowSidebar={handleShowSidebar} 
+                                isMobile={isMobile}
+                            />
+                        </MediaQuery>
+                    </>
+                    
                 }
             >  
                 <Chat 
@@ -129,6 +144,41 @@ const OpenAi = ({
             </AppShell>
         </OpenaiContext.Provider>
     )
+};
+
+const Sidebar = dynamic(async () => {
+    const Sidebar = await import("@/components/Sidebar");
+    return Sidebar;
+});
+
+const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: boolean; }> = ({
+    opened,
+    handleShowSidebar,
+  }) => {
+    const router = useRouter();
+    useEffect(() => {
+      router.events.on("routeChangeStart", handleShowSidebar);
+      return () => {
+        router.events.off("routeChangeStart", handleShowSidebar);
+      };
+    }, [handleShowSidebar, router.events]);
+  
+    return (
+      <Drawer
+        opened={opened}
+        onClose={handleShowSidebar}
+        size="auto"
+        withCloseButton={false}
+        sx={{ position: "relative" }}
+      >
+        <Space h="20px"/>
+        <Sidebar 
+            handleShowSidebar={handleShowSidebar}
+            isMobile={true} 
+            openedSidebar={opened}
+        />
+      </Drawer>
+    );
 };
 export default OpenAi;
 export const getSide = () => {

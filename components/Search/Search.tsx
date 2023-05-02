@@ -6,19 +6,13 @@ interface Props{
 }
 const Search:FC<Props> = ({}) =>{
     return (
-        <div className='pt-1'>
-            <Input
-                className="w-[100%]"
-                placeholder="Search"
-                rightSection={
-                    <div>
-                        <IconSearch size="1rem" style={{ display: 'block', opacity: 0.5 }} />
-                    </div>
-                }
-                width={250}
-            />
-            
-        </div>
+        <Input
+            placeholder="Search"
+            rightSection={
+                <IconSearch size="1rem" style={{ display: 'block', opacity: 0.5 }} />
+            }
+            width={250}
+        />
     )
 }
 

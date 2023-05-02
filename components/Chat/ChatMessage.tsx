@@ -1,8 +1,7 @@
 import { FC } from 'react';
-import { Flex, Space, Image } from '@mantine/core';
+import { Flex, Space, Image, Text } from '@mantine/core';
 import ChatInput from './ChatInput';
 import { Utility } from '@/types/role';
-import { ChatBody } from '@/types/chat';
 
 interface Props {
     selectedUtility: Utility;
@@ -52,7 +51,6 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 <input.component
                     key={input_key}
                     data={input.options}
-                    // searchable={true}
                     defaultValue={input.value}
                     className={input.style}
                     onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}
@@ -68,30 +66,31 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
         } else {
             value = e.target.value;
         }
-      
+        
         handleChangeUtilityInputsValue(index, value);
     }
     return (
         <div className='h-full flex flex-col'>
             <Space h="md"/>
-            <div className='text-[32px]'>
+            <Text fz="28px" fw={700}>
                 {selectedUtility.name}
-            </div>
-            <div className='text-[22] text-gray-500'>
+            </Text>
+            <Text fz='md'>
                 {selectedUtility.summary}
-            </div>
+            </Text>
             <Space h="md"/>
             {
                 selectedUtility.inputs.length > 0?
                 <Flex
                     gap="xs"
                     align='center'
+                    pl={50}
                 >
-                    <div className='w-[50px]'></div>
+                    
                     {
                         componentUtilityInputs()
                     }
-                    <div className='w-1/6'></div>
+                    
                 </Flex>
                 :<></>
             }
@@ -103,17 +102,18 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
             <div className='flex-grow overflow-auto'>
                 <Flex
                     justify="flex-start"
+                    pl={10}
+                    pr={2}
                 >
-                    <div className='w-[50px] pr-2'>
-                        <Image maw={30} mx="auto" radius="sd" src="icons/avatar_gpt.png" alt="chatgpt avatar" />
-                    </div>
+                    <Image maw={30} mx="auto" radius="sd" src="icons/avatar_gpt.png" alt="chatgpt avatar" />
                     <div className='flex-grow overflow-auto'>
+                        
                     </div>
                 </Flex>    
             </div>
-            <div className="px-3 pt-2 pb-3 text-center text-[12px]">
+            <Text fz="12px" ta="center" px={3} pt={2}>
                 ChatGPT Mar 23 version. Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
-            </div>
+            </Text>
         </div>
     )
 }

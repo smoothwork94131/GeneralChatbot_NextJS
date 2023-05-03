@@ -13,8 +13,7 @@ export interface Utility {
     summary: string;
     active: boolean;
     style: string | number;
-    type?:string;
-    
+    type?: 'form' | 'icon';
     input_align?: 'horizental',
     prompt_message?: string[];
 }

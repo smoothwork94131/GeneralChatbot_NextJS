@@ -56,12 +56,12 @@ const handleSend = async(message: string) => {
 
 
 const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue}) =>{
-    
+
     const componentUtilityInputs = () => {
         if(selectedUtility.inputs.length > 0) {
            
             return selectedUtility.inputs.map((input: Input, input_key: number) =>{
-                const component = input.component?input.component:'Select';
+                const component = input.component;
                 const FormComponent:React.FC<ComponentProps> = require("@mantine/core")[component];
                 const IconComponent:React.FC<ComponentProps> = require("@tabler/icons-react")[component];
 

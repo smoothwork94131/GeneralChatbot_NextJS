@@ -21,7 +21,6 @@ interface Props {
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
     (theme, params, getRef) => {
-        console.log(params);
       return {
         navbar: {
           position: "sticky",

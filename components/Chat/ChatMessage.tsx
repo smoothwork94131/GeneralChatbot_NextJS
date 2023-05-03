@@ -6,8 +6,10 @@ import {
     Text,
     Box
 } from '@mantine/core';
+
 import ChatInput from './ChatInput';
-import { Utility } from '@/types/role';
+import { Input, Utility } from '@/types/role';
+import * as MantineComponent from '@mantine/core';
 
 interface Props {
     selectedUtility: Utility;
@@ -50,20 +52,39 @@ const handleSend = async(message: string) => {
     */
 
 }
+
+
+
 const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue}) =>{
+    
     const componentUtilityInputs = () => {
         if(selectedUtility.inputs.length > 0) {
-            return selectedUtility.inputs.map((input: any, input_key: any) =>
-                <input.component
-                    key={input_key}
-                    data={input.options}
-                    defaultValue={input.value}
-                    className={input.style}
-                    onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}
-                />        
-            )
-        }   
+           
+            return selectedUtility.inputs.map((input: Input, input_key: number) =>{
+                const component = input.component?input.component:'Select';
+                const FormComponent:React.FC<ComponentProps> = require("@mantine/core")[component];
+                const IconComponent:React.FC<ComponentProps> = require("@tabler/icons-react")[component];
+
+                if(input.type == "icon") {
+                    return <IconComponent 
+                        key={input_key}
+                        className={input.style}
+                    />; 
+                } else {
+                    return <FormComponent 
+                        key={input_key}
+                        data={input.options}
+                        defaultValue={input.value}
+                        className={input.style}
+                        onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}
+                    />;    
+                }
+                
+            })
+        } 
+        
     };
+   
     const handleChangeInput = (index: number , e: React.ChangeEvent<HTMLInputElement> | string) => {
         let value='';
       
@@ -104,6 +125,7 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 <Flex
                     gap="xs"
                     align='center'
+                    direction={selectedUtility.input_align == "horizental"?'row':'column'}
                     sx={(theme) => ({
                         paddingLeft: theme.spacing.xl,
                     })}
@@ -129,7 +151,7 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 >
                     <Image maw={30} src="icons/avatar_gpt.png" alt="chatgpt avatar" />
                     <Box>
-                        
+            
                     </Box>
                 </Flex>    
             </Flex>
@@ -141,6 +163,18 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 ChatGPT Mar 23 version. Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
             </Text>
         </Box>
+    )
+}
+interface ComponentProps {
+    key: number;
+    data?: string[] | undefined;
+    defaultValue?: string | number | undefined;
+    className: string;
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+ }
+export const InputComponet = (Component: any) => {
+    return (
+        <Component />
     )
 }
 export default ChatMessage;

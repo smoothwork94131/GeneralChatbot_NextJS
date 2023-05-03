@@ -1,13 +1,30 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { UtilitiesGroup, Utility } from '@/types/role';
-import { NavLink, Space, Box, useMantineTheme } from '@mantine/core';
+import { NavLink,  Box } from '@mantine/core';
 interface  Props {
     handleSelectUtility: (group_index: number, utility_index: number) => void;
     selectedUtilityGroup: UtilitiesGroup[]
     selectedUtility: Utility,
 }
 const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUtility}) =>{
-    const Theme = useMantineTheme();
+    const [collapseUtilities, setCollapseUtilites] = useState<Boolean[]>([]);
+    useEffect(() =>{
+        let collapse=[];
+        for(let k = 0; k<selectedUtilityGroup.length;k++){
+            if(selectedUtilityGroup[k].utilities.filter((item) => item.active == true).length > 0) {
+                collapse.push(true);
+            } else{
+                collapse.push(false);
+            }
+        }
+        console.log(collapse);
+        setCollapseUtilites(collapse);
+    },[selectedUtilityGroup]);
+
+    const updateCollapse = (group_index: number) => {
+        const collpase = collapseUtilities; collpase[group_index] = !collpase[group_index];
+        setCollapseUtilites([...collpase]);
+    }
     return(
         <Box  
             sx={(theme) =>({
@@ -21,6 +38,13 @@ const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUt
                    <NavLink
                         label={group_item.name}
                         key={group_index}
+                        opened={
+                            group_item.utilities.length > 0 ? 
+                                collapseUtilities[group_index]
+                                ? true:false
+                            :false
+                        }
+                        onClick={()=> updateCollapse(group_index)}
                     >
                     {
                         group_item.utilities.length > 0?
@@ -31,7 +55,10 @@ const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUt
                                     utility_item.name
                                 }
                                 onClick={() => handleSelectUtility(group_index, utility_index)}
-                                active={selectedUtility.name == utility_item.name?true:false}
+                                active={
+                                    selectedUtility.name == utility_item.name || 
+                                    utility_item.active?true:false
+                                }
                             ></NavLink>
                         )
                         :<></>

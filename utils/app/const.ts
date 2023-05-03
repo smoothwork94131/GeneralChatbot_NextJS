@@ -38,12 +38,14 @@ export const ROLE_GROUP = [
                         summary: 'Enter text for translation',
                         type: 'translate',
                         style:'',
+                        active: true,
+                        input_align: 'horizental',
                         inputs:[
                             {
                                 name: "Language From",
-                                type: "Select",
+                                type: "form",
                                 value: 'English',
-                                component: Select,
+                                component: "Select",
                                 style:'',
                                 options: [
                                     "English",
@@ -52,15 +54,15 @@ export const ROLE_GROUP = [
                             },
                             {
                                 name: "convert icon",
-                                type: "IconArrowLeft",
+                                type: "icon",
+                                component: "IconArrowRight",
                                 style:'text-gray-400 w-[30px]',
-                                component: IconArrowRight,
                             },
                             {
                                 name: "Language From",
-                                type: "Select",
+                                component: "Select",
+                                type: 'form',
                                 value: "Spanish",
-                                component: Select,
                                 style:'',
                                 options: [
                                     "Spanish",
@@ -83,6 +85,8 @@ export const ROLE_GROUP = [
                         name: "Javascript",
                         summary: '',
                         style:'',
+                        input_align: 'horizental',
+                        active: true,
                         inputs:[
                         ]
                     },
@@ -90,12 +94,16 @@ export const ROLE_GROUP = [
                         name: "Css",
                         style:'',
                         summary: '',
+                        input_align: 'horizental',
+                        active: false,
                         inputs:[
                         ]
                     },
                     {
                         name: "Database",
                         style:'',
+                        input_align: 'horizental',
+                        active: false,
                         summary: '',
                         inputs:[
                         ]
@@ -109,6 +117,8 @@ export const ROLE_GROUP = [
                         name: "Spring boot",
                         summary: '',
                         style:'',
+                        active: false,
+                        input_align: 'horizental',
                         type:'',
                         inputs:[
                         ]
@@ -118,6 +128,8 @@ export const ROLE_GROUP = [
                         summary: '',
                         type:'',
                         style:'',
+                        input_align: 'horizental',
+                        active: false,
                         inputs:[
                         ]
                     },
@@ -125,7 +137,9 @@ export const ROLE_GROUP = [
                         name: "Android",
                         summary: '',
                         type:'',
+                        input_align: 'horizental',
                         style:'',
+                        active: false,
                         inputs:[
                         ]
                     }
@@ -143,6 +157,8 @@ export const ROLE_GROUP = [
                         name: "Base",
                         style:'',
                         type:'',
+                        active: true,
+                        input_align: 'horizental',
                         summary: '',
                         inputs:[
                         ]
@@ -151,6 +167,8 @@ export const ROLE_GROUP = [
                         name: "Influenty",
                         style:'',
                         type:'',
+                        active: false,
+                        input_align: 'horizental',
                         summary: '',
                         inputs:[
                         ]
@@ -158,7 +176,9 @@ export const ROLE_GROUP = [
                     {
                         name: "Native",
                         summary: '',
+                        active: false,
                         type:'',
+                        input_align: 'horizental',
                         style:'',
                         inputs:[
                         ]

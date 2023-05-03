@@ -10,9 +10,12 @@ export interface Utility {
     id?: number;
     name: string;
     inputs: Input[];
-    summary: string,
+    summary: string;
+    active: boolean;
     style: string | number;
     type?:string;
+    
+    input_align?: 'horizental',
     prompt_message?: string[];
 }
 export interface Input {
@@ -20,9 +23,9 @@ export interface Input {
     id?: number;
     type?: string;
     value?: string | number;
-    component: any;
     style: string;
     size?: string | number;
     options?: string[];
+    component: string;
     max_len?: number;
 }

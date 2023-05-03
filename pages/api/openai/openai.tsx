@@ -17,6 +17,7 @@ import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mantine/hooks";
+import { Collapse } from '@mantine/core';
 
 interface Props {
 
@@ -35,7 +36,8 @@ const OpenAi = ({
     const {
         state: {
             selectedRole,
-            roleGroup
+            roleGroup,
+            selectedUtilityGroup
         },
         dispatch,
     } = contextValue;
@@ -55,7 +57,6 @@ const OpenAi = ({
                     }
                 }
             }
-      
             dispatch({
                 field: "selectedRole",
                 value: updatedRole[updatedRole.length - 1]
@@ -108,7 +109,7 @@ const OpenAi = ({
     const handleShowSidebar = () => {
         setOpenedSiebar(!openedSidebar);
     };
-
+    
     return (
         <OpenaiContext.Provider
             value={{
@@ -145,7 +146,6 @@ const OpenAi = ({
                             />
                         </MediaQuery>
                     </>
-                    
                 }
             >  
                 <Chat 

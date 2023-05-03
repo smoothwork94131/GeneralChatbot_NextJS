@@ -17,6 +17,7 @@ interface Props {
     handleShowSidebar:() => void;
     openedSidebar: boolean;
     className?:string;
+ 
 }
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
@@ -36,11 +37,23 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
       };
     }
 );
+
 const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
     const {
         state: { selectedUtilityGroup, selectedUtility },
         handleSelectUtility,
+        dispatch: openAiDispatch
     } = useContext(OpenaiContext);
+
+    const collpaseUtiltyGroup = (group_index: number) => {
+        let selectedUtilityGroup_ = selectedUtilityGroup;
+        selectedUtilityGroup_[group_index].active = !selectedUtilityGroup_[group_index].active;
+        console.log(selectedUtilityGroup_);
+        openAiDispatch({
+            field: 'selectedUtilityGroup',
+            value: selectedUtilityGroup_
+        })
+    }
     const [collapsed, handlers] = useDisclosure(false);
     const { classes, cx } = useStyles({ collapsed });
     return (
@@ -50,7 +63,6 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
             })}
             className={cx(classes.navbar, className)}
         >
-           
             {
                 isMobile?
                 <Flex 
@@ -72,6 +84,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
                 selectedUtilityGroup = { selectedUtilityGroup }
                 handleSelectUtility = {handleSelectUtility}
                 selectedUtility = {selectedUtility}
+                collpaseUtiltyGroup = {collpaseUtiltyGroup}
             />
             {
                 !isMobile?

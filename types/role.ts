@@ -4,6 +4,7 @@ export interface RoleGroup {
 }
 export interface UtilitiesGroup {
     name: string;
+    active: boolean;
     utilities: Utility[];
 }
 export interface Utility {
@@ -13,14 +14,14 @@ export interface Utility {
     summary: string;
     active: boolean;
     style: string | number;
-    type?: 'form' | 'icon';
-    input_align?: 'horizental' | 'vertical',
+    type?: string;
+    input_align?: string,
     prompt_message?: string[];
 }
 export interface Input {
     name: string;
     id?: number;
-    type?: string;
+    type: "form" | "icon";
     value?: string | number;
     style: string;
     size?: string | number;

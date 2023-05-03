@@ -15,6 +15,9 @@ export default function Home() {
   
   const myTheme: MantineThemeOverride = {
     colorScheme: colorScheme,
+    spacing: {
+      chatInputPadding: '40px'
+    }
   };
 
   return (

@@ -79,7 +79,6 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                         onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}
                     />;    
                 }
-                
             })
         } 
         
@@ -123,11 +122,11 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
             {
                 selectedUtility.inputs.length > 0?
                 <Flex
-                    gap="xs"
+                    gap="sm"
                     align='center'
                     direction={selectedUtility.input_align == "horizental"?'row':'column'}
                     sx={(theme) => ({
-                        paddingLeft: theme.spacing.xl,
+                        paddingLeft: theme.spacing.chatInputPadding,
                     })}
                 >
                     {
@@ -146,7 +145,6 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                     flexGrow: 1,
                 })}
             >
-                    
                 <Flex
                 >
                     <Image maw={30} src="icons/avatar_gpt.png" alt="chatgpt avatar" />

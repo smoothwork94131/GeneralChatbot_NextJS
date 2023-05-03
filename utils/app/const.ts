@@ -32,6 +32,7 @@ export const ROLE_GROUP = [
         utilities_group:[
             {
                 name: "Copywriting",
+                active: true,
                 utilities: [
                     {
                         name: "Translate",
@@ -80,6 +81,7 @@ export const ROLE_GROUP = [
         utilities_group:[
             {
                 name: "Web",
+                active: true,
                 utilities: [
                     {
                         name: "Javascript",
@@ -112,6 +114,7 @@ export const ROLE_GROUP = [
             },
             {
                 name: "Java",
+                active: false,
                 utilities: [
                     {
                         name: "Spring boot",
@@ -152,6 +155,7 @@ export const ROLE_GROUP = [
         utilities_group:[
             {
                 name: "English",
+                active: true,
                 utilities: [
                     {
                         name: "Base",

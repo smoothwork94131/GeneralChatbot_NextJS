@@ -14,7 +14,7 @@ export interface Utility {
     active: boolean;
     style: string | number;
     type?: 'form' | 'icon';
-    input_align?: 'horizental',
+    input_align?: 'horizental' | 'vertical',
     prompt_message?: string[];
 }
 export interface Input {

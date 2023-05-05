@@ -4,7 +4,7 @@ import  Role  from "@/components/Role";
 import ChatMessage from './ChatMessage';
 import OpenaiContext from '@/pages/api/openai/openai.context';
 interface Props {
-    isMobile: boolean;
+    isMobile: boolean;  
     handleShowSidebar: ()=>void
 }
 const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {

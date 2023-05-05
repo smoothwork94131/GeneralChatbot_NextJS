@@ -1,117 +1,63 @@
-import { Message } from '@/types/chat';
-import { OpenAIModel } from '@/types/openai';
-
-import { AZURE_DEPLOYMENT_ID, OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION } from '../app/const';
-
 import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+    createParser,
+    ParsedEvent,
+    ReconnectInterval,
+} from "eventsource-parser";
 
-export class OpenAIError extends Error {
-  type: string;
-  param: string;
-  code: string;
+import { OPENAI_API_HOST } from '@/utils/app/const';
 
-  constructor(message: string, type: string, param: string, code: string) {
-    super(message);
-    this.name = 'OpenAIError';
-    this.type = type;
-    this.param = param;
-    this.code = code;
-  }
-}
+import { OpenAIStreamPayload } from "@/types/openai";
+export async function OpenAIStream(payload: OpenAIStreamPayload) {
 
-export const OpenAIStream = async (
-  model: OpenAIModel,
-  systemPrompt: string,
-  temperature : number,
-  key: string,
-  messages: Message[],
-) => {
-  let url = `${OPENAI_API_HOST}/v1/chat/completions`;
-  if (OPENAI_API_TYPE === 'azure') {
-    url = `${OPENAI_API_HOST}/openai/deployments/${AZURE_DEPLOYMENT_ID}/chat/completions?api-version=${OPENAI_API_VERSION}`;
-  }
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(OPENAI_API_TYPE === 'openai' && {
-        Authorization: `Bearer ${key ? key : process.env.OPENAI_API_KEY}`
-      }),
-      ...(OPENAI_API_TYPE === 'azure' && {
-        'api-key': `${key ? key : process.env.OPENAI_API_KEY}`
-      }),
-      ...((OPENAI_API_TYPE === 'openai' && OPENAI_ORGANIZATION) && {
-        'OpenAI-Organization': OPENAI_ORGANIZATION,
-      }),
-    },
-    method: 'POST',
-    body: JSON.stringify({
-      ...(OPENAI_API_TYPE === 'openai' && {model: model.id}),
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    let counter = 0;
+
+    const res = await fetch(`${OPENAI_API_HOST}/v1/chat/completions`, {
+        headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer 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`,
         },
-        ...messages,
-      ],
-      max_tokens: 1000,
-      temperature: temperature,
-      stream: true,
-    }),
-  });
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
 
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-
-  if (res.status !== 200) {
-    const result = await res.json();
-    if (result.error) {
-      throw new OpenAIError(
-        result.error.message,
-        result.error.type,
-        result.error.param,
-        result.error.code,
-      );
-    } else {
-      throw new Error(
-        `OpenAI API returned an error: ${
-          decoder.decode(result?.value) || result.statusText
-        }`,
-      );
-    }
-  }
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const onParse = (event: ParsedEvent | ReconnectInterval) => {
-        if (event.type === 'event') {
-          const data = event.data;
-
-          try {
-            const json = JSON.parse(data);
-            if (json.choices[0].finish_reason != null) {
-              controller.close();
-              return;
+    const stream = new ReadableStream({
+        async start(controller) {
+        // callback
+        function onParse(event: ParsedEvent | ReconnectInterval) {
+            if (event.type === "event") {
+            const data = event.data;
+            if (data === "[DONE]") {
+                controller.close();
+                return;
             }
-            const text = json.choices[0].delta.content;
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
-          } catch (e) {
-            controller.error(e);
-          }
+            try {
+                const json = JSON.parse(data);
+                const text = json.choices[0].delta?.content || "";
+                if (counter < 2 && (text.match(/\n/) || []).length) {
+                // this is a prefix character (i.e., "\n\n"), do nothing
+                return;
+                }
+                const queue = encoder.encode(text);
+                controller.enqueue(queue);
+                counter++;
+            } catch (e) {
+                // maybe parse error
+                controller.error(e);
+            }
+            }
         }
-      };
 
-      const parser = createParser(onParse);
+        // stream response (SSE) from OpenAI may be fragmented into multiple chunks
+        // this ensures we properly read chunks and invoke an event for each SSE event stream
+        const parser = createParser(onParse);
+        // https://web.dev/streams/#asynchronous-iteration
+        for await (const chunk of res.body as any) {
+            parser.feed(decoder.decode(chunk));
+        }
+        },
+    });
 
-      for await (const chunk of res.body as any) {
-        parser.feed(decoder.decode(chunk));
-      }
-    },
-  });
-
-  return stream;
-};
+    return stream;
+}

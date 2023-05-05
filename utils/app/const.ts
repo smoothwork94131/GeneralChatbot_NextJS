@@ -1,6 +1,3 @@
-import { IconArrowRight } from "@tabler/icons-react";
-import { Select } from "@mantine/core";
-
 export const Languages = [
     "English",
     "Spanish"
@@ -41,6 +38,7 @@ export const ROLE_GROUP = [
                         style:'',
                         active: true,
                         input_align: 'horizental',
+                        prompt_message:'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2}',
                         inputs:[
                             {
                                 name: "Language From",
@@ -74,6 +72,7 @@ export const ROLE_GROUP = [
                     }
                 ]
             }       
+            
         ]
     },
     {
@@ -89,6 +88,7 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: true,
+                        prompt_message:'',
                         inputs:[
                         ]
                     },
@@ -97,6 +97,7 @@ export const ROLE_GROUP = [
                         style:'',
                         summary: '',
                         input_align: 'horizental',
+                        prompt_message:'',
                         active: false,
                         inputs:[
                         ]
@@ -106,6 +107,7 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
+                        prompt_message:'',
                         summary: '',
                         inputs:[
                         ]
@@ -122,6 +124,7 @@ export const ROLE_GROUP = [
                         style:'',
                         active: false,
                         input_align: 'horizental',
+                        prompt_message:'',
                         type:'',
                         inputs:[
                         ]
@@ -142,6 +145,7 @@ export const ROLE_GROUP = [
                         type:'',
                         input_align: 'horizental',
                         style:'',
+                        prompt_message:'',
                         active: false,
                         inputs:[
                         ]
@@ -163,6 +167,7 @@ export const ROLE_GROUP = [
                         type:'',
                         active: true,
                         input_align: 'horizental',
+                        prompt_message:'',
                         summary: '',
                         inputs:[
                         ]
@@ -173,6 +178,7 @@ export const ROLE_GROUP = [
                         type:'',
                         active: false,
                         input_align: 'horizental',
+                        prompt_message:'',
                         summary: '',
                         inputs:[
                         ]
@@ -183,6 +189,7 @@ export const ROLE_GROUP = [
                         active: false,
                         type:'',
                         input_align: 'horizental',
+                        prompt_message:'',
                         style:'',
                         inputs:[
                         ]

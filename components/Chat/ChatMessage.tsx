@@ -6,56 +6,57 @@ import {
     Text,
     Box
 } from '@mantine/core';
-
 import ChatInput from './ChatInput';
 import { Input, Utility } from '@/types/role';
-import * as MantineComponent from '@mantine/core';
-
+import {
+    useState
+} from 'react';
 interface Props {
     selectedUtility: Utility;
     handleChangeUtilityInputsValue: (input_index: number, value: string)=>void
-}
-
-const handleSend = async(message: string) => {
-    /*
-    const controller = new AbortController();
-    const chatBody: ChatBody = {
-        model: {
-            id: 'gpt-3.5-turbo',
-            maxLength: 12000,
-            name: "GPT-3.5",
-            tokenLimit: 4000
-        },
-        messages: [
-            {role: 'user', content: message},
-            {role: 'assistant', content: message}
-        ],
-        key: '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',
-        prompt: "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-        temperature: 1,
-    };
-    
-    const body = JSON.stringify(chatBody);
-    const response = await fetch("api/chat", {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-        body,
-    });
-    if (response.ok) {
-        const data = response.body;
-        const reader = data?.getReader();
-        const decoder = new TextDecoder();
-    }
-    */
-
-}
-
-
+}   
 
 const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue}) =>{
+    const [response, setResponse] = useState<String>("");
+    const handleSend = async(message: string) => {
+        const inputs = selectedUtility.inputs.filter((input: Input) => input.type == "form");
+        let prompt_message = selectedUtility.prompt_message;
+        inputs.map((input: Input, index: number) => {
+            if(input.type == "form"){
+                prompt_message = prompt_message?.replace(`{${index}}`, input.value?input.value:'');
+            }
+        });
+        prompt_message = prompt_message?.replace(`{${inputs.length}}`, message);
+
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              prompt: prompt_message
+            }),
+        });
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+
+        const data = response.body;
+        if (!data) {
+            return;
+        }
+        const reader = data.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            const chunkValue = decoder.decode(value);
+            setResponse((prev) => prev + chunkValue);
+            console.log(chunkValue);
+        }
+
+    }
 
     const componentUtilityInputs = () => {
         if(selectedUtility.inputs.length > 0) {
@@ -64,7 +65,7 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 const component = input.component;
                 const FormComponent:React.FC<ComponentProps> = require("@mantine/core")[component];
                 const IconComponent:React.FC<ComponentProps> = require("@tabler/icons-react")[component];
-
+                
                 if(input.type == "icon") {
                     return <IconComponent 
                         key={input_key}
@@ -146,10 +147,13 @@ const ChatMessage: FC<Props> = ({selectedUtility, handleChangeUtilityInputsValue
                 })}
             >
                 <Flex
+                    gap="xs"
                 >
-                    <Image maw={30} src="icons/avatar_gpt.png" alt="chatgpt avatar" />
+                    <Image maw={30} src="icons/avatar_user.png" alt="chatgpt avatar" />
                     <Box>
-            
+                        {
+                            response
+                        }
                     </Box>
                 </Flex>    
             </Flex>

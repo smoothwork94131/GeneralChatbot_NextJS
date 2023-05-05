@@ -16,13 +16,13 @@ export interface Utility {
     style: string | number;
     type?: string;
     input_align?: string,
-    prompt_message?: string[];
+    prompt_message?: string;
 }
 export interface Input {
     name: string;
     id?: number;
     type: "form" | "icon";
-    value?: string | number;
+    value?: string;
     style: string;
     size?: string | number;
     options?: string[];

@@ -11,3 +11,7 @@
 .mantine-1avyp1d {
     transition: none !important;
 }
+.prose {
+    max-width: 100%;
+    --tw-prose-body: none;
+}

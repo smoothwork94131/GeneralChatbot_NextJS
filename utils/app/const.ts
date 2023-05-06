@@ -38,7 +38,8 @@ export const ROLE_GROUP = [
                         style:'',
                         active: true,
                         input_align: 'horizental',
-                        prompt_message:'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2}',
+                        prompt:'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2}',
+                        key: 'Marketing_Copywriting_Translate',
                         inputs:[
                             {
                                 name: "Language From",
@@ -88,7 +89,8 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: true,
-                        prompt_message:'',
+                        prompt:'',
+                        key: 'Coding_Web_Javascript',
                         inputs:[
                         ]
                     },
@@ -97,8 +99,9 @@ export const ROLE_GROUP = [
                         style:'',
                         summary: '',
                         input_align: 'horizental',
-                        prompt_message:'',
+                        prompt:'',
                         active: false,
+                        key:'Coding_Web_Css',
                         inputs:[
                         ]
                     },
@@ -107,7 +110,8 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
-                        prompt_message:'',
+                        prompt:'',
+                        key:'Coding_Web_Database',
                         summary: '',
                         inputs:[
                         ]
@@ -124,8 +128,9 @@ export const ROLE_GROUP = [
                         style:'',
                         active: false,
                         input_align: 'horizental',
-                        prompt_message:'',
+                        prompt:'',
                         type:'',
+                        key: 'Coding_Java_Spring boot',
                         inputs:[
                         ]
                     },
@@ -136,6 +141,7 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
+                        key: 'Coding_Java_Interface',
                         inputs:[
                         ]
                     },
@@ -145,7 +151,8 @@ export const ROLE_GROUP = [
                         type:'',
                         input_align: 'horizental',
                         style:'',
-                        prompt_message:'',
+                        prompt:'',
+                        key: 'Coding_Java_Android',
                         active: false,
                         inputs:[
                         ]
@@ -167,8 +174,9 @@ export const ROLE_GROUP = [
                         type:'',
                         active: true,
                         input_align: 'horizental',
-                        prompt_message:'',
+                        prompt:'',
                         summary: '',
+                        key: 'Learning_English_Base',
                         inputs:[
                         ]
                     },
@@ -178,7 +186,8 @@ export const ROLE_GROUP = [
                         type:'',
                         active: false,
                         input_align: 'horizental',
-                        prompt_message:'',
+                        prompt:'',
+                        key: 'Learning_English_Influenty',
                         summary: '',
                         inputs:[
                         ]
@@ -189,7 +198,8 @@ export const ROLE_GROUP = [
                         active: false,
                         type:'',
                         input_align: 'horizental',
-                        prompt_message:'',
+                        prompt:'',
+                        key: 'Learning_English_Native',
                         style:'',
                         inputs:[
                         ]

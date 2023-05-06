@@ -1,15 +1,19 @@
 import { FC } from 'react';
 import { UtilitiesGroup, Utility } from '@/types/role';
 import { NavLink,  Box } from '@mantine/core';
+import { IconMistOff } from '@tabler/icons-react';
 interface  Props {
-    handleSelectUtility: (group_index: number, utility_index: number) => void;
+    handleSelectUtility: (utility_key:string) => void;
     selectedUtilityGroup: UtilitiesGroup[]
     selectedUtility: Utility,
-    collpaseUtiltyGroup: (group_index: number) =>void;
+    collpaseUtiltyGroup: (name: string) =>void;
 }
-const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUtility, collpaseUtiltyGroup}) =>{
-
-    
+const Utils: FC<Props> = ({
+        handleSelectUtility, 
+        selectedUtilityGroup, 
+        selectedUtility, 
+        collpaseUtiltyGroup,
+    }) =>{
     return(
         <Box  
             sx={(theme) =>({
@@ -19,17 +23,26 @@ const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUt
                 paddingTop: theme.spacing.md
             })}>
             {
+                selectedUtilityGroup.length == 0 ?
+                <Box sx={(theme) => ({
+                   fontSize: 14,
+                    textAlign:'center'
+                })}>
+                    <IconMistOff size={30} className="mx-auto mb-3"/>
+                    <text>
+                        No data.
+                    </text>
+                </Box>:
                 selectedUtilityGroup.map((group_item, group_index) => 
                    <NavLink
                         label={group_item.name}
                         key={group_index}
                         opened={
                             group_item.utilities.length > 0 ? 
-                            selectedUtilityGroup[group_index].active
-                                ? true:false
+                                selectedUtilityGroup[group_index].active ? true:false
                             :false
                         }
-                        onClick={()=> collpaseUtiltyGroup(group_index)}
+                        onClick={()=> collpaseUtiltyGroup(group_item.name)}
                         sx={(theme) => ({
                             transition: 'none'
                         })}
@@ -42,7 +55,7 @@ const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUt
                                 label={
                                     utility_item.name
                                 }
-                                onClick={() => handleSelectUtility(group_index, utility_index)}
+                                onClick={() => handleSelectUtility(utility_item.key)}
                                 active={
                                     selectedUtility.name == utility_item.name || 
                                     utility_item.active?true:false
@@ -57,6 +70,7 @@ const Utils: FC<Props> = ({handleSelectUtility, selectedUtilityGroup, selectedUt
                     </NavLink>
                 )
             }
+            
         </Box>
     )
 }

@@ -7,11 +7,12 @@ export interface OpenaiInitialState {
     messageIsStreaming: boolean;
     messageError: boolean;
     searchTerm: string; 
-    converStations: Conversation[];
+    conversationHistory: Conversation[];
     selectedRole: RoleGroup;
     selectedUtility: Utility;
     roleGroup: RoleGroup[]
     selectedUtilityGroup: UtilitiesGroup[]; 
+    selectedConversation: Conversation;
 }
 export const initialState: OpenaiInitialState = {
     apiKey: '',
@@ -19,10 +20,11 @@ export const initialState: OpenaiInitialState = {
     messageIsStreaming: false,
     messageError: false,
     searchTerm: '',
-    converStations: [],
+    conversationHistory: [],
     selectedRole: ROLE_GROUP[0],
     selectedUtility: ROLE_GROUP[0].utilities_group[0].utilities[0],
     roleGroup: ROLE_GROUP,
     selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
+    selectedConversation: undefined
 };
   

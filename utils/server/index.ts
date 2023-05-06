@@ -21,7 +21,7 @@ export async function OpenAIStream(payload: OpenAIStreamPayload) {
         method: "POST",
         body: JSON.stringify(payload),
     });
-
+    
     const stream = new ReadableStream({
         async start(controller) {
         // callback

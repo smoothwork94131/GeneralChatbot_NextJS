@@ -19,7 +19,7 @@ export default function Home() {
       chatInputPadding: '40px'
     }
   };
-
+  
   return (
     <HomeContext.Provider
       value = {{

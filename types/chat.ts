@@ -5,17 +5,18 @@ export interface Message {
     content: string;
 }
 export interface Conversation {
-    id: string;
     name: string;
-    messages: Message[];
+    key: string;
+    messages: Message[][];
     prompt: string;
-    temperature: number;
+    temperature?: number;
 }
 
 export interface ChatBody {
     model: OpenAIModel;
-    messages: Message[];
+    messages: Message[][];
     key: string;
     prompt: string;
-    temperature: number;
+    temperature?: number;
 }
+

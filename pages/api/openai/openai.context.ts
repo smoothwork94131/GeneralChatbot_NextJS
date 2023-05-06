@@ -6,7 +6,7 @@ export interface OpenaiContextProps {
     state: OpenaiInitialState;
     dispatch: Dispatch<ActionType<OpenaiInitialState>>;
     handleSelectRole: (index: number) => void;
-    handleSelectUtility: (group_index: number, utility_index: number) => void;
+    handleSelectUtility: (utility_key: string) => void;
 }
 
 const OpenaiContext = createContext<OpenaiContextProps>(undefined!);

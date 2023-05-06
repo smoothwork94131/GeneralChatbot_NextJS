@@ -18,7 +18,10 @@ import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mantine/hooks";
 import { Collapse } from '@mantine/core';
+import { Conversation } from '@/types/chat';
+import { Utility } from '@/types/role';
 
+  
 interface Props {
 
 }
@@ -31,23 +34,52 @@ const OpenAi = ({
 
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
-        
     });
     const {
         state: {
             selectedRole,
             roleGroup,
-            selectedUtilityGroup
+            conversationHistory,
+            selectedUtility
         },
         dispatch,
     } = contextValue;
+    useEffect(() => {   
+        const _conversationHistory = localStorage.getItem("conversationHistory");
+        if(_conversationHistory){
+            const parsedConversationHistory:Conversation[] = JSON.parse(_conversationHistory);
+            dispatch({
+                "field": "conversationHistory",
+                "value": parsedConversationHistory
+            })
+        }
+    },[dispatch])
+    useEffect(() => {
 
-
+        let updatedConversation:Conversation;
+        const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
+        if(filterConversation.length > 0 ) {
+            updatedConversation = filterConversation[0]
+            
+        } else {
+            updatedConversation = {
+                name: selectedUtility.name,
+                key: selectedUtility.key,
+                prompt:'',
+                messages:[]
+            };
+        }
+        dispatch({
+            "field": "selectedConversation",
+            "value":updatedConversation
+        });
+    },[selectedUtility]);
+    
     const handleSelectRole = (index: number) => {
         const updatedRole = roleGroup.filter(
             (r, r_index) => r_index == index
         );
-        
+
         if(updatedRole.length > 0) {
             let utility;
             for(let g_index = 0; g_index < roleGroup[index].utilities_group.length; g_index++){
@@ -69,22 +101,24 @@ const OpenAi = ({
                 field: 'selectedUtility',
                 value: utility
             })
+            
         }
     };
-    const handleSelectUtility = (group_index: number, utility_index: number) => {
-        let updatedUtility = selectedRole?.utilities_group[group_index].utilities.filter(
-            (u, u_index) => u_index == utility_index
-        );
-        
+    const handleSelectUtility = (utility_key:string) => {
+        let updatedUtility: Utility[] = [];
+        for(let k = 0 ; k<selectedRole?.utilities_group.length; k++){
+            updatedUtility = selectedRole?.utilities_group[k].utilities.filter((utility) => utility.key == utility_key);
+            if(updatedUtility.length > 0) break;
+        }
         if(updatedUtility && updatedUtility.length > 0) {
             let roleGroup_ =roleGroup;
             const updatedUtility_ = updatedUtility[updatedUtility?.length - 1];
-            console.log(updatedUtility_);
+            
             for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
-                if(selectedRole.name == roleGroup_[r_index].name) {
+                if(selectedRole.name == roleGroup_[r_index].name) {            
                     for(let g_index = 0 ; g_index <roleGroup_[r_index].utilities_group.length; g_index++) {
                         for(let u_index = 0 ; u_index < roleGroup_[r_index].utilities_group[g_index].utilities.length; u_index++){
-                            if(updatedUtility_.name == roleGroup_[r_index].utilities_group[g_index].utilities[u_index].name 
+                            if(updatedUtility_.key == roleGroup_[r_index].utilities_group[g_index].utilities[u_index].key 
                                 ) {
                                 roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = true;
                             } else{
@@ -94,6 +128,7 @@ const OpenAi = ({
                     }
                 }    
             }
+
             dispatch({
                 field: "selectedUtility",
                 value: updatedUtility_
@@ -109,7 +144,8 @@ const OpenAi = ({
     const handleShowSidebar = () => {
         setOpenedSiebar(!openedSidebar);
     };
-    
+
+
     return (
         <OpenaiContext.Provider
             value={{

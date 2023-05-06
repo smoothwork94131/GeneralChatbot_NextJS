@@ -4,6 +4,8 @@ import Utils from '@/components/Utils';
 import Settings from '@/components/Settings';
 import OpenaiContext from '@/pages/api/openai/openai.context';
 import { useDisclosure } from "@mantine/hooks";
+import { useState, useEffect } from 'react';
+
 import { 
     Navbar,
     createStyles,
@@ -11,13 +13,13 @@ import {
     Flex
  } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
+import { UtilitiesGroup } from '@/types/role';
 
 interface Props {
     isMobile: boolean
     handleShowSidebar:() => void;
     openedSidebar: boolean;
     className?:string;
- 
 }
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
@@ -39,21 +41,66 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
 );
 
 const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
+    
     const {
         state: { selectedUtilityGroup, selectedUtility },
         handleSelectUtility,
         dispatch: openAiDispatch
     } = useContext(OpenaiContext);
-
-    const collpaseUtiltyGroup = (group_index: number) => {
-        let selectedUtilityGroup_ = selectedUtilityGroup;
-        selectedUtilityGroup_[group_index].active = !selectedUtilityGroup_[group_index].active;
-        console.log(selectedUtilityGroup_);
-        openAiDispatch({
-            field: 'selectedUtilityGroup',
-            value: selectedUtilityGroup_
-        })
+    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
+    
+    
+    const onSearchUtility = (keyword: string) => {
+        setSearchKeyword(keyword);
     }
+
+    useEffect(()=> {
+        let updatedUtilityGroup: UtilitiesGroup[] = [];
+        
+        for(let k=0; k<selectedUtilityGroup.length;k++){
+            let group_item = selectedUtilityGroup[k];
+            const filter_utilities = group_item.utilities.filter((u_item) => {
+                const searchable = u_item.name.toLowerCase() +
+                ' '+u_item.summary.toLowerCase();
+                return searchable.includes(searchKeyword.toLowerCase())
+            })
+            if(filter_utilities.length > 0) {
+                group_item = {
+                    ...group_item,
+                    utilities: filter_utilities,
+                    active: searchKeyword !="" ||
+                            filter_utilities.filter((utility) => utility.key == selectedUtility.key).length > 0?true:false
+                }
+                updatedUtilityGroup.push(group_item);
+            }
+        }
+        setFilterUtilityGroup(updatedUtilityGroup);
+    },[searchKeyword, selectedUtilityGroup])
+
+    useEffect(()=> {
+
+    },[])
+
+    const collpaseUtiltyGroup = (group_name: string) => {
+        let updatedUtilityGroup = filterUtilityGroup;
+        updatedUtilityGroup = updatedUtilityGroup.map((item) =>{
+            if(item.name == group_name){
+                item = {
+                    ...item,
+                    active: !item.active
+                };
+            }
+            return item;
+        })
+        setFilterUtilityGroup(updatedUtilityGroup); 
+        // openAiDispatch({
+        //     field: 'selectedUtilityGroup',
+        //     value: updatedUtilityGroup
+        // })
+
+    }
+
     const [collapsed, handlers] = useDisclosure(false);
     const { classes, cx } = useStyles({ collapsed });
     return (
@@ -69,7 +116,9 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
                     gap='sm'
                     align='center'
                 >
-                    <Search />
+                    <Search 
+                        onSearchUtility={onSearchUtility}
+                    />
                     <Text sx={(theme) => ({
                             color: theme.colors.gray[7]
                         })}>
@@ -78,10 +127,12 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
                         />        
                     </Text>
                 </Flex>:
-                <Search />
+                <Search 
+                    onSearchUtility = {onSearchUtility}
+                />
             }
             <Utils 
-                selectedUtilityGroup = { selectedUtilityGroup }
+                selectedUtilityGroup = { filterUtilityGroup }
                 handleSelectUtility = {handleSelectUtility}
                 selectedUtility = {selectedUtility}
                 collpaseUtiltyGroup = {collpaseUtiltyGroup}

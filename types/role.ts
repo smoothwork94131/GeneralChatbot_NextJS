@@ -8,7 +8,7 @@ export interface UtilitiesGroup {
     utilities: Utility[];
 }
 export interface Utility {
-    id?: number;
+    key: string;
     name: string;
     inputs: Input[];
     summary: string;
@@ -16,7 +16,7 @@ export interface Utility {
     style: string | number;
     type?: string;
     input_align?: string,
-    prompt_message?: string;
+    prompt?: string;
 }
 export interface Input {
     name: string;

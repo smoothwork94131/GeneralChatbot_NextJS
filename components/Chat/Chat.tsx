@@ -2,7 +2,7 @@ import { useContext, FC } from 'react';
 import { Box } from '@mantine/core';
 import  Role  from "@/components/Role";
 import ChatContent from './ChatContent';
-import OpenaiContext from '@/pages/api/openai/openai.context';
+import OpenaiContext from '@/components/openai/openai.context';
 import { Conversation } from '@/types/chat';
 import {
     saveConversationHistory,

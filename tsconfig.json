@@ -13,6 +13,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noImplicitAny": false,
     "jsx": "preserve",
     "incremental": true,
     "jsxImportSource": "@emotion/react",
@@ -23,7 +24,8 @@
       "@/hooks/*": ["hooks/*"],
       "@/styles/*":["styles/*"],
       "@/utils/*":["utils/*"],
-      "@/pages/*":["pages/*"]
+      "@/pages/*":["pages/*"],
+      "@/state/*":["state/*"]
 
     },
   },

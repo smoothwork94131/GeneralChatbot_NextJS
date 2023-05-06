@@ -1,8 +1,8 @@
 import { MantineProvider, ColorSchemeProvider, MantineThemeOverride } from '@mantine/core';
-import { initialState, HomeInitialState } from './index.state';
+import { initialState, HomeInitialState } from '@/state/index.state';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
-import OpenAi from './api/openai';
-import HomeContext from './index.context';
+import OpenAi from '@/components/openai';
+import HomeContext from '@/state/index.context';
 export default function Home() {
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,

@@ -1,4 +1,4 @@
-import { ApiChatInput, ApiChatResponse } from '../../pages/api/openai/chat';
+import { ApiChatInput, ApiChatResponse } from '../../components/openai/chat';
 import { ChatModelId, ChatModels } from '@/lib/data';
 import { cleanupPrompt } from './prompts';
 import { getOpenAIConfiguration } from '@/lib/stores/store-settings';

@@ -1,4 +1,4 @@
-import { ApiChatInput, ApiChatResponse } from '../../pages/api/openai/chat';
+import { ApiChatInput, ApiChatResponse } from '../../pages/api/openai_/chat';
 import { ChatModelId } from '@/lib/data';
 import { OpenAIAPI } from '@/types/api-openai';
 import { getOpenAIConfiguration } from '@/lib/stores/store-settings';

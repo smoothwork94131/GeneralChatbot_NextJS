@@ -31,7 +31,7 @@ export const ROLE_GROUP = [
                 name: "Copywriting",
                 active: true,
                 utilities: [
-                    {
+                    { 
                         name: "Translate",
                         summary: 'Enter text for translation',
                         type: 'translate',

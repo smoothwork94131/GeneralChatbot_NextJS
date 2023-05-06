@@ -6,7 +6,7 @@ import {
     Box, 
     Group } from '@mantine/core';
 import Settings from '../Settings';
-import OpenaiContext from '@/pages/api/openai/openai.context';
+import OpenaiContext from '@/components/openai/openai.context';
 import Role from '../Role';
 
 interface Props {

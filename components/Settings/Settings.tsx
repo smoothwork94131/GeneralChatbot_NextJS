@@ -1,7 +1,7 @@
 import { FC, useContext } from 'react';
 import { Flex, Menu, NavLink  } from '@mantine/core';
 import { IconLogout, IconMoon, IconStar, IconSun, IconTrash, IconUrgent, IconWorld } from '@tabler/icons-react';
-import HomeContext from '@/pages/index.context';
+import HomeContext from 'state/index.context';
 
 interface Props {
     isMobile: boolean;

@@ -2,7 +2,7 @@ import { FC, useContext} from 'react';
 import Search from '@/components/Search';
 import Utils from '@/components/Utils';
 import Settings from '@/components/Settings';
-import OpenaiContext from '@/pages/api/openai/openai.context';
+import OpenaiContext from '@/components/openai/openai.context';
 import { useDisclosure } from "@mantine/hooks";
 import { useState, useEffect } from 'react';
 

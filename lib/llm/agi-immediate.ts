@@ -1,4 +1,4 @@
-import { ApiChatInput } from '../../pages/api/openai/chat';
+import { ApiChatInput } from '../../pages/api/openai_/chat';
 import { ChatModelId, SystemPurposeId, SystemPurposes } from '@/lib/data';
 import { createDMessage, DMessage, useChatStore } from '@/lib/stores/store-chats';
 import { getOpenAIConfiguration, useSettingsStore } from '@/lib/stores/store-settings';

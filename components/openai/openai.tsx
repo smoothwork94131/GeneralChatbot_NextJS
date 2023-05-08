@@ -12,16 +12,15 @@ import {
     useState, 
     FC
  } from 'react';
+
+import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
-import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mantine/hooks";
-import { Collapse } from '@mantine/core';
 import { Conversation } from '@/types/chat';
-import { PrompState, Utility } from '@/types/role';
+import { Utility } from '@/types/role';
 
-  
 interface Props {
 
 }
@@ -98,8 +97,7 @@ const OpenAi = ({
             dispatch({
                 field: 'selectedUtility',
                 value: utility
-            })
-            
+            });
         }
     };
     const handleSelectUtility = (utility_key:string) => {
@@ -147,6 +145,7 @@ const OpenAi = ({
 
 
     return (
+        isMobile!==undefined?
         <OpenaiContext.Provider
             value={{
                 ...contextValue,
@@ -189,14 +188,9 @@ const OpenAi = ({
                     isMobile = {isMobile}
                 />    
             </AppShell>
-        </OpenaiContext.Provider>
+        </OpenaiContext.Provider>:<></>
     )
 };
-
-const Sidebar = dynamic(async () => {
-    const Sidebar = await import("@/components/Sidebar");
-    return Sidebar;
-});
 
 const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: boolean; }> = ({
     opened,

@@ -32,6 +32,7 @@ export interface Input {
 export interface Prompt {
     description?: string ;
     systemMessage: string;
+    userMessage: string;
     symbol?: string;
     examples?: string[];
     datetime?: string;

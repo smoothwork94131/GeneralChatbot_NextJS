@@ -47,7 +47,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
         handleSelectUtility,
         dispatch: openAiDispatch
     } = useContext(OpenaiContext);
-    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>([]);
+    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>(selectedUtilityGroup);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     
     

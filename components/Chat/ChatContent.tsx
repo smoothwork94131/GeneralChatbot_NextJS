@@ -12,7 +12,7 @@ import {
 import ChatInput from './ChatInput';
 import { Input, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
-import { AssistantMessageState, Conversation, Message } from '@/types/chat';
+import { AssistantMessageState, Conversation, Message, UserMessageState } from '@/types/chat';
 import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID } from '@/utils/app/const';
 import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
 
@@ -41,20 +41,23 @@ const ChatContent: FC<Props> = ({
             const today_datetime = new Date().toISOString().split('T')[0];
             let messages: Message[] = [];
             let system_message =  prompt?.systemMessage;
+            let user_message = prompt?.userMessage;
             inputs.map((input: Input, index: number) => {
-                if(input.type == "form" && system_message){
-                    system_message = system_message.replaceAll(`{${index}}`, input.value?input.value:'');
+                if(input.type == "form" && user_message){
+                    user_message = user_message.replaceAll(`{${index}}`, input.value?input.value:'');
                 }
             });
-            
-            if(system_message) {
-                system_message = system_message.replace('{{Today}}', today_datetime);
+            if(user_message) {
                 if(inputs.length > 0) {
-                    system_message = system_message.replaceAll(`{${inputs.length}}`, message);
-                }
+                    user_message = user_message.replaceAll(`{${inputs.length}}`, `: "${message}"`);
+                } 
+            }
+            if(user_message =="") {
+                user_message = message;
+            }
+            if(system_message){
                 messages =[{role: 'system', content: system_message}];
             }
-
             const selectedMessagesHistory = selectedConversation.messages;
             selectedMessagesHistory.map((messages_item) => {
                 messages_item.map((message) => {
@@ -62,8 +65,12 @@ const ChatContent: FC<Props> = ({
                 })
             });
 
-            const user_message: Message = {role: 'user',  content: message}
-            messages.push(user_message);
+            let user_prompt: Message = UserMessageState ;
+            if(user_message){
+                user_prompt = {role: 'user',  content: user_message};
+            }
+            
+            messages.push(user_prompt);
             
             setMessageIsStreaming(true);
             
@@ -78,8 +85,8 @@ const ChatContent: FC<Props> = ({
                 max_tokens: OPENAI_API_MAXTOKEN,
             };
 
-            updatedConversation.messages.push([user_message, AssistantMessageState]);
-
+            updatedConversation.messages.push([user_prompt, AssistantMessageState]);
+            
             const response = await fetch('/api/openai/chat', {
                 method: 'POST',
                 headers: {

@@ -23,3 +23,8 @@ export const AssistantMessageState: Message = {
     role:'assistant',
     content:''
 }
+
+export const UserMessageState: Message = {
+    role:'user',
+    content:''
+}

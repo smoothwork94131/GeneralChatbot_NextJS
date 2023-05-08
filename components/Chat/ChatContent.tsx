@@ -11,10 +11,10 @@ import {
 } from '@mantine/core';
 import ChatInput from './ChatInput';
 import { Input, Utility } from '@/types/role';
-
 import ChatMessage from '@/components/Chat/ChatMessage';
-import { Conversation, Message } from '@/types/chat';
-
+import { AssistantMessageState, Conversation, Message } from '@/types/chat';
+import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID } from '@/utils/app/const';
+import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
 
 interface Props {
     selectedUtility: Utility;
@@ -38,89 +38,87 @@ const ChatContent: FC<Props> = ({
             const inputs = selectedUtility.inputs.filter((input: Input) => input.type == "form");
             let prompt = selectedUtility.prompt;
 
+            const today_datetime = new Date().toISOString().split('T')[0];
+            let messages: Message[] = [];
+            let system_message =  prompt?.systemMessage;
             inputs.map((input: Input, index: number) => {
-                if(input.type == "form"){
-                    prompt = prompt?.replace(`{${index}}`, input.value?input.value:'');
+                if(input.type == "form" && system_message){
+                    system_message = system_message.replaceAll(`{${index}}`, input.value?input.value:'');
                 }
             });
-            if(inputs.length == 0 && prompt == '') {
-                prompt = message;
-            } else{
-                prompt = prompt?.replace(`{${inputs.length}}`, message);
+            
+            if(system_message) {
+                system_message = system_message.replace('{{Today}}', today_datetime);
+                if(inputs.length > 0) {
+                    system_message = system_message.replaceAll(`{${inputs.length}}`, message);
+                }
+                messages =[{role: 'system', content: system_message}];
             }
-            let messages:Message[] = [];
-            messages=[...messages, {role: 'user',  content: message}]
-           
-            updatedConversation.prompt = prompt?prompt:'';
+
+            const selectedMessagesHistory = selectedConversation.messages;
+            selectedMessagesHistory.map((messages_item) => {
+                messages_item.map((message) => {
+                    messages = [...messages, message];
+                })
+            });
+
+            const user_message: Message = {role: 'user',  content: message}
+            messages.push(user_message);
+            
             setMessageIsStreaming(true);
-            const response = await fetch("/api/chat", {
-                method: "POST",
-                headers: {
-                "Content-Type": "application/json",
+            
+            const input: ApiChatInput = {
+                api: {
+                    apiKey: OPENAI_API_KEY,
+                    apiHost: OPENAI_API_HOST,
+                    apiOrganizationId:''
                 },
-                body: JSON.stringify({
-                prompt: prompt
-                }),
+                model: OPENAI_MODELID,
+                messages: messages,
+                max_tokens: OPENAI_API_MAXTOKEN,
+            };
+
+            updatedConversation.messages.push([user_message, AssistantMessageState]);
+
+            const response = await fetch('/api/openai/chat', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(input),
             });
             if (!response.ok) {
-                throw new Error(response.statusText);
+                console.error('Error from API call: ', response.status, response.statusText);
+                return '';
             }
-            const data = response.body;
-            if (!data) {
-                return;
-            }
-            const reader = data.getReader();
-            const decoder = new TextDecoder();
-            let done = false;
-            let text = "";
-            let is_first = true;
+            const data: ApiChatResponse = await response.json();
             
-            while (!done) {
-                
-                const { value, done: doneReading } = await reader.read();
-                done = doneReading;
-                const chunkValue = decoder.decode(value);
-                text += chunkValue;
-                if(is_first) {
-                    is_first = false;
-                    messages = [...messages, { role: 'assistant', content: chunkValue }];
-
-                    const updatedMessages: Message[][] = [
-                        ...updatedConversation.messages,
-                        messages,
-                    ];
-                    updatedConversation = {
-                        ...updatedConversation,
-                        messages: updatedMessages,
-                    };
-                    saveSelectConverSation(updatedConversation);
-                } else {
-                    const updatedMessages: Message[][] =
-                    updatedConversation.messages.map((message, index) => {
-                        if (index === updatedConversation.messages.length - 1) {
-                            return message.map((role_message) => {
-                                if(role_message.role == "assistant") {
-                                    return {
-                                        ...role_message,
-                                        content: text,
-                                    };
-                                }
-                                return role_message;
-                            });
+            const assistant_message: Message = data.message;
+            
+            const updatedMessages: Message[][] =
+                updatedConversation.messages.map((message, index) => {
+                if (index === updatedConversation.messages.length - 1) {
+                    return message.map((role_message) => {
+                        if(role_message.role == "assistant") {
+                            role_message = assistant_message
                         }
-                        return message;
+                        return role_message;
                     });
-                    updatedConversation = {
-                        ...updatedConversation,
-                        messages: updatedMessages,
-                    };
-                    saveSelectConverSation(updatedConversation);
                 }
-            }
+                return message;
+            });
+            
+            updatedConversation = {
+                ...updatedConversation,
+                messages: updatedMessages,
+                datetime: today_datetime
+            };
+            
+            saveSelectConverSation(updatedConversation);
             setMessageIsStreaming(false);
         }
     }
-    
+
     const componentUtilityInputs = () => {
         if(selectedUtility.inputs.length > 0) {
            
@@ -147,7 +145,7 @@ const ChatContent: FC<Props> = ({
         } 
         
     };
-   
+    
     const handleChangeInput = (index: number , e: React.ChangeEvent<HTMLInputElement> | string) => {
         let value='';
       

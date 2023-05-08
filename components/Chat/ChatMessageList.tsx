@@ -1,7 +1,9 @@
 import { FC } from 'react';
 import {
     Flex,
-    Image } from '@mantine/core';
+    Image,
+    Box,
+    Loader } from '@mantine/core';
 import { Message } from '@/types/chat';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -11,12 +13,13 @@ import { CodeBlock } from '@/components/Markdown/CodeBlock';
 
 interface Props {
     message: Message;
-    cursor: string;
     messageIsStreaming:boolean;
+    cursor: string;
 }
-const ChatMessageList: FC<Props> = ({message, cursor, messageIsStreaming}) => {
+const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor}) => {
     
     return (
+        
         <Flex
             gap="xs"
             sx={(theme) =>({
@@ -81,7 +84,9 @@ const ChatMessageList: FC<Props> = ({message, cursor, messageIsStreaming}) => {
                   },
                 }}
               >
-                {cursor}
+                {
+                  cursor
+                }
               </MemoizedReactMarkdown>
         </Flex>
     )

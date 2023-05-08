@@ -1,6 +1,7 @@
 import { Conversation } from "@/types/chat";
-import { RoleGroup, UtilitiesGroup, Utility } from "@/types/role";
+import { RoleGroup, UtilitiesGroup, Utility, PrompState } from "@/types/role";
 import { ROLE_GROUP } from "@/utils/app/const";
+
 export interface OpenaiInitialState {
     apiKey: string;
     loading: boolean;
@@ -25,6 +26,6 @@ export const initialState: OpenaiInitialState = {
     selectedUtility: ROLE_GROUP[0].utilities_group[0].utilities[0],
     roleGroup: ROLE_GROUP,
     selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
-    selectedConversation: undefined
+    selectedConversation: PrompState
 };
   

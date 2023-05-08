@@ -5,23 +5,34 @@ export const Languages = [
 export const MOBILE_LIMIT_WIDTH = 760;
 export const OPENAI_API_HOST =
   process.env.OPENAI_API_HOST || 'https://api.openai.com';
+
 export const DEFAULT_TEMPERATURE = 
   parseFloat(process.env.NEXT_PUBLIC_DEFAULT_TEMPERATURE || "1");
 
 export const OPENAI_API_TYPE =
   process.env.OPENAI_API_TYPE || 'openai';
 
+export const OPENAI_API_KEY =
+  process.env.OPENAI_API_KEY || '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';
+
 export const OPENAI_API_VERSION =
   process.env.OPENAI_API_VERSION || '2023-03-15-preview';
+
+export const OPENAI_API_MAXTOKEN = 500;
 
 export const OPENAI_ORGANIZATION =
   process.env.OPENAI_ORGANIZATION || '';
 
+export const OPENAI_MODELID =
+  process.env.OPENAI_MODELID || 'gpt-3.5-turbo';
+
 export const AZURE_DEPLOYMENT_ID =
   process.env.AZURE_DEPLOYMENT_ID || '';
+
 export const DEFAULT_SYSTEM_PROMPT =
   process.env.NEXT_PUBLIC_DEFAULT_SYSTEM_PROMPT ||
   "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.";
+
 
 export const ROLE_GROUP = [
     {
@@ -31,14 +42,17 @@ export const ROLE_GROUP = [
                 name: "Copywriting",
                 active: true,
                 utilities: [
-                    { 
+                    {
                         name: "Translate",
                         summary: 'Enter text for translation',
                         type: 'translate',
                         style:'',
                         active: true,
                         input_align: 'horizental',
-                        prompt:'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2}',
+                        prompt:{
+                            systemMessage: 'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2} \nCurrent date: {{Today}}',
+                            examples:[]  
+                        },
                         key: 'Marketing_Copywriting_Translate',
                         inputs:[
                             {
@@ -89,7 +103,10 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: true,
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         key: 'Coding_Web_Javascript',
                         inputs:[
                         ]
@@ -99,7 +116,10 @@ export const ROLE_GROUP = [
                         style:'',
                         summary: '',
                         input_align: 'horizental',
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         active: false,
                         key:'Coding_Web_Css',
                         inputs:[
@@ -110,7 +130,10 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         key:'Coding_Web_Database',
                         summary: '',
                         inputs:[
@@ -128,7 +151,10 @@ export const ROLE_GROUP = [
                         style:'',
                         active: false,
                         input_align: 'horizental',
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         type:'',
                         key: 'Coding_Java_Spring boot',
                         inputs:[
@@ -141,6 +167,10 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         key: 'Coding_Java_Interface',
                         inputs:[
                         ]
@@ -151,7 +181,10 @@ export const ROLE_GROUP = [
                         type:'',
                         input_align: 'horizental',
                         style:'',
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         key: 'Coding_Java_Android',
                         active: false,
                         inputs:[
@@ -174,7 +207,10 @@ export const ROLE_GROUP = [
                         type:'',
                         active: true,
                         input_align: 'horizental',
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         summary: '',
                         key: 'Learning_English_Base',
                         inputs:[
@@ -186,7 +222,10 @@ export const ROLE_GROUP = [
                         type:'',
                         active: false,
                         input_align: 'horizental',
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         key: 'Learning_English_Influenty',
                         summary: '',
                         inputs:[
@@ -198,7 +237,10 @@ export const ROLE_GROUP = [
                         active: false,
                         type:'',
                         input_align: 'horizental',
-                        prompt:'',
+                        prompt:{
+                            systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
+                            examples:[]
+                        },
                         key: 'Learning_English_Native',
                         style:'',
                         inputs:[

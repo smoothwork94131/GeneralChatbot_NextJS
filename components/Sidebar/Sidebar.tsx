@@ -43,11 +43,11 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
 const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
     
     const {
-        state: { selectedUtilityGroup, selectedUtility },
+        state: { selectedUtilityGroup, selectedUtility, roleGroup },
         handleSelectUtility,
         dispatch: openAiDispatch
     } = useContext(OpenaiContext);
-    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>(selectedUtilityGroup);
+    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     
     
@@ -69,14 +69,14 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
                 group_item = {
                     ...group_item,
                     utilities: filter_utilities,
-                    active: searchKeyword !="" ||
-                            filter_utilities.filter((utility) => utility.key == selectedUtility.key).length > 0?true:false
+                    active: (searchKeyword !="") ||
+                            (group_item.active)? true:false
                 }
                 updatedUtilityGroup.push(group_item);
             }
         }
         setFilterUtilityGroup(updatedUtilityGroup);
-    },[searchKeyword, selectedUtilityGroup])
+    },[searchKeyword, selectedUtilityGroup, roleGroup])
 
     useEffect(()=> {
 
@@ -93,12 +93,23 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
             }
             return item;
         })
-        setFilterUtilityGroup(updatedUtilityGroup); 
-        // openAiDispatch({
-        //     field: 'selectedUtilityGroup',
-        //     value: updatedUtilityGroup
-        // })
 
+        const updated_role_Group = roleGroup.map((role_item) => {
+            const filter_utility_group = role_item.utilities_group.map((group_item) => {
+                
+                const group = updatedUtilityGroup.filter(updated_group_item => updated_group_item.name == group_item.name)
+                if(group.length > 0) {
+                    group_item.active = group[0].active;
+                }
+                return group_item;
+            })
+            role_item.utilities_group = filter_utility_group;
+            return role_item;
+        })
+        openAiDispatch({
+            field: 'roleGroup',
+            value: updated_role_Group
+        })
     }
 
     const [collapsed, handlers] = useDisclosure(false);

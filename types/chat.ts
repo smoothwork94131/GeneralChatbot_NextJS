@@ -1,5 +1,5 @@
 import { OpenAIModel } from './openai';
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'system';
 export interface Message {
     role: Role;
     content: string;
@@ -8,8 +8,8 @@ export interface Conversation {
     name: string;
     key: string;
     messages: Message[][];
-    prompt: string;
     temperature?: number;
+    datetime?:string,
 }
 
 export interface ChatBody {
@@ -19,4 +19,7 @@ export interface ChatBody {
     prompt: string;
     temperature?: number;
 }
-
+export const AssistantMessageState: Message = {
+    role:'assistant',
+    content:''
+}

@@ -19,8 +19,7 @@ import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mantine/hooks";
 import { Collapse } from '@mantine/core';
 import { Conversation } from '@/types/chat';
-import { Utility } from '@/types/role';
-import Sidebar from '../Sidebar/Sidebar';
+import { PrompState, Utility } from '@/types/role';
 
   
 interface Props {
@@ -61,12 +60,10 @@ const OpenAi = ({
         const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
         if(filterConversation.length > 0 ) {
             updatedConversation = filterConversation[0]
-            
         } else {
             updatedConversation = {
                 name: selectedUtility.name,
                 key: selectedUtility.key,
-                prompt:'',
                 messages:[]
             };
         }
@@ -80,7 +77,7 @@ const OpenAi = ({
         const updatedRole = roleGroup.filter(
             (r, r_index) => r_index == index
         );
-
+        
         if(updatedRole.length > 0) {
             let utility;
             for(let g_index = 0; g_index < roleGroup[index].utilities_group.length; g_index++){
@@ -111,8 +108,10 @@ const OpenAi = ({
             updatedUtility = selectedRole?.utilities_group[k].utilities.filter((utility) => utility.key == utility_key);
             if(updatedUtility.length > 0) break;
         }
+        
         if(updatedUtility && updatedUtility.length > 0) {
-            let roleGroup_ =roleGroup;
+            
+            let roleGroup_ = roleGroup;
             const updatedUtility_ = updatedUtility[updatedUtility?.length - 1];
             
             for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
@@ -146,7 +145,8 @@ const OpenAi = ({
         setOpenedSiebar(!openedSidebar);
     };
 
-    return (isMobile!==undefined?
+
+    return (
         <OpenaiContext.Provider
             value={{
                 ...contextValue,
@@ -189,14 +189,14 @@ const OpenAi = ({
                     isMobile = {isMobile}
                 />    
             </AppShell>
-        </OpenaiContext.Provider>:<></>
+        </OpenaiContext.Provider>
     )
 };
 
-// const Sidebar = dynamic(async () => {
-//     const Sidebar = await import("@/components/Sidebar");
-//     return Sidebar;
-// });
+const Sidebar = dynamic(async () => {
+    const Sidebar = await import("@/components/Sidebar");
+    return Sidebar;
+});
 
 const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: boolean; }> = ({
     opened,

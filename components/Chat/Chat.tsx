@@ -21,7 +21,7 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
             selectedUtility, 
             selectedRole, 
             conversationHistory,
-            selectedConversation
+            selectedConversation,
         },
         handleSelectRole,
         dispatch: openaiDispatch
@@ -35,8 +35,8 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
             value: t_utility
         });
     };
-    
     const saveSelectConverSation = (conversation: Conversation) => {
+        console.log(conversation);
         openaiDispatch({
             "field": "selectedConversation",
             "value": conversation

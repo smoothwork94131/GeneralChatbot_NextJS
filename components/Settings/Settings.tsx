@@ -21,6 +21,7 @@ const Settings:FC<Props> = ({isMobile}) =>{
           field: "lightMode",
           value: lightMode == 'dark'? 'light':'dark'
         });
+        localStorage.setItem("colorScheme", colorScheme == 'dark'? 'light':'dark');
     }
     return (
         isMobile?

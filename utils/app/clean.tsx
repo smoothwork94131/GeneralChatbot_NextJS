@@ -50,6 +50,7 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
   }
 
   return history.reduce((acc: any[], conversation) => {
+    alert()
     try {
       if (!conversation.model) {
         conversation.model = OpenAIModels[OpenAIModelID.GPT_3_5];

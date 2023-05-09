@@ -16,7 +16,8 @@ export interface Utility {
     style: string | number;
     type?: string;
     input_align?: string,
-    prompt?: Prompt;
+    system_prompt?: string;
+    user_prompt?: string;
 }
 export interface Input {
     name: string;
@@ -28,14 +29,6 @@ export interface Input {
     options?: string[];
     component: string;
     max_len?: number;
-}
-export interface Prompt {
-    description?: string ;
-    systemMessage: string;
-    userMessage: string;
-    symbol?: string;
-    examples?: string[];
-    datetime?: string;
 }
 
 export const PrompState = {key:'', name:'', messages:[], datetime: new Date().toISOString().split('T')[0]}

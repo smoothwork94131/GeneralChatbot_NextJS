@@ -19,7 +19,7 @@ import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation } from '@/types/chat';
-import { Utility } from '@/types/role';
+import {  Utility } from '@/types/role';
 
 interface Props {
 
@@ -43,6 +43,7 @@ const OpenAi = ({
         },
         dispatch,
     } = contextValue;
+
     useEffect(() => {   
         const _conversationHistory = localStorage.getItem("conversationHistory");
         if(_conversationHistory){
@@ -52,11 +53,12 @@ const OpenAi = ({
                 "value": parsedConversationHistory
             })
         }
-    },[dispatch])
+    },[]);
+    
     useEffect(() => {
-
         let updatedConversation:Conversation;
         const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
+        console.log(filterConversation);
         if(filterConversation.length > 0 ) {
             updatedConversation = filterConversation[0]
         } else {
@@ -70,7 +72,7 @@ const OpenAi = ({
             "field": "selectedConversation",
             "value":updatedConversation
         });
-    },[selectedUtility]);
+    },[selectedUtility, conversationHistory]);
     
     const handleSelectRole = (index: number) => {
         const updatedRole = roleGroup.filter(
@@ -138,12 +140,9 @@ const OpenAi = ({
         }  
         setOpenedSiebar(false);
     };
-    
     const handleShowSidebar = () => {
         setOpenedSiebar(!openedSidebar);
     };
-
-
     return (
         isMobile!==undefined?
         <OpenaiContext.Provider

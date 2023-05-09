@@ -1,6 +1,5 @@
 import { 
     FC, 
-    useEffect, 
     useState,
     useRef } from 'react';
 import { 
@@ -12,8 +11,8 @@ import {
 import ChatInput from './ChatInput';
 import { Input, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
-import { AssistantMessageState, Conversation, Message, UserMessageState } from '@/types/chat';
-import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID } from '@/utils/app/const';
+import { AssistantMessageState, Conversation, Message, Role, UserMessageState } from '@/types/chat';
+import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DefaultSystemPrompt } from '@/utils/app/const';
 import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
 
 interface Props {
@@ -27,53 +26,66 @@ const ChatContent: FC<Props> = ({
     selectedUtility, 
     handleChangeUtilityInputsValue, 
     selectedConversation,
-    saveSelectConverSation}) =>{
+    saveSelectConverSation,
+    }) =>{
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageIsStreaming, setMessageIsStreaming] = useState(false);
+    const [inputContent,  setInputContent] = useState<string>('');
+    
     const handleSend = async(message: string) => {
         if(selectedConversation) {
             let updatedConversation:Conversation = selectedConversation;
 
             const inputs = selectedUtility.inputs.filter((input: Input) => input.type == "form");
-            let prompt = selectedUtility.prompt;
 
-            const today_datetime = new Date().toISOString().split('T')[0];
+            let system_prompt = Object.keys(selectedUtility).includes("system_prompt")? selectedUtility.system_prompt:DefaultSystemPrompt;
+            let user_prompt = Object.keys(selectedUtility).includes("user_prompt")? selectedUtility.user_prompt:'';
+            const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
-            let system_message =  prompt?.systemMessage;
-            let user_message = prompt?.userMessage;
+            console.log(123);
             inputs.map((input: Input, index: number) => {
-                if(input.type == "form" && user_message){
-                    user_message = user_message.replaceAll(`{${index}}`, input.value?input.value:'');
+                if(input.type == "form" && user_prompt){
+                    user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
                 }
             });
-            if(user_message) {
+            if(user_prompt) {
                 if(inputs.length > 0) {
-                    user_message = user_message.replaceAll(`{${inputs.length}}`, `: "${message}"`);
+                    user_prompt = user_prompt.replaceAll(`{${inputs.length}}`, `: ${message}`);
                 } 
             }
-            if(user_message =="") {
-                user_message = message;
+            
+            if(system_prompt){
+                system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+                messages =[{role: 'system', content: system_prompt}];
             }
-            if(system_message){
-                messages =[{role: 'system', content: system_message}];
-            }
+            
             const selectedMessagesHistory = selectedConversation.messages;
             selectedMessagesHistory.map((messages_item) => {
                 messages_item.map((message) => {
                     messages = [...messages, message];
                 })
             });
+            
 
-            let user_prompt: Message = UserMessageState ;
-            if(user_message){
-                user_prompt = {role: 'user',  content: user_message};
-            }
+            let user_message: Message = UserMessageState ;
             
-            messages.push(user_prompt);
-            
+            user_message = {...user_message, 
+                content: user_prompt?user_prompt:message, 
+                datetime: today_datetime,
+            };
+            messages.push(user_message);
             setMessageIsStreaming(true);
             
+            const request_messages: Message[] = [];
+            
+            messages.map((item) => {
+                request_messages.push({
+                    role:item.role,
+                    content: item.content
+                });
+            });
+
             const input: ApiChatInput = {
                 api: {
                     apiKey: OPENAI_API_KEY,
@@ -81,12 +93,23 @@ const ChatContent: FC<Props> = ({
                     apiOrganizationId:''
                 },
                 model: OPENAI_MODELID,
-                messages: messages,
+                messages: request_messages.map((item) => {
+                    if(item.datetime) delete item?.datetime;
+                    if(item.inputs) delete item?.inputs;
+                    return item;
+                }),
                 max_tokens: OPENAI_API_MAXTOKEN,
             };
-
-            updatedConversation.messages.push([user_prompt, AssistantMessageState]);
             
+            user_message = {
+                ...user_message,
+                content: message,
+                inputs: inputs,
+                datetime: today_datetime,
+                active: false
+            };
+            
+            updatedConversation.messages.push([user_message, AssistantMessageState]);
             const response = await fetch('/api/openai/chat', {
                 method: 'POST',
                 headers: {
@@ -104,10 +127,15 @@ const ChatContent: FC<Props> = ({
             
             const updatedMessages: Message[][] =
                 updatedConversation.messages.map((message, index) => {
+                
                 if (index === updatedConversation.messages.length - 1) {
                     return message.map((role_message) => {
                         if(role_message.role == "assistant") {
-                            role_message = assistant_message
+                            role_message = assistant_message;
+                            role_message = {
+                                ...role_message,
+                                datetime: today_datetime,
+                            }
                         }
                         return role_message;
                     });
@@ -120,7 +148,7 @@ const ChatContent: FC<Props> = ({
                 messages: updatedMessages,
                 datetime: today_datetime
             };
-            
+    
             saveSelectConverSation(updatedConversation);
             setMessageIsStreaming(false);
         }
@@ -205,17 +233,20 @@ const ChatContent: FC<Props> = ({
                 :<></>
             }
             <Space h="md"/>
-            <ChatInput 
+            <ChatInput
                 onSend={(message) => handleSend(message)}
                 textareaRef={textareaRef}
                 messageIsStreaming={messageIsStreaming}
+                inputContent={inputContent}
+                setInputContent={(content)=> {setInputContent(content)}}
             />
             <Space h="md"/>
             <ChatMessage 
                 selectedConversation={selectedConversation}
                 messageIsStreaming={messageIsStreaming}
-            />           
-            
+                setInputContent={(content)=> {setInputContent(content)}}
+                saveSelctedConversation={saveSelectConverSation}
+            />
             <Text ta="center"
                 sx={(theme) => ({
                     fontSize: theme.fontSizes.xs

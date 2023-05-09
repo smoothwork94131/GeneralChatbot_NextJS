@@ -13,10 +13,12 @@ interface Props {
     onSend: (message: string) =>void;
     textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
     messageIsStreaming: boolean;
+    inputContent:string;    
+    setInputContent: (content: string)=>void;
 }
-const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming }) => {
-    const [content, setContent] = useState<string>();
+const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent}) => {
     const [textError, setTextError] = useState<string>();
+    
     useEffect(() => {
         if (textareaRef && textareaRef.current) {
             textareaRef.current.style.height = 'inherit';
@@ -29,22 +31,22 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming }) => {
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
-        setContent(value);
+        setInputContent(value);
     };
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
         if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming) {
             e.preventDefault();
             handleSend();
-            setContent("")
+            setInputContent("")
         }
     };
     const handleSend = () => {
-        if (!content) {
+        if (!inputContent) {
             setTextError("Please enter a message");
             return;
         }
         setTextError("");
-        onSend(content);
+        onSend(inputContent);
     };
 
     return (
@@ -65,9 +67,9 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming }) => {
                     // <IconSend size="1rem" className="opacity-[0.5] display-block;" />
                     messageIsStreaming?
                     <LoaderIcon style={{width: '20px', height: '20px'}}></LoaderIcon>:
-                    <IconSend size="1rem" className="opacity-[0.5] display-block;" />
+                    <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={handleSend}/>
                 }
-                value={content}
+                value={inputContent}
                 ref={textareaRef}
                 sx={(theme) => ({
                 })}

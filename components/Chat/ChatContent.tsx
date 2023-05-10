@@ -14,6 +14,7 @@ import ChatMessage from '@/components/Chat/ChatMessage';
 import { AssistantMessageState, Conversation, Message, Role, UserMessageState } from '@/types/chat';
 import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DefaultSystemPrompt } from '@/utils/app/const';
 import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
+import { useEffect } from 'react';
 
 interface Props {
     selectedUtility: Utility;
@@ -32,7 +33,9 @@ const ChatContent: FC<Props> = ({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageIsStreaming, setMessageIsStreaming] = useState(false);
     const [inputContent,  setInputContent] = useState<string>('');
-    
+    useEffect(() => {
+        setInputContent("");
+    }, [selectedConversation])
     const handleSend = async(message: string) => {
         if(selectedConversation) {
             let updatedConversation:Conversation = selectedConversation;
@@ -191,6 +194,7 @@ const ChatContent: FC<Props> = ({
         }
         handleChangeUtilityInputsValue(index, value);
     }
+
     return (
         <Box 
             sx={(theme) => ({

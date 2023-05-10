@@ -11,7 +11,6 @@ import { Box,
 import ChatMessageList  from '@/components/Chat/ChatMessageList';
 import { Conversation, ConversationState, Message } from '@/types/chat';
 import TimeAgo from 'react-timeago';
-import englishStrings from 'react-timeago/lib/language-strings/en'
 import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 import { IconArrowBackUp } from '@tabler/icons-react';
 
@@ -20,26 +19,50 @@ interface Props {
     messageIsStreaming: boolean;
     setInputContent: (content:string) =>void;
     saveSelctedConversation: (conversation: Conversation)=>void;
+    isMobile: boolean;
 }
 
-const ChatMessage: FC<Props> = ({selectedConversation, messageIsStreaming, setInputContent, saveSelctedConversation}) => {
-
-    const formatter = buildFormatter(englishStrings);
+const ChatMessage: FC<Props> = ({selectedConversation, 
+    messageIsStreaming, 
+    setInputContent,
+    saveSelctedConversation, 
+    isMobile,
+    }) => {
+    const L10nsStrings = {
+        prefixAgo: null,
+        prefixFromNow: null,
+        suffixAgo: '',
+        suffixFromNow: '',
+        seconds: '1m ago',
+        minute: '1m ago',
+        minutes: '%dm ago',
+        hour: '1h',
+        hours: '%dh ago',
+        day: '1d ago',
+        days: '%dd ago',
+        month: '1mo',
+        months: '%dmo ago',
+        year: '1yr ago',
+        years: '%dyr ago',
+        wordSeparator: ' ',
+    }
+    const formatter = buildFormatter(L10nsStrings);
     const selectedMessages = selectedConversation?.messages;
     const history_count = selectedMessages?.length?selectedMessages?.length:0;
     const [activeGroup, setActiveGroup] = useState<string[]>([]);
+    const [collapse, setCollpase] = useState<boolean>(false);
     useEffect(() => {
         let updatedActive: string[] =[];
         selectedConversation?.messages.map((message, index) => {
-            if(message[0].active) {
+            if(message[0].active || (index == 1 && !collapse)) {
                 updatedActive.push(`${selectedConversation.key}_${index}`);
             }
         })
         setActiveGroup(updatedActive);
+        setCollpase(false);
     },[selectedConversation])
-
+    
     const onCollopase = (activeSatus) => {
-        console.log(activeSatus);
         let updatedConversation:Conversation = ConversationState;
         if(selectedConversation) {
             updatedConversation = selectedConversation;
@@ -59,9 +82,9 @@ const ChatMessage: FC<Props> = ({selectedConversation, messageIsStreaming, setIn
                 messages: messages
             }
         }
+        setCollpase(true);
         saveSelctedConversation(updatedConversation);
     }
-
     return (
         <Box
             sx={{
@@ -112,7 +135,9 @@ const ChatMessage: FC<Props> = ({selectedConversation, messageIsStreaming, setIn
                                 }
                                 
                             </Box>:
-                            <Accordion.Item value={`${selectedConversation?.key}_${index}`}>
+                            <Accordion.Item value={`${selectedConversation?.key}_${index}`} sx={(theme) =>({
+                                padding: "0px"
+                            })}>
                                 <Accordion.Control>
                                     <Flex
                                         align='center'
@@ -120,16 +145,43 @@ const ChatMessage: FC<Props> = ({selectedConversation, messageIsStreaming, setIn
                                             justifyContent:'space-between'
                                         })}
                                     >
-                                        <Text >
-                                            {selectedMessages[history_count-index-1][0].content}
-                                            {
-                                                selectedMessages[history_count-index-1][0].inputs?.map((input, index) => 
-                                                    <Badge key={index} ml={5}>{input.value} </Badge>
-                                                )
-                                            }
-                                        </Text> 
-                                        <Group>
-                                            <IconArrowBackUp color='gray' onClick={(event) => {
+                                        
+                                        <Flex
+                                            align={isMobile?'flx-start':'center '}
+                                            direction={isMobile?'column-reverse':'row'}
+                                            justify="flex-start"
+                                            wrap="wrap"
+                                            sx={(theme) =>({
+                                                width: isMobile?'72%':''
+                                            })}
+                                        >
+                                            <Text
+                                                style={{fontSize: '18px'}}
+                                            >
+                                                {selectedMessages[history_count-index-1][0].content}
+                                            </Text>
+                                            <Box
+                                                sx={(theme)=>({
+                                                    marginLeft: isMobile?'-5px':'0px'
+                                                })}
+                                            >
+                                                {
+                                                    selectedMessages[history_count-index-1][0].inputs?.map((input, index) => 
+                                                        <Badge key={index} ml={5}
+                                                            size="xs"
+                                                            radius="sm"
+                                                            
+                                                        >{input.value}</Badge>
+                                                    )
+                                                    
+                                                }
+                                            </Box>
+                                        </Flex>                
+                                        <Flex
+                                            gap="xs"
+                                            align='flex-end'
+                                        >
+                                            <IconArrowBackUp color='gray' size={isMobile?15:22} onClick={(event) => {
                                                 setInputContent(selectedMessages[history_count-index-1][0].content);
                                                 event.stopPropagation();
                                             }}/>
@@ -141,20 +193,21 @@ const ChatMessage: FC<Props> = ({selectedConversation, messageIsStreaming, setIn
                                                     })}
                                                 >
                                                     <Text  className='date' sx={(theme) =>({
-                                                        display: 'none'
+                                                        display: 'none',
+                                                        fontSize: theme.fontSizes.xs
                                                     })}>
                                                         {selectedMessages[history_count-index-1][1].datetime}
                                                     </Text>
                                                     <TimeAgo  
                                                         date={selectedMessages[history_count-index-1][1].datetime} 
                                                         formatter={formatter} 
-                                                        style={{color: 'gray'}}
+                                                        style={{color: 'gray', fontSize:'12px',}}
                                                         locale={'en'}
                                                     />
-                                                    
+                                                        
                                                 </Box>
                                             }
-                                        </Group>  
+                                        </Flex>
                                     </Flex>
                                 </Accordion.Control>
                                 <Accordion.Panel>

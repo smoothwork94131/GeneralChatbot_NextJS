@@ -21,15 +21,19 @@ interface Props {
     handleChangeUtilityInputsValue: (input_index: number, value: string)=>void,
     selectedConversation: Conversation,
     saveSelectConverSation: (conversation: Conversation)=>void;
+    isMobile: boolean;
+    conversationHistory: Conversation[]
 } 
 
 const ChatContent: FC<Props> = ({
-    selectedUtility, 
-    handleChangeUtilityInputsValue, 
-    selectedConversation,
-    saveSelectConverSation,
+        selectedUtility, 
+        handleChangeUtilityInputsValue, 
+        selectedConversation,
+        saveSelectConverSation,
+        isMobile,
+        conversationHistory
     }) =>{
-
+    
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageIsStreaming, setMessageIsStreaming] = useState(false);
     const [inputContent,  setInputContent] = useState<string>('');
@@ -46,7 +50,6 @@ const ChatContent: FC<Props> = ({
             let user_prompt = Object.keys(selectedUtility).includes("user_prompt")? selectedUtility.user_prompt:'';
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
-            console.log(123);
             inputs.map((input: Input, index: number) => {
                 if(input.type == "form" && user_prompt){
                     user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
@@ -111,7 +114,7 @@ const ChatContent: FC<Props> = ({
                 datetime: today_datetime,
                 active: false
             };
-            
+
             updatedConversation.messages.push([user_message, AssistantMessageState]);
             const response = await fetch('/api/openai/chat', {
                 method: 'POST',
@@ -124,20 +127,19 @@ const ChatContent: FC<Props> = ({
                 console.error('Error from API call: ', response.status, response.statusText);
                 return '';
             }
-            const data: ApiChatResponse = await response.json();
             
+            const data: ApiChatResponse = await response.json();
             const assistant_message: Message = data.message;
             
             const updatedMessages: Message[][] =
-                updatedConversation.messages.map((message, index) => {
-                
-                if (index === updatedConversation.messages.length - 1) {
-                    return message.map((role_message) => {
-                        if(role_message.role == "assistant") {
-                            role_message = assistant_message;
-                            role_message = {
-                                ...role_message,
-                                datetime: today_datetime,
+                updatedConversation.messages.map((message, index) => {    
+                    if (index === updatedConversation.messages.length-1) {
+                        return message.map((role_message) => {
+                            if(role_message.role == "assistant") {
+                                role_message = assistant_message;
+                                role_message = {
+                                    ...role_message,
+                                    datetime: today_datetime,
                             }
                         }
                         return role_message;
@@ -250,6 +252,7 @@ const ChatContent: FC<Props> = ({
                 messageIsStreaming={messageIsStreaming}
                 setInputContent={(content)=> {setInputContent(content)}}
                 saveSelctedConversation={saveSelectConverSation}
+                isMobile={isMobile}
             />
             <Text ta="center"
                 sx={(theme) => ({

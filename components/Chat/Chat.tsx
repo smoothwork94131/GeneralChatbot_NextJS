@@ -65,7 +65,6 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
     return (
         <Box  
             sx={(theme) =>({
-                paddingLeft: theme.spacing.md,
                 flex: 'display',
                 height: '100%',
                 width: '100%',
@@ -88,6 +87,8 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
                 handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
                 selectedConversation={selectedConversation}
                 saveSelectConverSation={saveSelectConverSation}
+                isMobile={isMobile}
+                conversationHistory={conversationHistory}
             />
         </Box>
     )

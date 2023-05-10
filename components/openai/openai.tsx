@@ -30,7 +30,6 @@ const OpenAi = ({
     
     const [openedSidebar, setOpenedSiebar] = useState(false);
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
-
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
     });

@@ -15,3 +15,10 @@
     max-width: 100%;
     --tw-prose-body: none;
 }
+.mantine-Accordion-control {
+    padding: 2px;
+    padding-right: 10px;
+}
+.mantine-Accordion-chevron {
+    margin-right: 2px;
+}

@@ -34,7 +34,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         setInputContent(value);
     };
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming) {
+        if(e.key == "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSend();
             setInputContent("")
@@ -48,7 +48,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         setTextError("");
         onSend(inputContent);
     };
-
+    
     return (
         <Flex
             justify="flex-start"

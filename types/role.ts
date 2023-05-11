@@ -19,6 +19,14 @@ export interface Utility {
     system_prompt?: string;
     user_prompt?: string;
 }
+export const  UtilityState:Utility = {
+    key: '',
+    name: '',
+    inputs: [],
+    active: false,
+    style: '',
+    summary:'',
+}
 export interface Input {
     name: string;
     id?: number;

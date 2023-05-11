@@ -51,34 +51,32 @@ const ChatContent: FC<Props> = ({
     }, [selectedConversation, selectedUtility, conversationHistory]);
     
     useEffect(() => {
+        
         if(messageIsStreaming) {
             setMessageIsStreaming(false);
         }
     }, [selectedUtility])
 
     const handleSend = async(message: string) => {
-        if(selectedConversation) {
-            let updatedConversation:Conversation = ConversationState;
 
-            const history = localStorage.getItem("selectedConversation");
-            if(history) {
-                updatedConversation = JSON.parse(history);
-            } else{
-                updatedConversation = selectedConversation;
-            }
-            const inputs = selectedUtility.inputs;
+        if(selectedConversation) {
+            let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
+            const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
+            
             let system_prompt = Object.keys(selectedUtility).includes("system_prompt")? selectedUtility.system_prompt:DefaultSystemPrompt;
             let user_prompt = Object.keys(selectedUtility).includes("user_prompt")? selectedUtility.user_prompt:'';
             
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
             let index=0;
+
             inputs.map((input: Input) => {
                 if(input.type == "form" && user_prompt){
                     user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
                     index++;
                 }
             });
+
             if(user_prompt) {
                 if(inputs.length > 0) {
                     user_prompt = user_prompt.replaceAll(`{${index}}`, `: ${message}`);
@@ -89,8 +87,10 @@ const ChatContent: FC<Props> = ({
                 messages =[{role: 'system', content: system_prompt}];
             }
             
+            let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = 
+            [...selectedMessagesHistory, 
+            ...updatedConversation.messages];
             
-            let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = [...selectedMessagesHistory, ...selectedConversation.messages]
             selectedMessagesHistory.map((messages_item) => {
                 messages_item.map((message) => {
                     messages = [...messages, message];
@@ -143,9 +143,7 @@ const ChatContent: FC<Props> = ({
                 datetime: today_datetime,
                 active: false
             };
-             
             updatedConversation.messages.push([user_message, AssistantMessageState]);
-            
             
             
             saveSelectConverSation(updatedConversation);
@@ -168,19 +166,19 @@ const ChatContent: FC<Props> = ({
             const updatedMessages: Message[][] =
                 updatedConversation.messages.map((message, index) => {    
                     if (index === updatedConversation.messages.length-1) {
-                        return message.map((role_message) => {
+                        message = message.map((role_message) => {
                             if(role_message.role == "assistant") {
                                 role_message = assistant_message;
                                 role_message = {
                                     ...role_message,
                                     datetime: today_datetime,
+                                }
                             }
-                        }
-                        return role_message;
-                    });
-                }
-                return message;
-            });
+                            return role_message;
+                        });
+                    }
+                    return message;
+                });
             
             
             updatedConversation = { 
@@ -280,6 +278,7 @@ const ChatContent: FC<Props> = ({
                 messageIsStreaming={messageIsStreaming}
                 inputContent={inputContent}
                 setInputContent={(content)=> {setInputContent(content)}}
+                selectedConversation = {selectedConversation}
             />
             <Space h="md"/>
             <ChatMessage 

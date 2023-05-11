@@ -1,4 +1,4 @@
-import { useContext, FC } from 'react';
+import { useContext, FC, useEffect } from 'react';
 import { Box } from '@mantine/core';
 import  Role  from "@/components/Role";
 import ChatContent from './ChatContent';
@@ -8,6 +8,7 @@ import {
     saveConversationHistory,
     saveSelctedConversation,
 } from '@/utils/app/conversation';
+import { Utility, UtilityState } from '@/types/role';
 
 interface Props {
     isMobile: boolean;  
@@ -28,9 +29,10 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
     } = useContext(OpenaiContext);
     
     const handleChangeUtilityInputsValue = (input_index: number, value: string) => {
-        let t_utility = selectedUtility;
+        let t_utility: Utility = UtilityState;
+
+        t_utility = selectedUtility;
         t_utility.inputs[input_index].value = value;
-        console.log("handle", selectedConversation);
         openaiDispatch({
             field: "selectedUtility",
             value: t_utility
@@ -44,7 +46,7 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
             "field": "selectedConversation",
             "value": conversation
         });
-
+        
         let exist = false;
         let updatedHistory = conversationHistory.map((item, index) => {
             if(item.key == conversation.key) {
@@ -54,7 +56,7 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
                 return item;
             }
         });
-
+        
         if(!exist) {
             updatedHistory.push(conversation);
         }

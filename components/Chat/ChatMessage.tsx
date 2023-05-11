@@ -76,6 +76,7 @@ const ChatMessage: FC<Props> = ({
             setActiveGroup([`${historyConversation?.key}_0`]);
         }
     }, [])
+
     const onCollopase = (activeSatus) => {
         let updatedConversation:Conversation = ConversationState;
         if(historyConversation) {
@@ -122,7 +123,7 @@ const ChatMessage: FC<Props> = ({
                 flexGrow: 1,
                 overflow: 'auto', // overflowY: 'hidden'
             }}
-        >   
+        > 
             {
                 selectedMessages && selectedMessages.length > 0?
                 <Box>
@@ -166,7 +167,7 @@ const ChatMessage: FC<Props> = ({
                 selectedMessages?.map((message, index) =>
                     <Box key={index}>
                         {
-                            <Accordion.Item value={`${historyConversation?.key}_${index}`} sx={(theme) =>({
+                            <Accordion.Item value={`${historyConversation?.key}_${index}`} key={index} sx={(theme) =>({
                                 padding: "0px"
                             })}>
                                 <Accordion.Control>

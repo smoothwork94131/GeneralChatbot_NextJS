@@ -57,22 +57,23 @@ const OpenAi = ({
     },[]);
     
     useEffect(() => {
-        let updatedConversation:Conversation;
+        let updateConversation:Conversation;
         const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
         if(filterConversation.length > 0 ) {
-            updatedConversation = filterConversation[0]
+            updateConversation = filterConversation[0]
         } else {
-            updatedConversation = {
+            updateConversation = {
                 name: selectedUtility.name,
                 key: selectedUtility.key,
                 messages:[]
             };
         }
-        saveSelctedConversation(updatedConversation);    
+        saveSelctedConversation(updateConversation);    
         dispatch({
             "field": "selectedConversation",
-            "value":updatedConversation
+            "value":updateConversation
         });
+        
         
     },[selectedUtility, conversationHistory]);
     

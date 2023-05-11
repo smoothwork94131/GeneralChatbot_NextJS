@@ -456,7 +456,6 @@ export function Composer(props: {
               <Textarea
                 variant='outlined' autoFocus placeholder={textPlaceholder}
                 minRows={4} maxRows={12}
-                onKeyDown={handleKeyPress}
                 onDragEnter={handleMessageDragEnter}
                 value={composeText} onChange={(e) => setComposeText(e.target.value)}
                 slotProps={{

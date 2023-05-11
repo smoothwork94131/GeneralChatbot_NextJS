@@ -9,14 +9,16 @@ import { Flex, Image } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { Textarea } from '@mantine/core';
 import { LoaderIcon } from 'react-hot-toast';
+import { Conversation } from '@/types/chat';
 interface Props {
     onSend: (message: string) =>void;
     textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
     messageIsStreaming: boolean;
     inputContent:string;    
     setInputContent: (content: string)=>void;
+    selectedConversation: Conversation;
 }
-const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent}) => {
+const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent, selectedConversation}) => {
     const [textError, setTextError] = useState<string>();
     
     useEffect(() => {
@@ -33,9 +35,9 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         const value = e.target.value;
         setInputContent(value);
     };
-    const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = (e: any) => {
+        
         if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming) {
-            
             e.preventDefault();
             handleSend();
             setInputContent("")

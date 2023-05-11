@@ -21,7 +21,7 @@ export function InlineTextEdit(props: { initialText: string, onEdit: (text: stri
   return (
     <Textarea
       variant='soft' color='warning' autoFocus minRows={1}
-      value={text} onChange={handleEditTextChanged} onKeyDown={handleEditKeyPressed} onBlur={handleEditBlur}
+      // value={text} onChange={handleEditTextChanged} onKeyDown={handleEditKeyPressed} onBlur={handleEditBlur}
       sx={props.sx} />
   );
 }

@@ -13,20 +13,23 @@ import { Conversation, ConversationState, Message } from '@/types/chat';
 import TimeAgo from 'react-timeago';
 import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 import { IconArrowBackUp } from '@tabler/icons-react';
+import { Input } from '@/types/role';
 
 interface Props {
-    selectedConversation: Conversation | undefined;
+    historyConversation: Conversation | undefined;
     messageIsStreaming: boolean;
     setInputContent: (content:string) =>void;
     saveSelctedConversation: (conversation: Conversation)=>void;
     isMobile: boolean;
+    handleChangeUtilityInputsValue: (input_index: number, value: string)=>void,
 }
-
-const ChatMessage: FC<Props> = ({selectedConversation, 
-    messageIsStreaming, 
-    setInputContent,
-    saveSelctedConversation, 
-    isMobile,
+const ChatMessage: FC<Props> = ({
+        historyConversation, 
+        messageIsStreaming, 
+        setInputContent,
+        saveSelctedConversation, 
+        isMobile,
+        handleChangeUtilityInputsValue
     }) => {
     const L10nsStrings = {
         prefixAgo: null,
@@ -47,28 +50,39 @@ const ChatMessage: FC<Props> = ({selectedConversation,
         wordSeparator: ' ',
     }
     const formatter = buildFormatter(L10nsStrings);
-    const selectedMessages = selectedConversation?.messages;
+    const selectedMessages = historyConversation?.messages;
     const history_count = selectedMessages?.length?selectedMessages?.length:0;
     const [activeGroup, setActiveGroup] = useState<string[]>([]);
     const [collapse, setCollpase] = useState<boolean>(false);
+    
     useEffect(() => {
-        let updatedActive: string[] =[];
-        selectedConversation?.messages.map((message, index) => {
-            if(message[0].active || (index == 1 && !collapse)) {
-                updatedActive.push(`${selectedConversation.key}_${index}`);
-            }
+        let updatedActive: string[] = [];
+
+        historyConversation?.messages.map((message, index) => {
+            if( message[0].active ||
+                (index == 0 && !collapse)) {
+                updatedActive.push(`${historyConversation.key}_${index}`);
+            } 
         })
+        if(!collapse &&  historyConversation?.messages.length == 0) {
+            updatedActive = [`${historyConversation?.key}_0`];
+        }
         setActiveGroup(updatedActive);
         setCollpase(false);
-    },[selectedConversation])
+    },[historyConversation])
     
+    useEffect(() => {
+        if(historyConversation?.messages.length == 0) {
+            setActiveGroup([`${historyConversation?.key}_0`]);
+        }
+    }, [])
     const onCollopase = (activeSatus) => {
         let updatedConversation:Conversation = ConversationState;
-        if(selectedConversation) {
-            updatedConversation = selectedConversation;
+        if(historyConversation) {
+            updatedConversation = historyConversation;
         }
-        const messages = selectedConversation?.messages.map((message, index) => {
-            const active = activeSatus.filter((active) => `${selectedConversation.key}_${index}` == active)
+        const messages = historyConversation?.messages.map((message, index) => {
+            const active = activeSatus.filter((active) => `${historyConversation.key}_${index}` == active)
             if(active.length > 0 ) {
                 message[0].active = true;
             } else {
@@ -85,6 +99,23 @@ const ChatMessage: FC<Props> = ({selectedConversation,
         setCollpase(true);
         saveSelctedConversation(updatedConversation);
     }
+    const setInputs = (index) => {
+        if(selectedMessages) {
+            const real_index = history_count-index-1;
+            setInputContent(selectedMessages[real_index][0].content);
+            const inputs = selectedMessages[real_index][0].inputs;
+
+            if(inputs) {
+                if(inputs?.length > 0) {
+                    for(let k = 0; k < inputs.length; k++) {
+                        const input: Input = inputs[k];
+                        handleChangeUtilityInputsValue(k, input.value?input.value:'');
+                    }
+                }
+            }
+        }
+    }
+    
     return (
         <Box
             sx={{
@@ -92,6 +123,37 @@ const ChatMessage: FC<Props> = ({selectedConversation,
                 overflow: 'auto', // overflowY: 'hidden'
             }}
         >   
+            {
+                selectedMessages && selectedMessages.length > 0?
+                <Box>
+                    <ChatMessageList
+                        key = {0}
+                        cursor={selectedMessages[history_count-1][0].content}
+                        index={0}
+                        message = {selectedMessages[history_count-1][0]}
+                        messageIsStreaming={messageIsStreaming}
+                    />
+                    {
+                        messageIsStreaming?
+                        <Group sx={(theme) => ({
+                            padding: theme.spacing.md
+                        })}>
+                            Thinking...<Loader color="gray" variant="dots"></Loader>
+                        </Group>
+                        :
+                        <ChatMessageList
+                            key = {0}
+                            cursor={`${selectedMessages[history_count-1][1].content}${
+                                messageIsStreaming 
+                                ? '`▍`' : ''
+                            }`}
+                            index={0}
+                            message = {selectedMessages[history_count-1][1]}
+                            messageIsStreaming={messageIsStreaming}
+                        />
+                    }
+                </Box>:<></>
+            }
             <Accordion 
                 radius="xs" 
                 chevronPosition='left'
@@ -104,38 +166,7 @@ const ChatMessage: FC<Props> = ({selectedConversation,
                 selectedMessages?.map((message, index) =>
                     <Box key={index}>
                         {
-                            index == 0 ?
-                            <Box>
-                                <ChatMessageList
-                                    key = {index}
-                                    cursor={selectedMessages[history_count-index-1][0].content}
-                                    index={index}
-                                    message = {selectedMessages[history_count-index-1][0]}
-                                    messageIsStreaming={messageIsStreaming}
-                                />
-                                {
-                                    messageIsStreaming?
-                                    <Group sx={(theme) => ({
-                                        padding: theme.spacing.md
-                                    })}>
-                                        Thinking...<Loader color="gray" variant="dots"></Loader>
-                                    </Group>
-                                    :
-                                    <ChatMessageList
-                                        key = {index}
-                                        cursor={`${selectedMessages[history_count-index-1][1].content}${
-                                            messageIsStreaming 
-                                            && index == 0
-                                            ? '`▍`' : ''
-                                        }`}
-                                        index={index}
-                                        message = {selectedMessages[history_count-index-1][1]}
-                                        messageIsStreaming={messageIsStreaming}
-                                    />
-                                }
-                                
-                            </Box>:
-                            <Accordion.Item value={`${selectedConversation?.key}_${index}`} sx={(theme) =>({
+                            <Accordion.Item value={`${historyConversation?.key}_${index}`} sx={(theme) =>({
                                 padding: "0px"
                             })}>
                                 <Accordion.Control>
@@ -166,12 +197,13 @@ const ChatMessage: FC<Props> = ({selectedConversation,
                                                 })}
                                             >
                                                 {
-                                                    selectedMessages[history_count-index-1][0].inputs?.map((input, index) => 
+                                                    selectedMessages[history_count-index-1][0].inputs?.map((input, index) =>
+                                                        input.type == "form"?
                                                         <Badge key={index} ml={5}
                                                             size="xs"
                                                             radius="sm"
                                                             
-                                                        >{input.value}</Badge>
+                                                        >{input.value}</Badge>:<></>
                                                     )
                                                     
                                                 }
@@ -182,8 +214,8 @@ const ChatMessage: FC<Props> = ({selectedConversation,
                                             align='flex-end'
                                         >
                                             <IconArrowBackUp color='gray' size={isMobile?15:22} onClick={(event) => {
-                                                setInputContent(selectedMessages[history_count-index-1][0].content);
                                                 event.stopPropagation();
+                                                setInputs(index);
                                             }}/>
                                             {
                                                 <Box
@@ -216,12 +248,12 @@ const ChatMessage: FC<Props> = ({selectedConversation,
                                         cursor={`${selectedMessages[history_count-index-1][1].content}${
                                             messageIsStreaming 
                                             && index == 0
-                                            ? '`▍`' : ''
+                                            ? '`▍`': ''
                                         }`}
                                         index={index}
                                         message = {selectedMessages[history_count-index-1][1]}
                                         messageIsStreaming={messageIsStreaming}
-                                    />
+                                    />                                   
                                 </Accordion.Panel>
                             </Accordion.Item>
                         }

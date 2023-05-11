@@ -20,10 +20,12 @@ import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation } from '@/types/chat';
 import {  Utility } from '@/types/role';
+import { saveSelctedConversation } from '@/utils/app/conversation';
 
 interface Props {
 
 }
+
 const OpenAi = ({
     
 }: Props) => {
@@ -57,7 +59,6 @@ const OpenAi = ({
     useEffect(() => {
         let updatedConversation:Conversation;
         const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
-        console.log(filterConversation);
         if(filterConversation.length > 0 ) {
             updatedConversation = filterConversation[0]
         } else {
@@ -67,10 +68,12 @@ const OpenAi = ({
                 messages:[]
             };
         }
+        saveSelctedConversation(updatedConversation);    
         dispatch({
             "field": "selectedConversation",
             "value":updatedConversation
         });
+        
     },[selectedUtility, conversationHistory]);
     
     const handleSelectRole = (index: number) => {

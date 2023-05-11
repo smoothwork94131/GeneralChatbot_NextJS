@@ -39,15 +39,7 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
                 paddingBottom: theme.spacing.md,
                 '&:hover > .copy-assistant': { display: 'block' },
             })}
-        >
-            {
-                index == 0 ?
-                    message.role == "user"?  
-                    <Image maw={30} src="icons/avatar_user.png" alt="chatgpt avatar" />:
-                    <Image maw={30} src="icons/avatar_gpt.png" alt="chatgpt avatar" />
-                  :<></>
-            }
-            
+        >   
             <MemoizedReactMarkdown
               className="prose dark:prose-invert flex-1"
               remarkPlugins={[remarkGfm, remarkMath]}

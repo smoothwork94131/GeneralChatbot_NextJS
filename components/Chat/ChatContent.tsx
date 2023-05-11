@@ -11,7 +11,7 @@ import {
 import ChatInput from './ChatInput';
 import { Input, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
-import { AssistantMessageState, Conversation, Message, Role, UserMessageState } from '@/types/chat';
+import { AssistantMessageState, Conversation, ConversationState, Message, Role, UserMessageState } from '@/types/chat';
 import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DefaultSystemPrompt } from '@/utils/app/const';
 import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
 import { useEffect } from 'react';
@@ -37,50 +37,77 @@ const ChatContent: FC<Props> = ({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageIsStreaming, setMessageIsStreaming] = useState(false);
     const [inputContent,  setInputContent] = useState<string>('');
+    const [historyConversation, setHistoryConversation] = useState<Conversation>();
+    
     useEffect(() => {
         setInputContent("");
     }, [selectedConversation])
+
+    useEffect(() => {
+        const history = localStorage.getItem("selectedConversation");
+        if(history) {
+            setHistoryConversation(JSON.parse(history));
+        }
+    }, [selectedConversation, selectedUtility, conversationHistory]);
+    
+    useEffect(() => {
+        if(messageIsStreaming) {
+            setMessageIsStreaming(false);
+        }
+    }, [selectedUtility])
+
     const handleSend = async(message: string) => {
         if(selectedConversation) {
-            let updatedConversation:Conversation = selectedConversation;
+            let updatedConversation:Conversation = ConversationState;
 
-            const inputs = selectedUtility.inputs.filter((input: Input) => input.type == "form");
-
+            const history = localStorage.getItem("selectedConversation");
+            if(history) {
+                updatedConversation = JSON.parse(history);
+            } else{
+                updatedConversation = selectedConversation;
+            }
+            const inputs = selectedUtility.inputs;
             let system_prompt = Object.keys(selectedUtility).includes("system_prompt")? selectedUtility.system_prompt:DefaultSystemPrompt;
             let user_prompt = Object.keys(selectedUtility).includes("user_prompt")? selectedUtility.user_prompt:'';
+            
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
-            inputs.map((input: Input, index: number) => {
+            let index=0;
+            inputs.map((input: Input) => {
                 if(input.type == "form" && user_prompt){
                     user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
+                    index++;
                 }
             });
             if(user_prompt) {
                 if(inputs.length > 0) {
-                    user_prompt = user_prompt.replaceAll(`{${inputs.length}}`, `: ${message}`);
+                    user_prompt = user_prompt.replaceAll(`{${index}}`, `: ${message}`);
                 } 
             }
-            
             if(system_prompt){
                 system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
                 messages =[{role: 'system', content: system_prompt}];
             }
             
-            const selectedMessagesHistory = selectedConversation.messages;
+            
+            let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = [...selectedMessagesHistory, ...selectedConversation.messages]
             selectedMessagesHistory.map((messages_item) => {
                 messages_item.map((message) => {
                     messages = [...messages, message];
                 })
             });
             
-
+            
             let user_message: Message = UserMessageState ;
             
             user_message = {...user_message, 
                 content: user_prompt?user_prompt:message, 
                 datetime: today_datetime,
             };
+            
             messages.push(user_message);
+            
+            
             setMessageIsStreaming(true);
             
             const request_messages: Message[] = [];
@@ -92,6 +119,7 @@ const ChatContent: FC<Props> = ({
                 });
             });
 
+            
             const input: ApiChatInput = {
                 api: {
                     apiKey: OPENAI_API_KEY,
@@ -107,15 +135,20 @@ const ChatContent: FC<Props> = ({
                 max_tokens: OPENAI_API_MAXTOKEN,
             };
             
+            
             user_message = {
-                ...user_message,
+                role: 'user',
                 content: message,
                 inputs: inputs,
                 datetime: today_datetime,
                 active: false
             };
-
+             
             updatedConversation.messages.push([user_message, AssistantMessageState]);
+            
+            
+            
+            saveSelectConverSation(updatedConversation);
             const response = await fetch('/api/openai/chat', {
                 method: 'POST',
                 headers: {
@@ -123,12 +156,13 @@ const ChatContent: FC<Props> = ({
                 },
                 body: JSON.stringify(input),
             });
+
             if (!response.ok) {
                 console.error('Error from API call: ', response.status, response.statusText);
                 return '';
             }
             
-            const data: ApiChatResponse = await response.json();
+            const data = await response.json();
             const assistant_message: Message = data.message;
             
             const updatedMessages: Message[][] =
@@ -148,20 +182,20 @@ const ChatContent: FC<Props> = ({
                 return message;
             });
             
-            updatedConversation = {
+            
+            updatedConversation = { 
                 ...updatedConversation,
                 messages: updatedMessages,
                 datetime: today_datetime
             };
-    
+            
             saveSelectConverSation(updatedConversation);
             setMessageIsStreaming(false);
         }
     }
-
+    
     const componentUtilityInputs = () => {
         if(selectedUtility.inputs.length > 0) {
-           
             return selectedUtility.inputs.map((input: Input, input_key: number) =>{
                 const component = input.component;
                 const FormComponent:React.FC<ComponentProps> = require("@mantine/core")[component];
@@ -173,22 +207,23 @@ const ChatContent: FC<Props> = ({
                         className={input.style}
                     />; 
                 } else {
-                    return <FormComponent 
+                    let formComponent = <FormComponent 
                         key={input_key}
                         data={input.options}
+                        value={input.value}
                         defaultValue={input.value}
                         className={input.style}
                         onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}
-                    />;    
+                    />;  
+                    return formComponent;
                 }
             })
         } 
-        
     };
     
     const handleChangeInput = (index: number , e: React.ChangeEvent<HTMLInputElement> | string) => {
         let value='';
-      
+        
         if(typeof e == 'string') {
            value = e; 
         } else {
@@ -198,7 +233,7 @@ const ChatContent: FC<Props> = ({
     }
 
     return (
-        <Box 
+        <Box
             sx={(theme) => ({
                 height: '100%',
                 display: 'flex',
@@ -248,11 +283,12 @@ const ChatContent: FC<Props> = ({
             />
             <Space h="md"/>
             <ChatMessage 
-                selectedConversation={selectedConversation}
+                historyConversation={historyConversation}
                 messageIsStreaming={messageIsStreaming}
                 setInputContent={(content)=> {setInputContent(content)}}
                 saveSelctedConversation={saveSelectConverSation}
                 isMobile={isMobile}
+                handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
             />
             <Text ta="center"
                 sx={(theme) => ({
@@ -271,10 +307,12 @@ interface ComponentProps {
     defaultValue?: string | number | undefined;
     className: string;
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    value?:string;
  }
 export const InputComponet = (Component: any) => {
     return (
         <Component />
     )
 }
+
 export default ChatContent;

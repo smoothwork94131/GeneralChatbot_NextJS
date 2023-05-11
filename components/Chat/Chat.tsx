@@ -30,19 +30,21 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
     const handleChangeUtilityInputsValue = (input_index: number, value: string) => {
         let t_utility = selectedUtility;
         t_utility.inputs[input_index].value = value;
+        console.log("handle", selectedConversation);
         openaiDispatch({
             field: "selectedUtility",
             value: t_utility
         });
     };
+    
     const saveSelectConverSation = (conversation: Conversation) => {
-        console.log(conversation);
+        
+        saveSelctedConversation(conversation);
         openaiDispatch({
             "field": "selectedConversation",
             "value": conversation
         });
-        
-        saveSelctedConversation(conversation);
+
         let exist = false;
         let updatedHistory = conversationHistory.map((item, index) => {
             if(item.key == conversation.key) {
@@ -56,11 +58,12 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
         if(!exist) {
             updatedHistory.push(conversation);
         }
+        
+        saveConversationHistory(updatedHistory);
         openaiDispatch({
             "field":"conversationHistory",
             "value": updatedHistory
         });
-        saveConversationHistory(updatedHistory);
     }
     return (
         <Box  
@@ -87,8 +90,8 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
                 handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
                 selectedConversation={selectedConversation}
                 saveSelectConverSation={saveSelectConverSation}
-                isMobile={isMobile}
                 conversationHistory={conversationHistory}
+                isMobile={isMobile}
             />
         </Box>
     )

@@ -34,7 +34,8 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         setInputContent(value);
     };
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if(e.key == "Enter" && !e.shiftKey) {
+        if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming) {
+            
             e.preventDefault();
             handleSend();
             setInputContent("")

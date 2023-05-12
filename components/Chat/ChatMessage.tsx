@@ -13,8 +13,7 @@ import { Conversation, ConversationState, Message } from '@/types/chat';
 import TimeAgo from 'react-timeago';
 import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 import { IconArrowBackUp,
-    IconArrowLeft, 
-    IconChevronLeft} from '@tabler/icons-react';
+    IconChevronRight} from '@tabler/icons-react';
 import { Input } from '@/types/role';
 
 interface Props {
@@ -126,18 +125,9 @@ const ChatMessage: FC<Props> = ({
                 overflow: 'auto', // overflowY: 'hidden'
             }}
         > 
-            {
-                messageIsStreaming?
-                <Group sx={(theme) => ({
-                    padding: theme.spacing.md
-                })}>
-                    Thinking...<Loader color="gray" variant="dots"></Loader>
-                </Group>
-                :<></>
-            }
             <Accordion 
                 radius="xs" 
-                chevron={<IconChevronLeft size="1rem" />}
+                chevron={<IconChevronRight size="1rem" />}
                 chevronPosition='left'
                 variant="contained"
                 multiple 
@@ -146,7 +136,7 @@ const ChatMessage: FC<Props> = ({
                 styles={{
                     chevron: {
                       '&[data-rotate]': {
-                        transform: 'rotate(-90deg)',
+                        transform: 'rotate(90deg)',
                       },
                     },
                 }}

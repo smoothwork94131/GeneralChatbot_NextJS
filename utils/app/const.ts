@@ -31,8 +31,7 @@ export const AZURE_DEPLOYMENT_ID =
 
 export const DEFAULT_SYSTEM_PROMPT =
   process.env.NEXT_PUBLIC_DEFAULT_SYSTEM_PROMPT ||
-  "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.";
-  export const DefaultSystemPrompt = 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nKnowledge cutoff: 2021-09\nCurrent date: {{Today}}';
+'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nKnowledge cutoff: 2021-09\nCurrent date: {{Today}}';
 
 export const ROLE_GROUP = [
     {
@@ -51,6 +50,7 @@ export const ROLE_GROUP = [
                         input_align: 'horizental',
                         system_prompt: 'You are a helpful assistant that translates',
                         user_prompt: 'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2}',
+                        include_prompt_history: true,
                         key: 'Marketing_Copywriting_Translate',
                         inputs:[
                             {
@@ -84,8 +84,7 @@ export const ROLE_GROUP = [
                         ]
                     }
                 ]
-            }       
-            
+            }
         ]
     },
     {
@@ -102,7 +101,18 @@ export const ROLE_GROUP = [
                         input_align: 'horizental',
                         active: true,
                         key: 'Coding_Web_Javascript',
+                        include_prompt_history: false,
+                        user_prompt: 'Write a JavaScript function that implements {0} to {1}',
                         inputs:[
+                            {
+                                name: "",
+                                type: "form",
+                                value: '',
+                                component: "Input",
+                                style:'w-full',
+                                options: [
+                                ]
+                            },
                         ]
                     },
                     {
@@ -112,6 +122,7 @@ export const ROLE_GROUP = [
                         input_align: 'horizental',
                         active: false,
                         key:'Coding_Web_Css',
+                        include_prompt_history: true,
                         inputs:[
                         ]
                     },
@@ -120,6 +131,7 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
+                        include_prompt_history: true,
                         key:'Coding_Web_Database',
                         summary: '',
                         inputs:[
@@ -138,6 +150,7 @@ export const ROLE_GROUP = [
                         active: false,
                         input_align: 'horizental',
                         type:'',
+                        include_prompt_history: true,
                         key: 'Coding_Java_Spring boot',
                         inputs:[
                         ]
@@ -149,6 +162,7 @@ export const ROLE_GROUP = [
                         style:'',
                         input_align: 'horizental',
                         active: false,
+                        include_prompt_history: true,
                         key: 'Coding_Java_Interface',
                         inputs:[
                         ]
@@ -160,6 +174,7 @@ export const ROLE_GROUP = [
                         input_align: 'horizental',
                         style:'',
                         key: 'Coding_Java_Android',
+                        include_prompt_history: true,
                         active: false,
                         inputs:[
                         ]
@@ -182,6 +197,7 @@ export const ROLE_GROUP = [
                         active: true,
                         input_align: 'horizental',
                         summary: '',
+                        include_prompt_history: true,
                         key: 'Learning_English_Base',
                         inputs:[
                         ]
@@ -192,6 +208,7 @@ export const ROLE_GROUP = [
                         type:'',
                         active: false,
                         input_align: 'horizental',
+                        include_prompt_history: true,
                         key: 'Learning_English_Influenty',
                         summary: '',
                         inputs:[
@@ -203,6 +220,7 @@ export const ROLE_GROUP = [
                         active: false,
                         type:'',
                         input_align: 'horizental',
+                        include_prompt_history: true,
                         key: 'Learning_English_Native',
                         style:'',
                         inputs:[

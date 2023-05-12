@@ -33,10 +33,12 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
 
         t_utility = selectedUtility;
         t_utility.inputs[input_index].value = value;
+        
         openaiDispatch({
             field: "selectedUtility",
             value: t_utility
         });
+
     };
     
     const saveSelectConverSation = (conversation: Conversation) => {

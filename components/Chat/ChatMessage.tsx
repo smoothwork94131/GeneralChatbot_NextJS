@@ -12,7 +12,9 @@ import ChatMessageList  from '@/components/Chat/ChatMessageList';
 import { Conversation, ConversationState, Message } from '@/types/chat';
 import TimeAgo from 'react-timeago';
 import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
-import { IconArrowBackUp } from '@tabler/icons-react';
+import { IconArrowBackUp,
+    IconArrowLeft, 
+    IconChevronLeft} from '@tabler/icons-react';
 import { Input } from '@/types/role';
 
 interface Props {
@@ -125,43 +127,29 @@ const ChatMessage: FC<Props> = ({
             }}
         > 
             {
-                selectedMessages && selectedMessages.length > 0?
-                <Box>
-                    <ChatMessageList
-                        key = {0}
-                        cursor={selectedMessages[history_count-1][0].content}
-                        index={0}
-                        message = {selectedMessages[history_count-1][0]}
-                        messageIsStreaming={messageIsStreaming}
-                    />
-                    {
-                        messageIsStreaming?
-                        <Group sx={(theme) => ({
-                            padding: theme.spacing.md
-                        })}>
-                            Thinking...<Loader color="gray" variant="dots"></Loader>
-                        </Group>
-                        :
-                        <ChatMessageList
-                            key = {0}
-                            cursor={`${selectedMessages[history_count-1][1].content}${
-                                messageIsStreaming 
-                                ? '`▍`' : ''
-                            }`}
-                            index={0}
-                            message = {selectedMessages[history_count-1][1]}
-                            messageIsStreaming={messageIsStreaming}
-                        />
-                    }
-                </Box>:<></>
+                messageIsStreaming?
+                <Group sx={(theme) => ({
+                    padding: theme.spacing.md
+                })}>
+                    Thinking...<Loader color="gray" variant="dots"></Loader>
+                </Group>
+                :<></>
             }
             <Accordion 
                 radius="xs" 
+                chevron={<IconChevronLeft size="1rem" />}
                 chevronPosition='left'
                 variant="contained"
                 multiple 
                 value={activeGroup} 
                 onChange={onCollopase}
+                styles={{
+                    chevron: {
+                      '&[data-rotate]': {
+                        transform: 'rotate(-90deg)',
+                      },
+                    },
+                }}
             >
             {
                 selectedMessages?.map((message, index) =>

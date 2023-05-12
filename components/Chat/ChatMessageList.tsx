@@ -97,12 +97,13 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
               }
             </MemoizedReactMarkdown>
             {
-               message.role == "assistant" && index> 0?
+               message.role == "assistant"?
                <Box
                 style={{
                     position:'relative', 
-                    right: '0px', 
+                    right: '20px', 
                     top: '0px',
+                    height: '20px',
                     color: 'gray',
                     cursor: 'pointer',
                     display: 'block'
@@ -113,7 +114,6 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
                     <IconCopy 
                         onClick={handleCopyToClipboard}
                     />      
-                      
                   </Tooltip>
                </Box>
                :<></>

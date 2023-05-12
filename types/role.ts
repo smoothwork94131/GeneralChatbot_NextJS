@@ -18,6 +18,7 @@ export interface Utility {
     input_align?: string,
     system_prompt?: string;
     user_prompt?: string;
+    include_prompt_history: boolean;
 }
 export const  UtilityState:Utility = {
     key: '',
@@ -26,6 +27,7 @@ export const  UtilityState:Utility = {
     active: false,
     style: '',
     summary:'',
+    include_prompt_history: true
 }
 export interface Input {
     name: string;

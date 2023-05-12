@@ -11,8 +11,8 @@ import {
 import ChatInput from './ChatInput';
 import { Input, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
-import { AssistantMessageState, Conversation, ConversationState, Message, Role, UserMessageState } from '@/types/chat';
-import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DefaultSystemPrompt } from '@/utils/app/const';
+import { AssistantMessageState, Conversation, Message,  UserMessageState } from '@/types/chat';
+import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
 import { useEffect } from 'react';
 
@@ -63,7 +63,7 @@ const ChatContent: FC<Props> = ({
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
             
-            let system_prompt = Object.keys(selectedUtility).includes("system_prompt")? selectedUtility.system_prompt:DefaultSystemPrompt;
+            let system_prompt = Object.keys(selectedUtility).includes("system_prompt")? selectedUtility.system_prompt:DEFAULT_SYSTEM_PROMPT;
             let user_prompt = Object.keys(selectedUtility).includes("user_prompt")? selectedUtility.user_prompt:'';
             
             const today_datetime = new Date().toUTCString();
@@ -79,9 +79,10 @@ const ChatContent: FC<Props> = ({
 
             if(user_prompt) {
                 if(inputs.length > 0) {
-                    user_prompt = user_prompt.replaceAll(`{${index}}`, `: ${message}`);
-                } 
+                    user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
+                }
             }
+
             if(system_prompt){
                 system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
                 messages =[{role: 'system', content: system_prompt}];
@@ -91,12 +92,13 @@ const ChatContent: FC<Props> = ({
             [...selectedMessagesHistory, 
             ...updatedConversation.messages];
             
-            selectedMessagesHistory.map((messages_item) => {
-                messages_item.map((message) => {
-                    messages = [...messages, message];
-                })
-            });
-            
+            if(selectedUtility.include_prompt_history){
+                selectedMessagesHistory.map((messages_item) => {
+                    messages_item.map((message) => {
+                        messages = [...messages, message];
+                    })
+                });    
+            }
             
             let user_message: Message = UserMessageState ;
             
@@ -144,8 +146,7 @@ const ChatContent: FC<Props> = ({
                 active: false
             };
             updatedConversation.messages.push([user_message, AssistantMessageState]);
-            
-            
+
             saveSelectConverSation(updatedConversation);
             const response = await fetch('/api/openai/chat', {
                 method: 'POST',
@@ -212,7 +213,7 @@ const ChatContent: FC<Props> = ({
                         defaultValue={input.value}
                         className={input.style}
                         onChange={(event:React.ChangeEvent<HTMLInputElement>) => handleChangeInput(input_key, event)}
-                    />;  
+                    />; 
                     return formComponent;
                 }
             })

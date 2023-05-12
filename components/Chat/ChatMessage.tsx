@@ -202,7 +202,7 @@ const ChatMessage: FC<Props> = ({
                                             gap="xs"
                                             align='flex-end'
                                         >
-                                            <IconArrowBackUp color='gray' size={isMobile?15:22} onClick={(event) => {
+                                            <IconArrowBackUp color='gray' size={isMobile?18:22} onClick={(event) => {
                                                 event.stopPropagation();
                                                 setInputs(index);
                                             }}/>
@@ -237,12 +237,13 @@ const ChatMessage: FC<Props> = ({
                                             width: '100%',
                                             display: 'flex',
                                             justifyContent: 'flex-end',
+                                            cursor: 'pointer',
                                         })}
                                         className='copy-assistant'
                                     >
                                         <Tooltip label='Copy'>
                                             <IconCopy 
-                                                style={{color: 'gray'}}
+                                                style={{color: 'gray',}}
                                                 onClick={(event) => {
                                                         handleCopyToClipboard(selectedMessages[history_count-index-1][1].content)
                                                         event.stopPropagation();

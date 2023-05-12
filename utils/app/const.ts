@@ -49,7 +49,7 @@ export const ROLE_GROUP = [
                         active: true,
                         input_align: 'horizental',
                         system_prompt: 'You are a helpful assistant that translates',
-                        user_prompt: 'Translate the following text from {0} to {1} TEXT TO TRANSLATE {2}',
+                        user_prompt: 'Please translate the following text from {0} to {1} :{2}',
                         include_prompt_history: true,
                         key: 'Marketing_Copywriting_Translate',
                         inputs:[

@@ -30,8 +30,7 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
         <Flex
             gap="xs"
             sx={(theme) =>({
-                paddingTop: theme.spacing.md,
-                paddingBottom: theme.spacing.md,
+                paddingLeft: '10px',
                 '&:hover > .copy-assistant': { display: 'block' },
             })}
         >   

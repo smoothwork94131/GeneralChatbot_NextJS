@@ -102,17 +102,8 @@ export const ROLE_GROUP = [
                         active: true,
                         key: 'Coding_Web_Javascript',
                         include_prompt_history: false,
-                        user_prompt: 'Write a JavaScript function that implements {0} to {1}',
+                        user_prompt: 'Write a JavaScript function that implements {0}',
                         inputs:[
-                            {
-                                name: "",
-                                type: "form",
-                                value: '',
-                                component: "Input",
-                                style:'w-full',
-                                options: [
-                                ]
-                            },
                         ]
                     },
                     {

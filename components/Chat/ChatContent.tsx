@@ -78,9 +78,7 @@ const ChatContent: FC<Props> = ({
             });
 
             if(user_prompt) {
-                if(inputs.length > 0) {
-                    user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
-                }
+                user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
             }
 
             if(system_prompt){

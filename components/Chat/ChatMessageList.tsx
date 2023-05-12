@@ -1,18 +1,13 @@
 import { FC } from 'react';
 import {
-    Flex,
-    Image,
-    Box,
-    Loader, 
-    Tooltip,
-    Button} from '@mantine/core';
+    Flex} from '@mantine/core';
 import { Message } from '@/types/chat';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
-import { IconCopy } from '@tabler/icons-react';
+
 
 interface Props {
     message: Message;
@@ -96,28 +91,7 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
                 cursor
               }
             </MemoizedReactMarkdown>
-            {
-               message.role == "assistant"?
-               <Box
-                style={{
-                    position:'relative', 
-                    right: '20px', 
-                    top: '0px',
-                    height: '20px',
-                    color: 'gray',
-                    cursor: 'pointer',
-                    display: 'block'
-                }}
-                className='copy-assistant'
-               >
-                  <Tooltip label='Copy'>
-                    <IconCopy 
-                        onClick={handleCopyToClipboard}
-                    />      
-                  </Tooltip>
-               </Box>
-               :<></>
-            }
+            
             
         </Flex>
     )

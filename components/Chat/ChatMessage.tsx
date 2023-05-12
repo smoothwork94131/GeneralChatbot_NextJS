@@ -1,12 +1,11 @@
 import { FC,
     useEffect,
     useState } from 'react';
-import { Box, 
-    Group, 
-    Loader, 
+import { Box,
     Accordion, 
     Flex,
     Text,
+    Tooltip,
     Badge } from '@mantine/core';
 import ChatMessageList  from '@/components/Chat/ChatMessageList';
 import { Conversation, ConversationState, Message } from '@/types/chat';
@@ -15,7 +14,8 @@ import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 import { IconArrowBackUp,
     IconChevronRight} from '@tabler/icons-react';
 import { Input } from '@/types/role';
-
+import { IconCopy } from '@tabler/icons-react';
+import { theme } from '../../lib/theme';
 interface Props {
     historyConversation: Conversation | undefined;
     messageIsStreaming: boolean;
@@ -101,6 +101,17 @@ const ChatMessage: FC<Props> = ({
         setCollpase(true);
         saveSelctedConversation(updatedConversation);
     }
+    const handleCopyToClipboard = (message: string) => {
+        
+        copyToClipboard(message);
+    };
+      function copyToClipboard(text: string) {
+        if (typeof navigator !== 'undefined')
+          navigator.clipboard.writeText(text)
+            .then(() => console.log('Message copied to clipboard'))
+            .catch((err) => console.error('Failed to copy message: ', err));
+    }
+
     const setInputs = (index) => {
         if(selectedMessages) {
             const real_index = history_count-index-1;
@@ -155,7 +166,6 @@ const ChatMessage: FC<Props> = ({
                                             justifyContent:'space-between'
                                         })}
                                     >
-                                        
                                         <Flex
                                             align={isMobile?'flx-start':'center '}
                                             direction={isMobile?'column-reverse':'row'}
@@ -215,13 +225,32 @@ const ChatMessage: FC<Props> = ({
                                                         style={{color: 'gray', fontSize:'12px',}}
                                                         locale={'en'}
                                                     />
-                                                        
                                                 </Box>
                                             }
                                         </Flex>
                                     </Flex>
                                 </Accordion.Control>
                                 <Accordion.Panel>
+                                    <Box
+                                        sx={(theme) =>({
+                                            textAlign: 'right',
+                                            width: '100%',
+                                            display: 'flex',
+                                            justifyContent: 'flex-end',
+                                        })}
+                                        className='copy-assistant'
+                                    >
+                                        <Tooltip label='Copy'>
+                                            <IconCopy 
+                                                style={{color: 'gray'}}
+                                                onClick={(event) => {
+                                                        handleCopyToClipboard(selectedMessages[history_count-index-1][1].content)
+                                                        event.stopPropagation();
+                                                    }
+                                                }
+                                            />      
+                                        </Tooltip>
+                                    </Box>
                                     <ChatMessageList
                                         key = {index}
                                         cursor={`${selectedMessages[history_count-index-1][1].content}${

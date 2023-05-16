@@ -140,7 +140,3 @@ export default async function handler(){
   const res = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
   return new NextResponse(JSON.stringify(roleData));  
 }
-
-export const config = {
-  runtime: 'edge',
-};

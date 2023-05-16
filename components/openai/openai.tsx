@@ -451,8 +451,6 @@ export async function getStaticProps(context) {
         }
     });
 
-    const roleData = await getEmojiList();
-    console.log("rolData", roleData);
     return {
         props: {
           serverRoleGroup: response

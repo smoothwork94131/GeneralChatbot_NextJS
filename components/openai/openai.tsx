@@ -444,18 +444,18 @@ const DrawerNav: FC<{
 
 export default OpenAi;
 export async function getStaticProps(context) {
-    // const response = await fetch('/api/googlesheets', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     }
-    // });
+    const response = await fetch('/api/googlesheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+    });
 
-    // const roleData = await getEmojiList();
-    // console.log("rolData", roleData);
+    const roleData = await getEmojiList();
+    console.log("rolData", roleData);
     return {
         props: {
-          serverRoleGroup: []
+          serverRoleGroup: response
         },
         revalidate: 1, // In seconds
     };

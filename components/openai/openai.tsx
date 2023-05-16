@@ -2,50 +2,93 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { initialState, OpenaiInitialState } from './openai.state';
 import OpenaiContext from './openai.context';
 import  Chat  from '@/components/Chat';
+import { getEmojiList } from '@/lib/googlesheets';
+
 import { 
     AppShell, 
+    UnstyledButton,
+    Group, 
     Drawer,
     MediaQuery,
+    Text,
+    createStyles,
+    Box,
+    rem
 } from '@mantine/core';
 import { 
     useEffect, 
     useState, 
-    FC
+    FC,
  } from 'react';
-
+import { SpotlightProvider, SpotlightAction, SpotlightActionProps  } from '@mantine/spotlight';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation } from '@/types/chat';
-import {  Utility } from '@/types/role';
+import {  SelectedSearch, UtilitiesGroup, Utility } from '@/types/role';
 import { saveSelctedConversation } from '@/utils/app/conversation';
+import { IconSearch } from '@tabler/icons-react';
+import { RoleGroup } from '../../types/role';
 
 interface Props {
-
+    serverRoleData: RoleGroup[]
 }
 
+const spotlightProps = {
+    /* Props for your Spotlight component go here */
+    styles: {
+        window: {
+        maxWidth: '1000px',
+        margin: '0 auto'
+      }
+    }
+};
+
 const OpenAi = ({
-    
+    serverRoleData
 }: Props) => {
-    
     const [openedSidebar, setOpenedSiebar] = useState(false);
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
+    const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
+
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
     });
+
+    const useStyles = createStyles((theme) => ({
+        action: {
+          position: 'relative',
+          display: 'block',
+          width: '100%',
+          borderRadius: theme.radius.sm,
+          padding: `${rem(10)} ${rem(12)}`,
+          ...theme.fn.hover({
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1],
+          }),
+      
+          '&[data-hovered]': {
+            backgroundColor: theme.colors.blue,
+            color: theme.colors.white
+          },
+        },
+      }));
+    
     const {
         state: {
             selectedRole,
             roleGroup,
             conversationHistory,
-            selectedUtility
+            selectedUtility,
+            selectedSearch
         },
         dispatch,
     } = contextValue;
 
     useEffect(() => {   
+        
+        getServiceGroupData();
         const _conversationHistory = localStorage.getItem("conversationHistory");
         if(_conversationHistory){
             const parsedConversationHistory:Conversation[] = JSON.parse(_conversationHistory);
@@ -55,7 +98,12 @@ const OpenAi = ({
             })
         }
     },[]);
-    
+
+    const getServiceGroupData = async() => {
+        const res = await fetch('/api/googlesheets');
+        console.log("server_render",res);
+    }
+
     useEffect(() => {
         let updateConversation:Conversation;
         const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
@@ -73,8 +121,6 @@ const OpenAi = ({
             "field": "selectedConversation",
             "value":updateConversation
         });
-        
-        
     },[selectedUtility, conversationHistory]);
     
     const handleSelectRole = (index: number) => {
@@ -105,6 +151,7 @@ const OpenAi = ({
             });
         }
     };
+
     const handleSelectUtility = (utility_key:string) => {
         let updatedUtility: Utility[] = [];
         for(let k = 0 ; k<selectedRole?.utilities_group.length; k++){
@@ -146,6 +193,157 @@ const OpenAi = ({
     const handleShowSidebar = () => {
         setOpenedSiebar(!openedSidebar);
     };
+    const handleInputSearch = (event) => {
+        const searchKey = event.target.value;
+        const updatedHistoryActions: {
+            timestamp: number;
+            title: string;
+            utilityKey: string;
+            roleName: string;
+            historyIndex: number;
+            searchKey: string;
+            prevText: string;
+            nextText: string;
+            description: string;
+        }[] = [];
+        let searchHistoryActions:SpotlightAction[] = [];
+        
+        conversationHistory.map((conversation, conversationIndex) => {
+            conversation.messages.map((messages, messagesIndex) => {
+                messages.map((message, messageIndex) => {
+                    const content = message.content;
+                    if(!content.toLowerCase().includes(searchKey.toLowerCase())) {
+                        return;
+                    }
+                    const searchIndex = content.toLowerCase().indexOf(searchKey.toLowerCase());
+                    let prevText = ''; let nextText = '';
+                    
+                    if(searchIndex > 25) {
+                        prevText = "..."+content.substr(searchIndex-25, 25);        
+                    } else {
+                        prevText = content.substr(0, searchIndex);
+                    }   
+                    if(content.length - (searchIndex + searchKey.length) > 25) {
+                        nextText = content.substr((searchIndex + searchKey.length), 25)+"...";
+                    } else {
+                        nextText = content.substr((searchIndex + searchKey.length), content.length - (searchIndex + searchKey.length));
+                    }
+                    let timestamp: Date = new Date() ;
+                    if(messages[0].datetime) {
+                        timestamp = new Date(messages[0].datetime)
+                    }
+                    const splitKey = conversation.key.split("_");
+                    updatedHistoryActions.push({
+                        title: `${splitKey[1]} > ${splitKey[2]}`,
+                        roleName: splitKey[0],
+                        historyIndex: messagesIndex,
+                        utilityKey: conversation.key,
+                        timestamp: Math.floor(timestamp.getTime()/1000),
+                        searchKey: searchKey,
+                        nextText: nextText,
+                        prevText: prevText,
+                        description: `${nextText}${searchKey}${prevText}`
+                    });
+                })
+            })
+        });   
+        updatedHistoryActions.sort((a, b) => b.timestamp-a.timestamp);
+        updatedHistoryActions.map((item) => {
+            searchHistoryActions.push({
+                title: item.title,
+                utilityKey:item.utilityKey,
+                roleName: item.roleName,
+                searchKey: item.searchKey,
+                description: item.description,
+                nextText: item.nextText,
+                prevText: item.prevText,
+                onTrigger: () => {
+                    onTriggarSearch(item.utilityKey, item.historyIndex)
+                },
+            })
+        })
+        setSearchHistory(searchHistoryActions);
+    }
+    
+    const onTriggarSearch = (utilityKey: string, messagesIndex: number) => {
+        const utilityInfo = utilityKey.split("_");
+        const searchRoleName:string = utilityInfo[0]; const searchUtilityGroupName:string = utilityInfo[1]; const searchUtilityName:string = utilityInfo[2];
+
+        roleGroup.map((role:RoleGroup) => {
+            if(role.name == searchRoleName) {
+                dispatch({
+                    "field":"selectedRole",
+                    "value": role
+                });
+                dispatch({
+                    "field": "selectedUtilityGroup",
+                    "value": role.utilities_group
+                });
+                role.utilities_group.map((utility_group) => {
+                    if(utility_group.name == searchUtilityGroupName) {
+                        utility_group.utilities.map((utility) => {
+                            if(utility.name == searchUtilityName) {
+                                dispatch({
+                                    "field": "selectedUtility",
+                                    "value": utility
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        })
+        setSearchHistory([]);
+        dispatch({
+            "field": "selectedSearch",
+            value: {
+                utility_key: utilityKey,
+                history_index: messagesIndex
+            }
+        });
+    }
+    
+    function  CustomSplitlightAction({
+        action,
+        styles,
+        classNames,
+        hovered,
+        onTrigger,
+        ...others
+      }: SpotlightActionProps) {
+        const { classes } = useStyles(undefined, { styles, classNames, name: 'Spotlight' });
+
+        return (
+            <UnstyledButton
+                className={classes.action}
+                data-hovered={hovered || undefined}
+                tabIndex={-1}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={onTrigger}
+                {...others}
+            >
+            <Group noWrap>
+                <Box style={{ flex: 1 }}>
+                    <Text color={`${hovered?'white':'dimmed'}`}>{action.title}</Text>
+                    {
+                        <Text color={`${hovered?'white':'dimmed'}`} size="sm">
+                            {
+                                action.prevText
+                            }
+                            <span style={{background: 'orange', color: 'black'}}>
+                                {action.searchKey}
+                            </span>
+                            {action.nextText}
+                        </Text>
+                    }    
+                </Box>
+                <Text color={`${hovered?'white':'dimmed'}`}>
+                    [{action.roleName}]
+                </Text>
+            </Group>
+            </UnstyledButton>
+        );
+    }
     return (
         isMobile!==undefined?
         <OpenaiContext.Provider
@@ -155,48 +353,68 @@ const OpenAi = ({
                 handleSelectUtility       
             }}
         >
-            <AppShell
-                navbarOffsetBreakpoint="sm"
-                asideOffsetBreakpoint="sm"
-                header = {
-                    isMobile?
-                    <OpenAiHeader
+            <SpotlightProvider
+                actions={searchHistory}
+                searchIcon={<IconSearch size="1.2rem" />}
+                searchPlaceholder="Search..."
+                shortcut="mod + shift + 1"
+                nothingFoundMessage="Nothing found..."
+                onChange={handleInputSearch}
+                actionComponent={CustomSplitlightAction}
+                highlightQuery
+            >
+                <AppShell
+                    navbarOffsetBreakpoint="sm"
+                    asideOffsetBreakpoint="sm"
+                    header = {
+                        isMobile?
+                        <OpenAiHeader
+                            handleShowSidebar={handleShowSidebar}
+                            openedSidebar={openedSidebar}
+                            isMobile={isMobile}
+                        />:<></>
+                    }
+                    navbar={
+                        <>
+                            <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                                <Sidebar
+                                    handleShowSidebar={handleShowSidebar}
+                                    isMobile = {isMobile}
+                                    openedSidebar={openedSidebar}
+                                    selectedSearch={selectedSearch}
+                                />
+                            </MediaQuery>
+                            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                                <DrawerNav 
+                                    opened={openedSidebar} 
+                                    handleShowSidebar={handleShowSidebar} 
+                                    isMobile={isMobile}
+                                    selectedSearch={selectedSearch}
+                                />
+                            </MediaQuery>
+                        </>
+                    }
+                >  
+                    <Chat 
                         handleShowSidebar={handleShowSidebar}
-                        openedSidebar={openedSidebar}
-                        isMobile={isMobile}
-                    />:<></>
-                }
-                navbar={
-                    <>
-                        <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-                            <Sidebar
-                                handleShowSidebar={handleShowSidebar}
-                                isMobile = {isMobile}
-                                openedSidebar={openedSidebar}
-                            />
-                        </MediaQuery>
-                        <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                            <DrawerNav 
-                                opened={openedSidebar} 
-                                handleShowSidebar={handleShowSidebar} 
-                                isMobile={isMobile}
-                            />
-                        </MediaQuery>
-                    </>
-                }
-            >  
-                <Chat 
-                    handleShowSidebar={handleShowSidebar}
-                    isMobile = {isMobile}
-                />    
-            </AppShell>
+                        isMobile = {isMobile}
+                        selectedSearch={selectedSearch}
+                    />    
+                </AppShell>
+            </SpotlightProvider>
         </OpenaiContext.Provider>:<></>
     )
 };
 
-const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: boolean; }> = ({
+const DrawerNav: FC<{ 
+    opened: boolean; 
+    handleShowSidebar: () => void; 
+    isMobile: boolean;
+    selectedSearch: SelectedSearch 
+}> = ({
     opened,
     handleShowSidebar,
+    selectedSearch
   }) => {
     const router = useRouter();
     useEffect(() => {
@@ -218,11 +436,27 @@ const DrawerNav: FC<{ opened: boolean; handleShowSidebar: () => void; isMobile: 
             handleShowSidebar={handleShowSidebar}
             isMobile={true} 
             openedSidebar={opened}
+            selectedSearch={selectedSearch}
         />
       </Drawer>
     );
 };
+
 export default OpenAi;
-export const getSide = () => {
-    
+export async function getStaticProps(context) {
+    // const response = await fetch('/api/googlesheets', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     }
+    // });
+
+    // const roleData = await getEmojiList();
+    // console.log("rolData", roleData);
+    return {
+        props: {
+          serverRoleGroup: []
+        },
+        revalidate: 1, // In seconds
+    };
 }

@@ -7,6 +7,7 @@ export interface UtilitiesGroup {
     active: boolean;
     utilities: Utility[];
 }
+
 export interface Utility {
     key: string;
     name: string;
@@ -29,6 +30,7 @@ export const  UtilityState:Utility = {
     summary:'',
     include_prompt_history: true
 }
+
 export interface Input {
     name: string;
     id?: number;
@@ -39,6 +41,14 @@ export interface Input {
     options?: string[];
     component: string;
     max_len?: number;
+}
+export interface SelectedSearch {
+    utility_key:string,
+    history_index: number,
+}
+export const SelectedSearchState = {
+    utility_key: '',
+    history_index: 0
 }
 
 export const PrompState = {key:'', name:'', messages:[], datetime: new Date().toISOString().split('T')[0]}

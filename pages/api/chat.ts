@@ -33,5 +33,4 @@ export default async function POST(req: Request): Promise<Response> {
     console.error('Fetch request failed:', error);
     return new NextResponse(`[Issue] ${error}`, { status: 400 });
   }
-  
 }

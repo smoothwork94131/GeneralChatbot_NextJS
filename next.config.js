@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+
+
 const nextConfig = {
   reactStrictMode: true,
   env: {
@@ -8,15 +10,16 @@ const nextConfig = {
     HAS_SERVER_KEY_PRODIA: !!process.env.PRODIA_API_KEY,
   },
   webpack(config, { isServer, dev }) {
-    // @mui/joy: anything material gets redirected to Joy
-    config.resolve.alias['@mui/material'] = '@mui/joy';
-
-    // @dqbd/tiktoken: enable asynchronous WebAssembly
+    if (!isServer) {
+      config.resolve.fallback.fs = false;
+      config.resolve.fallback.tls = false;
+      config.resolve.fallback.net = false;
+      config.resolve.fallback.child_process = false;
+    }
     config.experiments = {
       asyncWebAssembly: true,
       layers: true,
     };
-
     return config;
   },
   typescript: {

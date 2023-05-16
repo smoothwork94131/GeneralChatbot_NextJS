@@ -55,10 +55,11 @@ const Utils: FC<Props> = ({
                                 label={
                                     utility_item.name
                                 }
+
+                                
                                 onClick={() => handleSelectUtility(utility_item.key)}
                                 active={
-                                    selectedUtility.name == utility_item.name || 
-                                    utility_item.active?true:false
+                                    selectedUtility.key == utility_item.key 
                                 }
                                 sx={(theme) => ({
                                     transform: 'none'

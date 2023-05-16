@@ -1,6 +1,7 @@
 import { FC, useContext } from 'react';
 import { Flex, Menu, NavLink  } from '@mantine/core';
-import { IconLogout, IconMoon, IconStar, IconSun, IconTrash, IconUrgent, IconWorld } from '@tabler/icons-react';
+import { IconLogout, IconMoon, IconSearch, IconStar, IconSun, IconTrash, IconUrgent, IconWorld } from '@tabler/icons-react';
+import { spotlight } from '@mantine/spotlight';
 import HomeContext from 'state/index.context';
 
 interface Props {
@@ -44,6 +45,12 @@ const Settings:FC<Props> = ({isMobile}) =>{
             >
                 {colorScheme == "dark"?"Light":"Dark"}
             </Menu.Item>
+            <Menu.Item 
+                icon={<IconSearch size={14} />}
+                onClick={() => {spotlight.open()}}
+            >
+                Search History
+            </Menu.Item>
             <Menu.Item
                 icon={<IconWorld size={14} />}
             >
@@ -84,6 +91,12 @@ const Settings:FC<Props> = ({isMobile}) =>{
                 icon={colorScheme == "dark"?<IconSun size="1rem" stroke={1.5} />:<IconMoon size="1rem" stroke={1.5}/>}
                 variant="subtle"          
                 onClick={handleColorScheme}  
+            />
+            <NavLink
+                label="Search Hitory"
+                icon={<IconSearch size="1rem" stroke={1.5} />}
+                variant="subtle"    
+                onClick={() => {spotlight.open()}}
             />
             <NavLink
                 label="Updates & FAQ"

@@ -13,13 +13,14 @@ import {
     Flex
  } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { UtilitiesGroup } from '@/types/role';
+import { SelectedSearch, UtilitiesGroup } from '@/types/role';
 
 interface Props {
     isMobile: boolean
     handleShowSidebar:() => void;
     openedSidebar: boolean;
     className?:string;
+    selectedSearch: SelectedSearch
 }
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
@@ -41,7 +42,6 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
 );
 
 const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
-    
     const {
         state: { selectedUtilityGroup, selectedUtility, roleGroup },
         handleSelectUtility,
@@ -54,10 +54,9 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
     const onSearchUtility = (keyword: string) => {
         setSearchKeyword(keyword);
     }
-
+    
     useEffect(()=> {
         let updatedUtilityGroup: UtilitiesGroup[] = [];
-        
         for(let k=0; k<selectedUtilityGroup.length;k++){
             let group_item = selectedUtilityGroup[k];
             const filter_utilities = group_item.utilities.filter((u_item) => {
@@ -65,6 +64,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
                 ' '+u_item.summary.toLowerCase();
                 return searchable.includes(searchKeyword.toLowerCase())
             })
+
             if(filter_utilities.length > 0) {
                 group_item = {
                     ...group_item,
@@ -96,7 +96,6 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
 
         const updated_role_Group = roleGroup.map((role_item) => {
             const filter_utility_group = role_item.utilities_group.map((group_item) => {
-                
                 const group = updatedUtilityGroup.filter(updated_group_item => updated_group_item.name == group_item.name)
                 if(group.length > 0) {
                     group_item.active = group[0].active;
@@ -117,7 +116,9 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
     return (
         <Navbar 
             sx={(theme) => ({
-                padding: theme.spacing.sm
+                padding: theme.spacing.sm,
+                background: 'none',
+                borderRight: `1px solid ${theme.colorScheme == 'dark'? theme.colors.gray[8]: theme.colors.gray[1]}`,
             })}
             className={cx(classes.navbar, className)}
         >

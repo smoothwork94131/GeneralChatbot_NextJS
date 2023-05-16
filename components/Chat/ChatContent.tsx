@@ -9,7 +9,7 @@ import {
     Box
 } from '@mantine/core';
 import ChatInput from './ChatInput';
-import { Input, Utility } from '@/types/role';
+import { Input, SelectedSearch, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
 import { AssistantMessageState, Conversation, Message,  UserMessageState } from '@/types/chat';
 import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
@@ -22,7 +22,9 @@ interface Props {
     selectedConversation: Conversation,
     saveSelectConverSation: (conversation: Conversation)=>void;
     isMobile: boolean;
-    conversationHistory: Conversation[]
+    conversationHistory: Conversation[],
+    selectedSearch: SelectedSearch,
+    clearSelectedSearch: () =>void;
 } 
 
 const ChatContent: FC<Props> = ({
@@ -31,7 +33,9 @@ const ChatContent: FC<Props> = ({
         selectedConversation,
         saveSelectConverSation,
         isMobile,
-        conversationHistory
+        conversationHistory,
+        selectedSearch,
+        clearSelectedSearch
     }) =>{
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -232,7 +236,7 @@ const ChatContent: FC<Props> = ({
     return (
         <Box
             sx={(theme) => ({
-                height: '100%',
+                minHeight: '96%',
                 display: 'flex',
                 flexDirection: 'column'
             })}
@@ -287,6 +291,8 @@ const ChatContent: FC<Props> = ({
                 saveSelctedConversation={saveSelectConverSation}
                 isMobile={isMobile}
                 handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
+                selectedSearch={selectedSearch}
+                clearSelectedSearch={clearSelectedSearch}
             />
             <Text ta="center"
                 sx={(theme) => ({

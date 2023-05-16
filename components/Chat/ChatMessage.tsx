@@ -13,9 +13,9 @@ import TimeAgo from 'react-timeago';
 import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 import { IconArrowBackUp,
     IconChevronRight} from '@tabler/icons-react';
-import { Input } from '@/types/role';
+import { Input, SelectedSearch } from '@/types/role';
 import { IconCopy } from '@tabler/icons-react';
-import { theme } from '../../lib/theme';
+
 interface Props {
     historyConversation: Conversation | undefined;
     messageIsStreaming: boolean;
@@ -23,6 +23,8 @@ interface Props {
     saveSelctedConversation: (conversation: Conversation)=>void;
     isMobile: boolean;
     handleChangeUtilityInputsValue: (input_index: number, value: string)=>void,
+    selectedSearch: SelectedSearch,
+    clearSelectedSearch: () =>void
 }
 const ChatMessage: FC<Props> = ({
         historyConversation, 
@@ -30,7 +32,9 @@ const ChatMessage: FC<Props> = ({
         setInputContent,
         saveSelctedConversation, 
         isMobile,
-        handleChangeUtilityInputsValue
+        handleChangeUtilityInputsValue,
+        selectedSearch,
+        clearSelectedSearch
     }) => {
     const L10nsStrings = {
         prefixAgo: null,
@@ -58,10 +62,15 @@ const ChatMessage: FC<Props> = ({
     
     useEffect(() => {
         let updatedActive: string[] = [];
-
+    
         historyConversation?.messages.map((message, index) => {
             if( message[0].active ||
-                (index == 0 && !collapse)) {
+                ((index == 0 || 
+                    (selectedSearch.history_index == (historyConversation?.messages.length - 1 - index) &&
+                    historyConversation.key == selectedSearch.utility_key)
+                )
+                && !collapse)) {
+                    
                 updatedActive.push(`${historyConversation.key}_${index}`);
             } 
         })
@@ -69,20 +78,31 @@ const ChatMessage: FC<Props> = ({
             updatedActive = [`${historyConversation?.key}_0`];
         }
         setActiveGroup(updatedActive);
-        setCollpase(false);
-    },[historyConversation])
+        setCollpase(false); 
+
+        setTimeout(goSelectedSection, 1000);
+    },[historyConversation, selectedSearch])
     
     useEffect(() => {
         if(historyConversation?.messages.length == 0) {
             setActiveGroup([`${historyConversation?.key}_0`]);
         }
+        setTimeout(goSelectedSection, 1000);
     }, [])
 
+    const goSelectedSection = () => {
+        const element = document.getElementById(`messages-${selectedSearch.history_index}`);
+        if (element) {
+            element.scrollIntoView({behavior: 'smooth',block: 'start'});
+        }
+    }
+    
     const onCollopase = (activeSatus) => {
         let updatedConversation:Conversation = ConversationState;
         if(historyConversation) {
             updatedConversation = historyConversation;
         }
+        
         const messages = historyConversation?.messages.map((message, index) => {
             const active = activeSatus.filter((active) => `${historyConversation.key}_${index}` == active)
             if(active.length > 0 ) {
@@ -92,6 +112,7 @@ const ChatMessage: FC<Props> = ({
             }
             return message;
         })
+        
         if(messages) {
             updatedConversation = {
                 ...updatedConversation,
@@ -99,10 +120,11 @@ const ChatMessage: FC<Props> = ({
             }
         }
         setCollpase(true);
+        clearSelectedSearch();
         saveSelctedConversation(updatedConversation);
     }
+    
     const handleCopyToClipboard = (message: string) => {
-        
         copyToClipboard(message);
     };
       function copyToClipboard(text: string) {
@@ -156,7 +178,10 @@ const ChatMessage: FC<Props> = ({
                 selectedMessages?.map((message, index) =>
                     <Box key={index}>
                         {
-                            <Accordion.Item value={`${historyConversation?.key}_${index}`} key={index} sx={(theme) =>({
+                            <Accordion.Item 
+                                id={`messages-${selectedMessages.length-index-1}`}
+                                value={`${historyConversation?.key}_${index}`} 
+                                key={index} sx={(theme) =>({
                                 padding: "0px"
                             })}>
                                 <Accordion.Control>
@@ -197,7 +222,7 @@ const ChatMessage: FC<Props> = ({
                                                     
                                                 }
                                             </Box>
-                                        </Flex>                
+                                        </Flex>                 
                                         <Flex
                                             gap="xs"
                                             align='flex-end'

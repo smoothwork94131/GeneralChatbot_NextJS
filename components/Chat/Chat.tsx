@@ -8,14 +8,15 @@ import {
     saveConversationHistory,
     saveSelctedConversation,
 } from '@/utils/app/conversation';
-import { Utility, UtilityState } from '@/types/role';
+import { SelectedSearch, SelectedSearchState, Utility, UtilityState } from '@/types/role';
 
 interface Props {
     isMobile: boolean;  
-    handleShowSidebar: ()=>void
+    handleShowSidebar: ()=>void;
+    selectedSearch: SelectedSearch;
 }
 
-const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
+const Chat:FC<Props> = ({isMobile,selectedSearch}) => {
     const {
         state: { 
             roleGroup, 
@@ -40,7 +41,12 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
         });
 
     };
-    
+    const clearSelectedSearch = () => {
+        openaiDispatch({
+            "field": "selectedSearch",
+            "value": SelectedSearchState
+        })
+    }
     const saveSelectConverSation = (conversation: Conversation) => {
         
         saveSelctedConversation(conversation);
@@ -96,6 +102,8 @@ const Chat:FC<Props> = ({isMobile, handleShowSidebar}) => {
                 saveSelectConverSation={saveSelectConverSation}
                 conversationHistory={conversationHistory}
                 isMobile={isMobile}
+                selectedSearch={selectedSearch}
+                clearSelectedSearch={clearSelectedSearch}
             />
         </Box>
     )

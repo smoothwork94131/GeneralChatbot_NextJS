@@ -1,1 +1,1 @@
-export { default, getSide } from './openai';
+export { default } from './openai';

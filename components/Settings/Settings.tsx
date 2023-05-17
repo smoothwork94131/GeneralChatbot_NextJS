@@ -6,8 +6,9 @@ import HomeContext from 'state/index.context';
 
 interface Props {
     isMobile: boolean;
+    updateServerRoleData:() =>void;
 }
-const Settings:FC<Props> = ({isMobile}) =>{
+const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
     const {
         state: { colorScheme, lightMode },
         dispatch: homeDispatch,
@@ -53,6 +54,7 @@ const Settings:FC<Props> = ({isMobile}) =>{
             </Menu.Item>
             <Menu.Item
                 icon={<IconWorld size={14} />}
+                onClick = {() => {updateServerRoleData()}}
             >
                 Updates & FAQ
             </Menu.Item>
@@ -101,7 +103,8 @@ const Settings:FC<Props> = ({isMobile}) =>{
             <NavLink
                 label="Updates & FAQ"
                 icon={<IconWorld size="1rem" stroke={1.5} />}
-                variant="subtle"            
+                variant="subtle"           
+                onClick = {() => {updateServerRoleData()}}
             />
             <NavLink
                 label="Log out"

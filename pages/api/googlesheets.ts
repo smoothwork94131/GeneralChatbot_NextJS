@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 let roleData:any = [];
 function mapRowToCustomData(row: string[], headers: string[]): void {
+  
   row.map((row_item, row_index) => {  
 
     const roleName = getFieldValue(row, headers, 'Role');
@@ -16,10 +17,11 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const userPrompt = getFieldValue(row, headers, 'Utility_User_Prompt');
     const systemPrompt = getFieldValue(row, headers, 'Utility_System_Prompt');
     const inputPromptHistory = getFieldValue(row, headers, 'Input_Prompt_History');
+    const input_align = getFieldValue(row, headers, `Input_Align`);
     
     let role_index = chkExistObject(roleData, roleName);
   
-
+    
     if(role_index == roleData.length) {
       const role = {
         name: roleName,
@@ -34,9 +36,14 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     let utilities_group_index = chkExistObject(utilities_group, utilityGroupName);
 
     if(utilities_group_index == utilities_group.length){
+      let active = false;
+      if(utilities_group_index == 0) {
+        active = true;
+      }
       utilities_group.push({
         name: utilityGroupName,
-        utilities:[]
+        utilities:[],
+        active: active
       })
     }
 
@@ -44,15 +51,22 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     let utilities = utilities_group[utilities_group_index].utilities;
     let utility_index = chkExistObject(utilities, utilityName);
     
+
     if(utility_index == utilities.length) {
+      let active = false;
+      if(utility_index == 0 && utilities_group_index == 0 ) {
+        active = true;
+      }
       utilities.push({
         name: utilityName,
+        active: active,
         summary: utilitySummary?utilitySummary:'',
         user_prompt: userPrompt?userPrompt:'',
         system_prompt: systemPrompt?systemPrompt:'',
-        input_prompt_history: inputPromptHistory || inputPromptHistory == 'true'?true:false,
+        input_prompt_history: inputPromptHistory ==''? true:false,
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
-        inputs: getUtilityInputs(row, headers)
+        inputs: getUtilityInputs(row, headers),
+        input_align: input_align?input_align:'horizental',
       })
     }
     utilities_group[utilities_group_index].utilities = utilities;
@@ -91,21 +105,23 @@ function getUtilityInputs(row, headers) {
     const type = getFieldValue(row, headers, `Input_${k+1}_Type`);
     const component = getFieldValue(row, headers, `Input_${k+1}_Component`);
     const value = getFieldValue(row, headers, `Input_${k+1}_Value`);
-    const option = getFieldValue(row, headers, `Input_${k+1}_Value`).replaceAll(" ", "").split(",");
+    const option = getFieldValue(row, headers, `Input_${k+1}_Options`).replace(/ /g, "").split(",");
     const style = getFieldValue(row, headers, `Input_${k+1}_Style`);
     inputs.push({
       name: name?name:'',
       type: type?type:'',
       component: component?component:'',
       value: value?value:'',
-      option: option?option:'',
-      style: style?style:''
+      options: option?option:'',
+      style: style?style:'',
+      
     });
   }
   return inputs;
 }
 
 async function getSheetData(spreadsheetId: string, range: string): Promise<void> {
+  roleData = [];
   try {
     const target = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
     const jwt = new google.auth.JWT(
@@ -122,7 +138,6 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
     });
 
     const rows = response.data.values;
-    
     if (!rows) throw new Error('No data found in the sheet');
     const headers = rows.shift();
     
@@ -136,7 +151,7 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
 }
 
 
-export default async function handler(){
-  const res = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-  return new NextResponse(JSON.stringify(roleData));  
+export default async function handler(req,res){
+  const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
+  res.status(200).json(roleData);
 }

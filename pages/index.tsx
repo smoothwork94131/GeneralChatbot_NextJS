@@ -5,12 +5,10 @@ import OpenAi from '@/components/openai';
 import HomeContext from '@/state/index.context';
 import { GetServerSideProps } from 'next';
 import { RoleGroup } from '@/types/role';
-interface Props {
-  serverRoleGroup: RoleGroup[]
-}
+
 const Home = ({
-  serverRoleGroup
-}: Props) => {
+  
+}) => {
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
@@ -46,4 +44,5 @@ const Home = ({
     </HomeContext.Provider>
  )
 }
+
 export default Home;

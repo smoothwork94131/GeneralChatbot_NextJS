@@ -2,7 +2,6 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { initialState, OpenaiInitialState } from './openai.state';
 import OpenaiContext from './openai.context';
 import  Chat  from '@/components/Chat';
-import { getEmojiList } from '@/lib/googlesheets';
 
 import { 
     AppShell, 
@@ -13,7 +12,8 @@ import {
     Text,
     createStyles,
     Box,
-    rem
+    rem,
+    Loader 
 } from '@mantine/core';
 import { 
     useEffect, 
@@ -47,11 +47,12 @@ const spotlightProps = {
 };
 
 const OpenAi = ({
-    serverRoleData
+    
 }: Props) => {
     const [openedSidebar, setOpenedSiebar] = useState(false);
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
+    const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
 
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
@@ -86,9 +87,47 @@ const OpenAi = ({
         dispatch,
     } = contextValue;
 
-    useEffect(() => {   
+    
+    useEffect(()=>{
+        updateServerRoleData();
+    },[])
+
+    const updateServerRoleData = async() => {
+        setUpdateDataLoader(true);
+        const response = await fetch('/api/googlesheets', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+        });
+        if (!response.ok) {
+            console.error('Error from API call: ', response.status, response.statusText);
+            return '';
+        }
         
-        getServiceGroupData();
+        const data = await response.json();
+        if(data) {
+            dispatch({
+                "field": "roleGroup",
+                "value": data
+            });
+            dispatch({
+                "field": "selectedRole",
+                "value": data[0]
+            })
+            dispatch({
+                "field": "selectedUtility",
+                "value": data[0].utilities_group[0].utilities[0]
+            })
+            dispatch({
+                "field": "selectedUtilityGroup",
+                "value": data[0].utilities_group
+            })
+        }
+        setUpdateDataLoader(false);
+        
+    }
+    useEffect(() => {   
         const _conversationHistory = localStorage.getItem("conversationHistory");
         if(_conversationHistory){
             const parsedConversationHistory:Conversation[] = JSON.parse(_conversationHistory);
@@ -97,12 +136,8 @@ const OpenAi = ({
                 "value": parsedConversationHistory
             })
         }
-    },[]);
 
-    const getServiceGroupData = async() => {
-        const res = await fetch('/api/googlesheets');
-        console.log("server_render",res);
-    }
+    },[roleGroup]);
 
     useEffect(() => {
         let updateConversation:Conversation;
@@ -312,7 +347,7 @@ const OpenAi = ({
         ...others
       }: SpotlightActionProps) {
         const { classes } = useStyles(undefined, { styles, classNames, name: 'Spotlight' });
-
+        
         return (
             <UnstyledButton
                 className={classes.action}
@@ -346,63 +381,77 @@ const OpenAi = ({
     }
     return (
         isMobile!==undefined?
-        <OpenaiContext.Provider
-            value={{
-                ...contextValue,
-                handleSelectRole,
-                handleSelectUtility       
-            }}
-        >
-            <SpotlightProvider
-                actions={searchHistory}
-                searchIcon={<IconSearch size="1.2rem" />}
-                searchPlaceholder="Search..."
-                shortcut="mod + shift + 1"
-                nothingFoundMessage="Nothing found..."
-                onChange={handleInputSearch}
-                actionComponent={CustomSplitlightAction}
-                highlightQuery
+            !updateDataLoader?
+            <OpenaiContext.Provider
+                value={{
+                    ...contextValue,
+                    handleSelectRole,
+                    handleSelectUtility       
+                }}
             >
-                <AppShell
-                    navbarOffsetBreakpoint="sm"
-                    asideOffsetBreakpoint="sm"
-                    header = {
-                        isMobile?
-                        <OpenAiHeader
+                <SpotlightProvider
+                    actions={searchHistory}
+                    searchIcon={<IconSearch size="1.2rem" />}
+                    searchPlaceholder="Search..."
+                    shortcut="mod + shift + 1"
+                    nothingFoundMessage="Nothing found..."
+                    onChange={handleInputSearch}
+                    actionComponent={CustomSplitlightAction}
+                    highlightQuery
+                >
+                    <AppShell
+                        navbarOffsetBreakpoint="sm"
+                        asideOffsetBreakpoint="sm"
+                        header = {
+                            isMobile?
+                            <OpenAiHeader
+                                handleShowSidebar={handleShowSidebar}
+                                openedSidebar={openedSidebar}
+                                isMobile={isMobile}
+                            />:<></>
+                        }
+                        navbar={
+                            <>
+                                <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                                    <Sidebar
+                                        handleShowSidebar={handleShowSidebar}
+                                        isMobile = {isMobile}
+                                        openedSidebar={openedSidebar}
+                                        selectedSearch={selectedSearch}
+                                        updateServerRoleData={updateServerRoleData}
+                                    />
+                                </MediaQuery>
+                                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                                    <DrawerNav 
+                                        opened={openedSidebar} 
+                                        handleShowSidebar={handleShowSidebar} 
+                                        isMobile={isMobile}
+                                        selectedSearch={selectedSearch}
+                                        updateServerRoleData={updateServerRoleData}
+                                    />
+                                </MediaQuery>
+                            </>
+                        }
+                    >  
+                        <Chat 
                             handleShowSidebar={handleShowSidebar}
-                            openedSidebar={openedSidebar}
-                            isMobile={isMobile}
-                        />:<></>
-                    }
-                    navbar={
-                        <>
-                            <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-                                <Sidebar
-                                    handleShowSidebar={handleShowSidebar}
-                                    isMobile = {isMobile}
-                                    openedSidebar={openedSidebar}
-                                    selectedSearch={selectedSearch}
-                                />
-                            </MediaQuery>
-                            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                                <DrawerNav 
-                                    opened={openedSidebar} 
-                                    handleShowSidebar={handleShowSidebar} 
-                                    isMobile={isMobile}
-                                    selectedSearch={selectedSearch}
-                                />
-                            </MediaQuery>
-                        </>
-                    }
-                >  
-                    <Chat 
-                        handleShowSidebar={handleShowSidebar}
-                        isMobile = {isMobile}
-                        selectedSearch={selectedSearch}
-                    />    
-                </AppShell>
-            </SpotlightProvider>
-        </OpenaiContext.Provider>:<></>
+                            isMobile = {isMobile}
+                            selectedSearch={selectedSearch}
+                        />    
+                    </AppShell>
+                </SpotlightProvider>
+            </OpenaiContext.Provider>:
+            <Box sx={({
+                width: '100%',
+                height: '100%'
+            })}>
+                <Loader sx={(theme) =>({
+                    position: 'absolute',
+                    top: '30%',
+                    left: '48%'
+                })} />
+            </Box>:
+        <></>
     )
 };
 
@@ -410,11 +459,13 @@ const DrawerNav: FC<{
     opened: boolean; 
     handleShowSidebar: () => void; 
     isMobile: boolean;
-    selectedSearch: SelectedSearch 
+    selectedSearch: SelectedSearch,
+    updateServerRoleData: ()=>void;
 }> = ({
     opened,
     handleShowSidebar,
-    selectedSearch
+    selectedSearch,
+    updateServerRoleData
   }) => {
     const router = useRouter();
     useEffect(() => {
@@ -437,24 +488,10 @@ const DrawerNav: FC<{
             isMobile={true} 
             openedSidebar={opened}
             selectedSearch={selectedSearch}
+            updateServerRoleData={updateServerRoleData}
         />
       </Drawer>
     );
 };
 
 export default OpenAi;
-export async function getStaticProps(context) {
-    const response = await fetch('/api/googlesheets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-    });
-
-    return {
-        props: {
-          serverRoleGroup: response
-        },
-        revalidate: 1, // In seconds
-    };
-}

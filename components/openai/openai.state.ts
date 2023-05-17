@@ -1,5 +1,5 @@
 import { Conversation } from "@/types/chat";
-import { RoleGroup, UtilitiesGroup, Utility, PrompState, SelectedSearch, SelectedSearchState } from "@/types/role";
+import { RoleGroup, UtilitiesGroup, Utility, PrompState, SelectedSearch, SelectedSearchState, UtilityState, RoleGroupState } from "@/types/role";
 import { ROLE_GROUP } from "@/utils/app/const";
 
 export interface OpenaiInitialState {
@@ -23,10 +23,12 @@ export const initialState: OpenaiInitialState = {
     messageError: false,
     searchTerm: '',
     conversationHistory: [],
-    selectedRole: ROLE_GROUP[0],
-    selectedUtility: ROLE_GROUP[0].utilities_group[0].utilities[0],
+    selectedRole: RoleGroupState,
+    // selectedUtility: ROLE_GROUP[0].utilities_group[0].utilities[0],
+    selectedUtility: UtilityState,
     roleGroup: ROLE_GROUP,
-    selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
+    // selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
+    selectedUtilityGroup:[],
     selectedConversation: PrompState,
     selectedSearch: SelectedSearchState
 };

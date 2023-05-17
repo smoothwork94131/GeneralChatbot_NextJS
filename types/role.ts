@@ -2,6 +2,10 @@ export interface RoleGroup {
     name: string;
     utilities_group: UtilitiesGroup[]
 }
+export const RoleGroupState = {
+    name: '',
+    utilities_group:[]
+}
 export interface UtilitiesGroup {
     name: string;
     active: boolean;
@@ -21,6 +25,7 @@ export interface Utility {
     user_prompt?: string;
     include_prompt_history: boolean;
 }
+
 export const  UtilityState:Utility = {
     key: '',
     name: '',

@@ -23,3 +23,7 @@
 .mantine-Accordion-chevron {
     margin-right: 2px;
 }
+
+.mantine-Spotlight-content {
+    min-width: 70%;
+}

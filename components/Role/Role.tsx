@@ -90,6 +90,7 @@ export const RoleMenu = ({index, name, handleSelectRole}: RoleInfo) => {
     )
 }
 export const RoleTab = ({index, name, selectedRole, handleSelectRole}: RoleInfo) => {
+    console.log(selectedRole);
     return (
         <Flex 
             sx={(theme) => ({

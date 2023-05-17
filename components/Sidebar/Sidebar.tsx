@@ -20,7 +20,8 @@ interface Props {
     handleShowSidebar:() => void;
     openedSidebar: boolean;
     className?:string;
-    selectedSearch: SelectedSearch
+    selectedSearch: SelectedSearch;
+    updateServerRoleData: () =>void;
 }
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
@@ -41,7 +42,7 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
     }
 );
 
-const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
+const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServerRoleData}) =>{
     const {
         state: { selectedUtilityGroup, selectedUtility, roleGroup },
         handleSelectUtility,
@@ -151,7 +152,10 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar}) =>{
             />
             {
                 !isMobile?
-                <Settings isMobile={isMobile}/>:<></>
+                <Settings 
+                    isMobile={isMobile}
+                    updateServerRoleData={updateServerRoleData}
+                />:<></>
             }
         </Navbar>
     )

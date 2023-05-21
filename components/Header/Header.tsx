@@ -8,14 +8,18 @@ import {
 import Settings from '../Settings';
 import OpenaiContext from '@/components/openai/openai.context';
 import Role from '../Role';
+import AccountButtons from '@/components/Account/AccountButtons';
+import { Conversation } from '@/types/chat';
 
 interface Props {
     handleShowSidebar: ()=>void;
     openedSidebar: boolean,
-    isMobile: boolean
+    isMobile: boolean,
+    updateServerRoleData: () =>void;
+    selectedConversation: Conversation
 }
 
-const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile}) => {
+const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile, updateServerRoleData, selectedConversation}) => {
     const {
         state: { roleGroup, selectedRole },
         handleSelectRole,
@@ -48,6 +52,7 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile}) =>
                     />
                 </Group>
                 <Group>
+                    <AccountButtons selectedConversation={selectedConversation} isMobile={true}/>
                     <Menu shadow="md" width={200}>
                         <Menu.Target>
                             <Avatar 
@@ -57,6 +62,7 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile}) =>
                         </Menu.Target>
                         <Settings 
                             isMobile={isMobile}
+                            updateServerRoleData={updateServerRoleData}
                         />
                     </Menu>
                 </Group>

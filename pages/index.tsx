@@ -1,48 +1,21 @@
-import { MantineProvider, ColorSchemeProvider, MantineThemeOverride } from '@mantine/core';
-import { initialState, HomeInitialState } from '@/state/index.state';
-import { useCreateReducer } from '@/hooks/useCreateReducer';
-import OpenAi from '@/components/openai';
-import HomeContext from '@/state/index.context';
-import { GetServerSideProps } from 'next';
-import { RoleGroup } from '@/types/role';
-
+import OpenAi from '@/components/openai/openai';
+import { Props } from '../utils/app/useUser';
+import { getSheets } from './api/googlesheets';
 const Home = ({
-  
+  serverRoleData
 }) => {
-  const contextValue = useCreateReducer<HomeInitialState>({
-    initialState,
-  });
-  
-  const {
-      state: {
-        colorScheme,
-      },
-      dispatch
-  } = contextValue;
-  
-  
-  const myTheme: MantineThemeOverride = {
-    colorScheme: colorScheme,
-    spacing: {
-      chatInputPadding: '40px'
-    }
-  };
-  
   return (
-    <HomeContext.Provider
-      value = {{
-        ...contextValue,
-      }}
-    >
-      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={()=>{}}>
-          <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
-            <OpenAi 
-              
-            />
-          </MantineProvider>
-      </ColorSchemeProvider>  
-    </HomeContext.Provider>
- )
+    <OpenAi  serverRoleData = {serverRoleData}/>
+  )
 }
 
+export async function getStaticProps(context) {
+  const data = await getSheets();
+  return {
+      props: {
+        serverRoleData:data
+      },
+      revalidate: 1,
+  };
+}
 export default Home;

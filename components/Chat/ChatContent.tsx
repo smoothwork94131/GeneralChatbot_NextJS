@@ -12,9 +12,16 @@ import ChatInput from './ChatInput';
 import { Input, SelectedSearch, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
 import { AssistantMessageState, Conversation, Message,  UserMessageState } from '@/types/chat';
-import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
-import { ApiChatInput, ApiChatResponse } from '@/pages/api/openai/chat';
+import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT, USER_TIMES_LIMIT } from '@/utils/app/const';
+import { ApiChatInput } from '@/pages/api/openai/chat';
 import { useEffect } from 'react';
+import { getUserTimes, reducerUserTimes, getActiveProductsWithPrices,chkIsSubscription } from '@/utils/app/supabase-client';
+import { useRouter } from 'next/router';
+import { useUser } from '@supabase/auth-helpers-react';
+import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
+import Subscription from '@/components/Account/Subscription';
+import MyModal from '@/components/Account/Modal';
+import { ProductWithPrice } from '@/types/user';
 
 interface Props {
     selectedUtility: Utility;
@@ -35,14 +42,31 @@ const ChatContent: FC<Props> = ({
         isMobile,
         conversationHistory,
         selectedSearch,
-        clearSelectedSearch
+        clearSelectedSearch,
     }) =>{
+    const router = useRouter();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageIsStreaming, setMessageIsStreaming] = useState(false);
     const [inputContent,  setInputContent] = useState<string>('');
     const [historyConversation, setHistoryConversation] = useState<Conversation>();
+    const [isModal, setIsModal] = useState<boolean>(false);
+    const [modalType, setModalType] = useState<string>('auth');
+    const [products, setProducts] = useState<ProductWithPrice[]>([]);
+    const [isSubscription , setSubscription ] = useState<boolean>(false);
     
+    const user = useUser();
+    
+    useEffect(() => {
+        const fetchData = async() => {
+            const products = await getActiveProductsWithPrices();
+            const data = await chkIsSubscription(user);
+            setSubscription(data);
+            setProducts(products);
+        }
+        fetchData();
+    },[user]);
+
     useEffect(() => {
         setInputContent("");
     }, [selectedConversation])
@@ -54,15 +78,27 @@ const ChatContent: FC<Props> = ({
         }
     }, [selectedConversation, selectedUtility, conversationHistory]);
     
-    useEffect(() => {
-        
+    useEffect(() => {    
         if(messageIsStreaming) {
             setMessageIsStreaming(false);
         }
     }, [selectedUtility])
 
     const handleSend = async(message: string) => {
+        const userTimes = await getUserTimes(user);
 
+        if(!user && userTimes <=0) {
+            setModalType('auth');      
+            setIsModal(true); 
+            return;
+        } else {
+            if(userTimes <=0 && !isSubscription) {
+                setModalType('Subscription');
+                setIsModal(true); 
+                return;
+            }
+        }
+        
         if(selectedConversation) {
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
@@ -167,31 +203,32 @@ const ChatContent: FC<Props> = ({
             const assistant_message: Message = data.message;
             
             const updatedMessages: Message[][] =
-                updatedConversation.messages.map((message, index) => {    
-                    if (index === updatedConversation.messages.length-1) {
-                        message = message.map((role_message) => {
-                            if(role_message.role == "assistant") {
-                                role_message = assistant_message;
-                                role_message = {
-                                    ...role_message,
-                                    datetime: today_datetime,
-                                }
+            updatedConversation.messages.map((message, index) => {    
+                if (index === updatedConversation.messages.length-1) {
+                    message = message.map((role_message) => {
+                        if(role_message.role == "assistant") {
+                            role_message = assistant_message;
+                            role_message = {
+                                ...role_message,
+                                datetime: today_datetime,
                             }
-                            return role_message;
-                        });
-                    }
-                    return message;
-                });
-            
-            
+                        }
+                        return role_message;
+                    });
+                }
+                return message;
+            });
             updatedConversation = { 
                 ...updatedConversation,
                 messages: updatedMessages,
                 datetime: today_datetime
             };
-            
+
+            await reducerUserTimes(user);
+
             saveSelectConverSation(updatedConversation);
             setMessageIsStreaming(false);
+            
         }
     }
     
@@ -232,75 +269,81 @@ const ChatContent: FC<Props> = ({
         }
         handleChangeUtilityInputsValue(index, value);
     }
-
+    const closeModal = () => {
+        setIsModal(false);
+    }
     return (
         <Box
             sx={(theme) => ({
-                minHeight: '96%',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
             })}
         >
-            <Space h="md"/>
-            <Text 
-                sx={(theme) => ({
-                    fontSize: theme.fontSizes.lg,
-                    fontWeight: 600
-                })}
-            >
-                {selectedUtility.name}
-            </Text>
-            <Text 
-                sx={(theme) => ({
-                    fontSize: theme.fontSizes.sm,
-                })}
-            >
-                {selectedUtility.summary}
-            </Text>
-            <Space h="md"/>
-            {
-                selectedUtility.inputs.length > 0?
-                <Flex
-                    gap="sm"
-                    align='center'
-                    direction={selectedUtility.input_align == "horizental"?'row':'column'}
+            <Box>
+                <Space h="md"/>
+                <Text 
                     sx={(theme) => ({
-                        paddingLeft: theme.spacing.chatInputPadding,
+                        fontSize: theme.fontSizes.lg,
+                        fontWeight: 600
                     })}
                 >
-                    {
-                        componentUtilityInputs()
-                    }
-                </Flex>
-                :<></>
-            }
-            <Space h="md"/>
-            <ChatInput
-                onSend={(message) => handleSend(message)}
-                textareaRef={textareaRef}
-                messageIsStreaming={messageIsStreaming}
-                inputContent={inputContent}
-                setInputContent={(content)=> {setInputContent(content)}}
-                selectedConversation = {selectedConversation}
+                    {selectedUtility.name}
+                </Text>
+                <Text 
+                    sx={(theme) => ({
+                        fontSize: theme.fontSizes.sm,
+                    })}
+                >
+                    {selectedUtility.summary}
+                </Text>
+                <Space h="md"/>
+                {
+                    selectedUtility.inputs.length > 0?
+                    <Flex
+                        gap="sm"
+                        align='center'
+                        direction={selectedUtility.input_align == "horizental"?'row':'column'}
+                        sx={(theme) => ({
+                            paddingLeft: theme.spacing.chatInputPadding,
+                        })}
+                    >
+                        {
+                            componentUtilityInputs()
+                        }
+                    </Flex>
+                    :<></>
+                }
+                <Space h="md"/>
+                <ChatInput
+                    onSend={(message) => handleSend(message)}
+                    textareaRef={textareaRef}
+                    messageIsStreaming={messageIsStreaming}
+                    inputContent={inputContent}
+                    setInputContent={(content)=> {setInputContent(content)}}
+                    selectedConversation = {selectedConversation}
+                />
+                <Space h="md"/>
+                <ChatMessage 
+                    historyConversation={historyConversation}
+                    messageIsStreaming={messageIsStreaming}
+                    setInputContent={(content)=> {setInputContent(content)}}
+                    saveSelctedConversation={saveSelectConverSation}
+                    isMobile={isMobile}
+                    handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
+                    selectedSearch={selectedSearch}
+                    clearSelectedSearch={clearSelectedSearch}
+                />
+                    
+            </Box>
+            
+            
+            <MyModal
+                size={modalType == 'auth'?'sm':'xl'}
+                isModal={isModal}
+                child={modalType == 'auth'? <AuthenticationForm />:<Subscription products={products}/>}
+                title=''
+                closeModal={closeModal}
             />
-            <Space h="md"/>
-            <ChatMessage 
-                historyConversation={historyConversation}
-                messageIsStreaming={messageIsStreaming}
-                setInputContent={(content)=> {setInputContent(content)}}
-                saveSelctedConversation={saveSelectConverSation}
-                isMobile={isMobile}
-                handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
-                selectedSearch={selectedSearch}
-                clearSelectedSearch={clearSelectedSearch}
-            />
-            <Text ta="center"
-                sx={(theme) => ({
-                    fontSize: theme.fontSizes.xs
-                })} 
-            >   
-                ChatGPT Mar 23 version. Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
-            </Text>
         </Box>
     )
 }

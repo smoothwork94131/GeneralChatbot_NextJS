@@ -13,7 +13,8 @@ import {
     createStyles,
     Box,
     rem,
-    Loader 
+    Loader, 
+    Badge
 } from '@mantine/core';
 import { 
     useEffect, 
@@ -27,17 +28,17 @@ import OpenAiHeader from '@/components/Header';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation } from '@/types/chat';
-import {  SelectedSearch, UtilitiesGroup, Utility } from '@/types/role';
+import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } from '@/types/role';
 import { saveSelctedConversation } from '@/utils/app/conversation';
 import { IconSearch } from '@tabler/icons-react';
 import { RoleGroup } from '../../types/role';
+import { getSubscriptions, getUserInfo, getUserTimes } from '@/utils/app/supabase-client';
 
 interface Props {
     serverRoleData: RoleGroup[]
 }
 
 const spotlightProps = {
-    /* Props for your Spotlight component go here */
     styles: {
         window: {
         maxWidth: '1000px',
@@ -47,17 +48,19 @@ const spotlightProps = {
 };
 
 const OpenAi = ({
-    
+    serverRoleData
 }: Props) => {
+
     const [openedSidebar, setOpenedSiebar] = useState(false);
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
     const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
+    const [userTimes, setUserTimes] = useState<number>(0);
 
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
     });
-
+    
     const useStyles = createStyles((theme) => ({
         action: {
           position: 'relative',
@@ -74,7 +77,7 @@ const OpenAi = ({
             color: theme.colors.white
           },
         },
-      }));
+    }));
     
     const {
         state: {
@@ -82,46 +85,34 @@ const OpenAi = ({
             roleGroup,
             conversationHistory,
             selectedUtility,
-            selectedSearch
+            selectedSearch,
+            selectedConversation
         },
         dispatch,
     } = contextValue;
-
-    
     useEffect(()=>{
         updateServerRoleData();
-    },[])
-
+    },[]);
     const updateServerRoleData = async() => {
-        setUpdateDataLoader(true);
-        const response = await fetch('/api/googlesheets', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-        });
-        if (!response.ok) {
-            console.error('Error from API call: ', response.status, response.statusText);
-            return '';
-        }
         
-        const data = await response.json();
-        if(data) {
+        console.log("serverRoleData", serverRoleData);
+
+        if(serverRoleData) {
             dispatch({
                 "field": "roleGroup",
-                "value": data
+                "value": serverRoleData
             });
             dispatch({
                 "field": "selectedRole",
-                "value": data[0]
+                "value": serverRoleData[0]
             })
             dispatch({
                 "field": "selectedUtility",
-                "value": data[0].utilities_group[0].utilities[0]
+                "value": serverRoleData[0].utilities_group[0].utilities[0]
             })
             dispatch({
                 "field": "selectedUtilityGroup",
-                "value": data[0].utilities_group
+                "value": serverRoleData[0].utilities_group
             })
         }
         setUpdateDataLoader(false);
@@ -184,6 +175,10 @@ const OpenAi = ({
                 field: 'selectedUtility',
                 value: utility
             });
+            dispatch({
+                field: 'selectedSearch',
+                value: SelectedSearchState
+            });
         }
     };
 
@@ -234,20 +229,21 @@ const OpenAi = ({
             timestamp: number;
             title: string;
             utilityKey: string;
-            roleName: string;
             historyIndex: number;
             searchKey: string;
             prevText: string;
             nextText: string;
             description: string;
+            inputs: Input[]
         }[] = [];
         let searchHistoryActions:SpotlightAction[] = [];
         
         conversationHistory.map((conversation, conversationIndex) => {
             conversation.messages.map((messages, messagesIndex) => {
+                let flag = false;
                 messages.map((message, messageIndex) => {
                     const content = message.content;
-                    if(!content.toLowerCase().includes(searchKey.toLowerCase())) {
+                    if(!content.toLowerCase().includes(searchKey.toLowerCase()) || flag) {
                         return;
                     }
                     const searchIndex = content.toLowerCase().indexOf(searchKey.toLowerCase());
@@ -257,28 +253,37 @@ const OpenAi = ({
                         prevText = "..."+content.substr(searchIndex-25, 25);        
                     } else {
                         prevText = content.substr(0, searchIndex);
-                    }   
+                    }
+                     
                     if(content.length - (searchIndex + searchKey.length) > 25) {
                         nextText = content.substr((searchIndex + searchKey.length), 25)+"...";
                     } else {
                         nextText = content.substr((searchIndex + searchKey.length), content.length - (searchIndex + searchKey.length));
+                        if(messageIndex == 0) {
+                            if(messages[1].content.length > 25) {
+                                nextText = "..."+messages[1].content.substr(0, 25)+"...";
+                            } else {
+                                nextText = "..."+   messages[1].content.substr(0, messages[1].content.length-1);
+                            }   
+                        }
                     }
+
                     let timestamp: Date = new Date() ;
                     if(messages[0].datetime) {
                         timestamp = new Date(messages[0].datetime)
                     }
-                    const splitKey = conversation.key.split("_");
                     updatedHistoryActions.push({
-                        title: `${splitKey[1]} > ${splitKey[2]}`,
-                        roleName: splitKey[0],
+                        title: conversation.key.replaceAll("_", " > "),
                         historyIndex: messagesIndex,
                         utilityKey: conversation.key,
                         timestamp: Math.floor(timestamp.getTime()/1000),
                         searchKey: searchKey,
                         nextText: nextText,
+                        inputs: messages[0].inputs?messages[0].inputs:[],
                         prevText: prevText,
                         description: `${nextText}${searchKey}${prevText}`
                     });
+                    flag = true;
                 })
             })
         });   
@@ -287,11 +292,11 @@ const OpenAi = ({
             searchHistoryActions.push({
                 title: item.title,
                 utilityKey:item.utilityKey,
-                roleName: item.roleName,
                 searchKey: item.searchKey,
                 description: item.description,
                 nextText: item.nextText,
                 prevText: item.prevText,
+                inputs: item.inputs,
                 onTrigger: () => {
                     onTriggarSearch(item.utilityKey, item.historyIndex)
                 },
@@ -373,7 +378,17 @@ const OpenAi = ({
                     }    
                 </Box>
                 <Text color={`${hovered?'white':'dimmed'}`}>
-                    [{action.roleName}]
+                    {
+                        action.inputs.map((input, index) => {
+                            if(input.type == "form") {
+                                return (
+                                    <Badge key={index}>
+                                        {input.value}
+                                    </Badge>
+                                )
+                            }
+                        })
+                    }
                 </Text>
             </Group>
             </UnstyledButton>
@@ -408,6 +423,9 @@ const OpenAi = ({
                                 handleShowSidebar={handleShowSidebar}
                                 openedSidebar={openedSidebar}
                                 isMobile={isMobile}
+                                updateServerRoleData={updateServerRoleData}
+                                selectedConversation={selectedConversation}
+                                
                             />:<></>
                         }
                         navbar={
@@ -493,5 +511,7 @@ const DrawerNav: FC<{
       </Drawer>
     );
 };
+
+
 
 export default OpenAi;

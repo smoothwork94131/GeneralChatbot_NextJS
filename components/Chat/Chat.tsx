@@ -1,5 +1,5 @@
 import { useContext, FC, useEffect } from 'react';
-import { Box } from '@mantine/core';
+import { Box, Flex, Text } from '@mantine/core';
 import  Role  from "@/components/Role";
 import ChatContent from './ChatContent';
 import OpenaiContext from '@/components/openai/openai.context';
@@ -9,6 +9,7 @@ import {
     saveSelctedConversation,
 } from '@/utils/app/conversation';
 import { SelectedSearch, SelectedSearchState, Utility, UtilityState } from '@/types/role';
+import AccountButtons from '@/components/Account/AccountButtons';
 
 interface Props {
     isMobile: boolean;  
@@ -16,7 +17,9 @@ interface Props {
     selectedSearch: SelectedSearch;
 }
 
-const Chat:FC<Props> = ({isMobile,selectedSearch}) => {
+const Chat:FC<Props> = ({isMobile,
+    selectedSearch,
+}) => {
     const {
         state: { 
             roleGroup, 
@@ -39,7 +42,6 @@ const Chat:FC<Props> = ({isMobile,selectedSearch}) => {
             field: "selectedUtility",
             value: t_utility
         });
-
     };
     const clearSelectedSearch = () => {
         openaiDispatch({
@@ -87,14 +89,22 @@ const Chat:FC<Props> = ({isMobile,selectedSearch}) => {
         >
             {
                 !isMobile?
-                <Role 
-                    handleSelectRole = {handleSelectRole}
-                    roleGroup = {roleGroup}
-                    selectedRole = {selectedRole}
-                    isMobile = {isMobile}
-                />:<></>
+                <Flex
+                    align='center'
+                    justify='space-between'
+                >
+                    <Role 
+                        handleSelectRole = {handleSelectRole}
+                        roleGroup = {roleGroup}
+                        selectedRole = {selectedRole}
+                        isMobile = {isMobile}
+                    />
+                    <AccountButtons 
+                        selectedConversation={selectedConversation}
+                        isMobile={isMobile}
+                    />
+                </Flex>:<></>
             }
-            
             <ChatContent
                 selectedUtility={selectedUtility}
                 handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
@@ -105,6 +115,14 @@ const Chat:FC<Props> = ({isMobile,selectedSearch}) => {
                 selectedSearch={selectedSearch}
                 clearSelectedSearch={clearSelectedSearch}
             />
+            {/* <Text ta="center"
+                sx={(theme) => ({
+                    fontSize: theme.fontSizes.xs,
+                    flexGrow: 1
+                })} 
+            >   
+                ChatGPT Mar 23 version. Free Research Preview. ChatGPT may produce inaccurate information about people, places, or facts.
+            </Text> */}
         </Box>
     )
 }

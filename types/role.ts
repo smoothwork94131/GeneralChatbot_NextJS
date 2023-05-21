@@ -53,7 +53,7 @@ export interface SelectedSearch {
 }
 export const SelectedSearchState = {
     utility_key: '',
-    history_index: 0
+    history_index: -1
 }
 
 export const PrompState = {key:'', name:'', messages:[], datetime: new Date().toISOString().split('T')[0]}

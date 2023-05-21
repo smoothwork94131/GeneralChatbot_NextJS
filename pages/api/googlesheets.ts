@@ -20,7 +20,6 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const input_align = getFieldValue(row, headers, `Input_Align`);
     
     let role_index = chkExistObject(roleData, roleName);
-  
     
     if(role_index == roleData.length) {
       const role = {
@@ -151,7 +150,7 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
 }
 
 
-export default async function handler(req,res){
+export  async function getSheets(){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-  res.status(200).json(roleData);
+  return roleData;
 }

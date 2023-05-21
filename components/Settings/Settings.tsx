@@ -1,18 +1,27 @@
 import { FC, useContext } from 'react';
 import { Flex, Menu, NavLink  } from '@mantine/core';
-import { IconLogout, IconMoon, IconSearch, IconStar, IconSun, IconTrash, IconUrgent, IconWorld } from '@tabler/icons-react';
+import { IconLogin, IconLogout, IconMoon, IconSearch, IconShoppingBag, IconStar, IconSun, IconTrash, IconUrgent, IconWorld } from '@tabler/icons-react';
 import { spotlight } from '@mantine/spotlight';
 import HomeContext from 'state/index.context';
+import { useUser } from '@/utils/app/useUser';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { supabase } from '@/utils/app/supabase-client';
 
 interface Props {
     isMobile: boolean;
     updateServerRoleData:() =>void;
 }
 const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
+    
+    const { user } = useUser();
+    const router = useRouter();
+
     const {
         state: { colorScheme, lightMode },
         dispatch: homeDispatch,
     } = useContext(HomeContext);
+
 
     const handleColorScheme = () => {
         homeDispatch({
@@ -25,6 +34,20 @@ const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
         });
         localStorage.setItem("colorScheme", colorScheme == 'dark'? 'light':'dark');
     }
+    const goLogin = async () => {
+        if(user) {
+            await supabase.auth.signOut();
+        } else {
+            window.location.href='/signin';
+        }
+    }
+    const goPricingPage = async () => {
+        if(user) {
+            window.location.href='/pricing';
+        } else {
+            window.location.href='/signin';
+        }
+    }
     return (
         isMobile?
         <Menu.Dropdown>
@@ -36,7 +59,7 @@ const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
             <Menu.Item
                 icon={<IconTrash size={14} />}
             >
-                 Clear Conversation
+                Clear Conversation
             </Menu.Item>
             <Menu.Item 
                 icon={
@@ -58,12 +81,23 @@ const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
             >
                 Updates & FAQ
             </Menu.Item>
+            
             <Menu.Item
-                icon={<IconLogout size={14}/>}
-                onClick={()=>{}}
+                icon={<IconShoppingBag size={14} />}
+                onClick={() => {goPricingPage()}}
             >
-                Log out
+                Pricing
+            </Menu.Item>    
+            <Menu.Item
+                icon={user?<IconLogout size={14}/>:<IconLogin size={14} />}
+                onClick={()=>goLogin()}
+            >
+                {
+                    user?'Sign out':'Sign in'
+                }
             </Menu.Item>
+           
+            
         </Menu.Dropdown>:
         <Flex
             mih={50}
@@ -107,9 +141,18 @@ const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
                 onClick = {() => {updateServerRoleData()}}
             />
             <NavLink
-                label="Log out"
-                icon={<IconLogout size="1rem" stroke={1.5} />}
-                variant="subtle"            
+                label="Pricing"
+                icon={<IconShoppingBag size="1rem" stroke={1.5} />}
+                variant="subtle" 
+                onClick={()=>{window.location.href='/pricing'}}          
+            />
+            <NavLink
+                label={
+                    user?'Sign out':'Sign in'
+                }
+                icon={user?<IconLogout size="1rem" stroke={1.5} />:<IconLogin size="1rem" stroke={1.5} />}
+                variant="subtle"      
+                onClick={()=>goLogin()}      
             />
         </Flex> 
     )

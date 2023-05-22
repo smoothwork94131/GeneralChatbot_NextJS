@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { sheets as sheets_, auth } from '@googleapis/sheets';
 
 import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/app/const'
 import { RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
@@ -123,14 +123,14 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
   roleData = [];
   try {
     const target = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
-    const jwt = new google.auth.JWT(
+    const jwt = new auth.JWT(
       GOOGLE_SHEETS_CLIENT_EMAIL,
       undefined,
       ( GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
       target
     );
     
-    const sheets = google.sheets({ version: 'v4', auth: jwt });
+    const sheets = sheets_({ version: 'v4', auth: jwt });
     const response = await sheets.spreadsheets.values.get({ 
       spreadsheetId: spreadsheetId, 
       range: range 

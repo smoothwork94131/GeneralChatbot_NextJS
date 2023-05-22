@@ -4,7 +4,7 @@ import {
 } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/types/types_db';
 import { ProductWithPrice } from '@/types/user';
-import * as FingerprintJS from '@/utils/app/finterprinter';
+import * as FingerprintJS from '@fingerprintjs/fingerprintjs'
 import { createClient } from '@supabase/supabase-js';
 import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from './const';
 import moment from 'moment';

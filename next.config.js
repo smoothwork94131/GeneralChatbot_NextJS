@@ -25,9 +25,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, 
   },
-  experimental: {
-    outputFileTracingIgnores: ['**canvas**'],
-  },
+  // experimental: {
+  //   outputFileTracingIgnores: ['**canvas**'],
+  // },
 };
 
 module.exports = nextConfig;

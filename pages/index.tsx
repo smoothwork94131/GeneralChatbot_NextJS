@@ -1,11 +1,16 @@
-import OpenAi from '@/components/openai/openai';
+
 import { Props } from '../utils/app/useUser';
 import { getSheets } from './api/googlesheets';
+
+
+import dynamic from 'next/dynamic'
+const OpenAi = dynamic(() => import('@/components/openai/openai'), { ssr: false })
+
 const Home = ({
   serverRoleData
 }) => {
   return (
-    <OpenAi  serverRoleData = {serverRoleData}/>
+    <OpenAi serverRoleData = {serverRoleData}/>
   )
 }
 

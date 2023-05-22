@@ -3,7 +3,7 @@ import {
   User
 } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/types/types_db';
-import { ProductWithPrice, UserDetails } from '@/types/user';
+import { ProductWithPrice } from '@/types/user';
 import * as FingerprintJS from '@/utils/app/finterprinter';
 import { createClient } from '@supabase/supabase-js';
 import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from './const';
@@ -65,7 +65,7 @@ export const getUserTimes = async (user: User|null) => {
     .select('*')
     .eq('visitorId', visitorId)
     .order("id");
-    
+
     if(data) {
       if(data.length == 0) {
         times = NO_ACCOUNT_TIMES ;

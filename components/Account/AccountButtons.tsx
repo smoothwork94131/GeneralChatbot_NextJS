@@ -3,6 +3,7 @@ import {
     Button, 
     Text
 } from "@mantine/core";
+
 import { useUser } from '@supabase/auth-helpers-react';
 import { getUserTimes, chkIsSubscription, getActiveProductsWithPrices } from "@/utils/app/supabase-client";
 import { useEffect, useState, FC } from "react";
@@ -18,11 +19,12 @@ interface Props {
 }
 
 const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
+       
     const [isSubscription , setSubscription ] = useState<boolean>(false);
     const [times, setTimes] = useState<number>(0);
     const [isModal, setIsModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<string>('auth');
-    
+
     const [products, setProducts] = useState<Product[]>([]);
     const user = useUser();
 

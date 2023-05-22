@@ -18,4 +18,5 @@ export async function getStaticProps(context) {
       revalidate: 1,
   };
 }
+
 export default Home;

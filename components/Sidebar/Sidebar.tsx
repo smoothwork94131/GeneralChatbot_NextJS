@@ -94,7 +94,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
             }
             return item;
         })
-
+        
         const updated_role_Group = roleGroup.map((role_item) => {
             const filter_utility_group = role_item.utilities_group.map((group_item) => {
                 const group = updatedUtilityGroup.filter(updated_group_item => updated_group_item.name == group_item.name)

@@ -62,7 +62,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
         summary: utilitySummary?utilitySummary:'',
         user_prompt: userPrompt?userPrompt:'',
         system_prompt: systemPrompt?systemPrompt:DEFAULT_SYSTEM_PROMPT,
-        include_prompt_history: includePromptHistory ==''? true:false,
+        include_prompt_history: includePromptHistory ==''? false:true,
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',

@@ -1,9 +1,12 @@
+// import dotenv from 'dotenv';
+// dotenv.config({ path: '.env.local'})
 import {  NextResponse } from 'next/server';
 import { OpenAIAPI } from '@/types/openai';
 // import { supabase } from '@/utils/app/supabase-client';
 import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
 import { supabaseAdmin } from '@/utils/app/supabase-client';
 import moment from 'moment';
+
 
 import {rateLimiterMiddleware} from '../middleware';
 
@@ -12,9 +15,6 @@ if (!process.env.OPENAI_API_KEY)
     'OPENAI_API_KEY has not been provided in this deployment environment. ' +
     'Will use the optional keys incoming from the client, which is not recommended.',
 );
-
-console.warn('process.env.OPENAI_API_KEY', process.env.OPENAI_API_KEY);
-console.warn('process.env.SHEET_RANGE', process.env.SHEET_RANGE);
 
 
 // helper functions
@@ -277,4 +277,7 @@ export default async function handler(req, res) {
   
    
 }
-// export const runtime = 'edge';
+// noinspection JSUnusedGlobalSymbols
+export const config = {
+  runtime: 'edge',
+};

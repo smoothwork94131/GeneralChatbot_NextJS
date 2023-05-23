@@ -15,6 +15,9 @@ export const supabaseAdmin = createClient<Database>(
   NEXT_PUBLIC_SUPABASE_KEY || ''
 );
 
+console.warn('NEXT_PUBLIC_SUPABASE_URL', NEXT_PUBLIC_SUPABASE_URL)
+console.warn('process.env.NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL)
+
 export const getActiveProductsWithPrices = async (): Promise<
   ProductWithPrice[]
 > => {

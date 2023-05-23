@@ -18,7 +18,7 @@ export interface Utility {
     inputs: Input[];
     summary: string;
     active: boolean;
-    style: string | number;
+    style?: string | number;
     type?: string;
     input_align?: string,
     system_prompt?: string;

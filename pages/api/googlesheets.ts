@@ -1,10 +1,11 @@
 import { sheets as sheets_, auth } from '@googleapis/sheets';
 
-import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/app/const'
-import { RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
+import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/server/const'
+import { Input, RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
+import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 
 
-let roleData:any = [];
+let roleData:RoleGroup[] = [];
 function mapRowToCustomData(row: string[], headers: string[]): void {
   
   row.map((row_item, row_index) => {  
@@ -15,13 +16,13 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const utilitySummary = getFieldValue(row, headers, 'Utility_Summary');
     const userPrompt = getFieldValue(row, headers, 'Utility_User_Prompt');
     const systemPrompt = getFieldValue(row, headers, 'Utility_System_Prompt');
-    const inputPromptHistory = getFieldValue(row, headers, 'Input_Prompt_History');
+    const includePromptHistory = getFieldValue(row, headers, 'Include_Prompt_History');
     const input_align = getFieldValue(row, headers, `Input_Align`);
     
     let role_index = chkExistObject(roleData, roleName);
     
     if(role_index == roleData.length) {
-      const role = {
+      const role:RoleGroup = {
         name: roleName,
         utilities_group:[]
       };
@@ -60,8 +61,8 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
         active: active,
         summary: utilitySummary?utilitySummary:'',
         user_prompt: userPrompt?userPrompt:'',
-        system_prompt: systemPrompt?systemPrompt:'',
-        input_prompt_history: inputPromptHistory ==''? true:false,
+        system_prompt: systemPrompt?systemPrompt:DEFAULT_SYSTEM_PROMPT,
+        include_prompt_history: includePromptHistory ==''? true:false,
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',
@@ -93,7 +94,7 @@ function getFieldValue(row, headers, fieldName){
 }
 
 function getUtilityInputs(row, headers) {
-  let inputs:any = [];
+  let inputs:Input[] = [];
   let input_number = getFieldValue(row, headers, "Number_of_inputs");
   if(!input_number) {
     return [];
@@ -110,7 +111,7 @@ function getUtilityInputs(row, headers) {
       type: type?type:'',
       component: component?component:'',
       value: value?value:'',
-      options: option?option:'',
+      options: option?option:[''],
       style: style?style:'',
       
     });
@@ -147,11 +148,11 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
     throw error;
   }
 }
+
 export default async function handler(req, res){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
   return res.json(roleData);
 }
-
 
 export  async function getSheets(){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)

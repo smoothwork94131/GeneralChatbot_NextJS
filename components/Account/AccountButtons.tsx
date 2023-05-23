@@ -20,7 +20,7 @@ interface Props {
 
 const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
        
-    const [isSubscription , setSubscription ] = useState<boolean>(false);
+    const [isSubscription , setSubscription ] = useState<boolean>(true);
     const [times, setTimes] = useState<number>();
     const [isModal, setIsModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<string>('auth');
@@ -34,20 +34,17 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
             setTimes(userTimes);
         }
         fetchData();
-    }, [selectedConversation]);
+    }, [selectedConversation, isSubscription, user]);
     
     useEffect(() => {
         const fetchData = async() => {
             const is_subscription = await chkIsSubscription(user); 
             const products = await getActiveProductsWithPrices();
-            const userTimes = await getUserTimes(user);
-            setTimes(userTimes);
             setProducts(products);
             setSubscription(is_subscription);
-            
         }
         fetchData();
-    },[user])
+    },[user]);
 
     const closeModal = () => {
         setIsModal(false);

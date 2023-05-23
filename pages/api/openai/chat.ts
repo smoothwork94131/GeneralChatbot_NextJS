@@ -60,7 +60,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
     .from('free')
     .select('*')
     .eq('visitorId', fingerId)
-    .order("id");
+    .order("id", { ascending: false });
 
     if(data) {
       if(data.length == 0) {
@@ -167,7 +167,7 @@ export const getSubscriptions = async (user_id) => {
     .select('*')
     .eq("user_id", user_id)
     .gte('current_period_end', moment().format("YYYY-MM-D"))
-    .order("current_priod_end");
+    .order("current_priod_end", { ascending: false });
 
   if(data) {
     if(data.length > 0) {
@@ -188,7 +188,6 @@ export async function postToOpenAI<TBody extends object>(api: OpenAIAPI.Configur
   return response;
 }
 
-
 // I/O types for this endpoint
 
 export interface ApiChatInput {
@@ -202,7 +201,6 @@ export interface ApiChatInput {
 export interface ApiChatResponse {
   message: OpenAIAPI.Chat.Message;
 }
-
 
 export default async function handler(req) {
 

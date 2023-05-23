@@ -1,7 +1,7 @@
-import rateLimit from 'express-rate-limit';
+import {RateLimiter} from "limiter";
+const MAX_REQUESTS_PER_MINUTE = 100;
 
-export const rateLimiterMiddleware = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests, please try again later.',
+export const limiter = new RateLimiter({
+  tokensPerInterval: MAX_REQUESTS_PER_MINUTE,
+  interval: "minute",
 });

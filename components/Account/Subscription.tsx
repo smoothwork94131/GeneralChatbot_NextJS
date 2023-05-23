@@ -1,42 +1,43 @@
 import { Card, Image, Text, Badge, Button, Group, Flex, Box, Space, Textarea, Loader } from '@mantine/core';
 import { FC, useState, useEffect } from 'react';
-import { Price, ProductWithPrice } from '@/types/user';
+import { Price, Product, ProductWithPrice } from '@/types/user';
 import { useUser } from '@/utils/app/useUser';
 import { SegmentedControl } from '@mantine/core';
 import { getStripe } from '@/utils/app/stripe-client';
 import { postData } from '@/utils/app/helpers';
 import { useRouter } from 'next/router';
+import { getActiveProductsWithPrices } from '@/utils/app/supabase-client';
 
 type BillingInterval = 'year' | 'month';
-interface Props {
-    products: ProductWithPrice[];
-}
 
-const Subscription: FC<Props> = ({ products }) => {
+
+const Subscription: FC<Props> = () => {
     const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
     const { user, isLoading, subscription } = useUser();
+    const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [priceIdLoading, setPriceIdLoading] = useState<string>();
     const router = useRouter();
-    
     
     const setSeg = (value) => {
         setBillingInterval(value);
     }
-
-    // useEffect(()=> {
-    //     if(!user) {
-    //         router.replace("/signin");
-    //     }
-    // },[])
-
-
+    useEffect(() => {
+        const fetchData = async() => {
+            const res = await getActiveProductsWithPrices();
+            setProducts(res);
+        }
+        fetchData();
+    }, []);
     const handleCheckout = async (price: Price) => {
         setPriceIdLoading(price.id);
         const return_url = window.location.href;
         try {
             const { sessionId } = await postData({
                 url: '/api/create-checkout-session',
-                data: { price, return_url }
+                data: { 
+                    price: price,
+                    return_url: return_url
+                 }
             });
             const stripe = await getStripe();
             stripe?.redirectToCheckout({ sessionId });

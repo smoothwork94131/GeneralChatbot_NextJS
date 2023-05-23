@@ -11,19 +11,10 @@ interface Props {
 const Pricing:FC<Props> = ({products: products}) => {
   return (
     <Layout childrenSize='70%'>
-      <Subscription products={products}/>
+      <Subscription />
     </Layout>
   )
 }
 
-export async function getStaticProps(): Promise<GetStaticPropsResult<Props>> {
-    const products = await getActiveProductsWithPrices();
-  
-    return {
-      props: {
-        products
-      },
-      revalidate: 60
-    };
-  }
+
 export default Pricing;

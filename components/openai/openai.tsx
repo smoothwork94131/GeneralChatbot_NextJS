@@ -258,16 +258,15 @@ const OpenAi = ({
                     } else {
                         prevText = content.substr(0, searchIndex);
                     }
-                     
                     if(content.length - (searchIndex + searchKey.length) > 25) {
                         nextText = content.substr((searchIndex + searchKey.length), 25)+"...";
                     } else {
                         nextText = content.substr((searchIndex + searchKey.length), content.length - (searchIndex + searchKey.length));
                         if(messageIndex == 0) {
                             if(messages[1].content.length > 25) {
-                                nextText = "..."+messages[1].content.substr(0, 25)+"...";
+                                nextText = nextText+"..."+messages[1].content.substr(0, 25)+"...";
                             } else {
-                                nextText = "..."+   messages[1].content.substr(0, messages[1].content.length-1);
+                                nextText = nextText+"..."+messages[1].content.substr(0, messages[1].content.length-1);
                             }   
                         }
                     }

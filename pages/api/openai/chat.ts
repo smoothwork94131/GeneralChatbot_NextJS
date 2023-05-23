@@ -113,12 +113,19 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
   return times;
 }
 
-export const decreaseUserTimes = async (userId, fingerId) => {
-  const userTimes = await getUserTimes(userId, fingerId);
+export const decreaseUserTimes = async (userId, fingerId, current_times=-1) => {
+  let userTimes
+  
+  if(current_times === -1){
+    userTimes = await getUserTimes(userId, fingerId);
+  } else {
+    userTimes = current_times;
+  }
 
   if(userTimes == 0) {
     return;
   }
+
   if(!userId) {
     const { error } = await supabaseAdmin
     .from('free')
@@ -249,9 +256,12 @@ export default async function handler(req, res) {
 
     const { api, ...rest } = extractOpenaiChatInputs(input);
     const payLoad = chatCompletionPayload(rest, false);
-    const response = await postToOpenAI(api, "/v1/chat/completions", payLoad);
+    const response_ = postToOpenAI(api, "/v1/chat/completions", payLoad);
+    const decreaseUser = decreaseUserTimes(userId, fingerId, userTimes);
+    
+    const [response,_] = await Promise.all([response_, decreaseUser]);
     const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
-    await decreaseUserTimes(userId, fingerId);
+    
     return new NextResponse(JSON.stringify({
       message: completion.choices[0].message,
     }));

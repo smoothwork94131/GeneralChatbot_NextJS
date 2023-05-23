@@ -251,7 +251,7 @@ export default async function handler(req, res) {
     const payLoad = chatCompletionPayload(rest, false);
     const response = await postToOpenAI(api, "/v1/chat/completions", payLoad);
     const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
-    decreaseUserTimes(userId, fingerId);
+    await decreaseUserTimes(userId, fingerId);
     return new NextResponse(JSON.stringify({
       message: completion.choices[0].message,
     }));

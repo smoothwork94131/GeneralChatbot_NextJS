@@ -212,6 +212,10 @@ const ChatContent: FC<Props> = ({
                     setIsModal(true); 
                     setMessageIsStreaming(false);
                     return;
+                } else if(response.status ==  429) {
+                    alert("Too many requests");
+                    setMessageIsStreaming(false);
+                    return;
                 }
                 console.error('Error from API call: ', response.status, response.statusText);
                 return '';
@@ -241,7 +245,6 @@ const ChatContent: FC<Props> = ({
                 messages: updatedMessages,
                 datetime: today_datetime
             };
-
 
             saveSelectConverSation(updatedConversation);
             setMessageIsStreaming(false);

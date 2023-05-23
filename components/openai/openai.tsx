@@ -238,6 +238,7 @@ const OpenAi = ({
             prevText: string;
             nextText: string;
             description: string;
+            roleName: string;
             inputs: Input[]
         }[] = [];
         let searchHistoryActions:SpotlightAction[] = [];
@@ -280,6 +281,7 @@ const OpenAi = ({
                     const splitKey = conversation.key.split("_");
                     updatedHistoryActions.push({
                         title: `${splitKey[1]} > ${splitKey[2]}`,
+                        roleName: splitKey[0],
                         historyIndex: messagesIndex,
                         utilityKey: conversation.key,
                         timestamp: Math.floor(timestamp.getTime()/1000),
@@ -302,6 +304,7 @@ const OpenAi = ({
                 description: item.description,
                 nextText: item.nextText,
                 prevText: item.prevText,
+                roleName: item.roleName,
                 inputs: item.inputs,
                 onTrigger: () => {
                     onTriggarSearch(item.utilityKey, item.historyIndex)
@@ -385,17 +388,9 @@ const OpenAi = ({
                 </Box>
                 <Text color={`${hovered?'white':'dimmed'}`}>
                     {
-                        action.inputs.map((input, index) => {
-                            if(input.type == "form") {
-                                return (
-                                    <Badge key={index}  sx={(theme) => ({
-                                        marginLeft: theme.spacing.xs
-                                    })}>
-                                        {input.value}
-                                    </Badge>
-                                )
-                            }
-                        })
+                        <Badge>
+                            {action.roleName}
+                        </Badge>
                     }
                 </Text>
                 

@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextResponse } from 'next/server';
 import { OpenAIAPI } from '@/types/openai';
 import { supabase } from '@/utils/app/supabase-client';
-import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
+import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
 import { supabaseAdmin } from '@/utils/app/supabase-client';
 import moment from 'moment';
-import * as FingerprintJS from '@fingerprintjs/fingerprintjs';
+
+import {rateLimiterMiddleware} from '../middleware';
+
 if (!process.env.OPENAI_API_KEY)
   console.warn(
     'OPENAI_API_KEY has not been provided in this deployment environment. ' +
@@ -151,6 +153,7 @@ async function rethrowOpenAIError(response: Response) {
   }
 }
 
+
 export async function getOpenAIJson<TJson extends object>(api: OpenAIAPI.Configuration, apiPath: string): Promise<TJson> {
   const response = await fetch(`https://${api.apiHost}${apiPath}`, {
     method: 'GET',
@@ -202,39 +205,50 @@ export interface ApiChatResponse {
   message: OpenAIAPI.Chat.Message;
 }
 
-export default async function handler(req) {
 
-  const userApi = await req.json();
-
-  const input = userApi.input;
-  const fingerId = userApi.fingerId;
-  const userId = userApi.userId;
-
-  const userTimes = await getUserTimes(userId, fingerId);
-  const isSubscription = await getSubscriptions(userId);
-
-  if(!userId && userTimes <=0) {
-      return new NextResponse(`user times `, { status: 401 });
-  } else {
-      if(userTimes <=0 && !isSubscription) {
-        return new NextResponse(`user subscription `, { status: 402 });  
-      }
-  }
+export default async function handler(req, res) {
 
   try {
-    
-    const { api, ...rest } = await extractOpenaiChatInputs(input);
-    const payLoad = chatCompletionPayload(rest, false);
-    const response = await postToOpenAI(api, '/v1/chat/completions', payLoad);
-    const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
-    await decreaseUserTimes(userId, fingerId);
-    return new NextResponse(JSON.stringify({
-      message: completion.choices[0].message,
-    } as ApiChatResponse));
+    await rateLimiterMiddleware(req, res, async() => {
+      
+    });
+  }catch(e) {
 
-  } catch (error: any) {
-    return new NextResponse(`[Issue] ${error}`, { status: 400 });
   }
+  try{
+    
+      const userApi = await req.json();
+      const input = userApi.input;
+      const fingerId = userApi.fingerId;
+      const userId = userApi.userId;
+  
+      const userTimes = await getUserTimes(userId, fingerId);
+      const isSubscription = await getSubscriptions(userId);
+  
+      if(!userId && userTimes <=0) {
+          return new NextResponse(`user times `, { status: 401 });
+      } else {
+          if(userTimes <=0 && !isSubscription) {
+            return new NextResponse(`user subscription `, { status: 402 });  
+          }
+      }
+
+      try {
+        const { api, ...rest } = await extractOpenaiChatInputs(input);
+        const payLoad = chatCompletionPayload(rest, false);
+        const response = await postToOpenAI(api, '/v1/chat/completions', payLoad);
+        const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
+        await decreaseUserTimes(userId, fingerId);
+        return new NextResponse(JSON.stringify({
+          message: completion.choices[0].message,
+        } as ApiChatResponse));
+  
+      } catch (error: any) {
+        return new NextResponse(`[Issue] ${error}`, { status: 400 });
+      }
+  }catch(e) {
+
+  } 
 }
 
 // noinspection JSUnusedGlobalSymbols

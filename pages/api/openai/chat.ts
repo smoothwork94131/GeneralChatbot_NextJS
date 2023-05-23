@@ -13,6 +13,9 @@ if (!process.env.OPENAI_API_KEY)
     'Will use the optional keys incoming from the client, which is not recommended.',
 );
 
+console.warn('process.env.OPENAI_API_KEY', process.env.OPENAI_API_KEY);
+console.warn('process.env.SHEET_RANGE', process.env.SHEET_RANGE);
+
 
 // helper functions
 

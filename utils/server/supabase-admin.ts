@@ -1,18 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
-import { stripe } from './stripe';
-import { toDateTime } from './helpers';
+import { stripe } from '../app/stripe';
+import { toDateTime } from '../app/helpers';
 
 import { Customer, UserDetails, Price, Product } from '@/types/user';
 import type { Database } from '@/types/types_db';
 
-import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY } from './const';
+import { NEXT_PUBLIC_SUPABASE_URL } from '../app/const';
+import { SUPABASE_SERVICE_ROLE_KEY } from './const';
 // Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
 // as it has admin priviliges and overwrites RLS policies!
 const supabaseAdmin = createClient<Database>(
-  NEXT_PUBLIC_SUPABASE_URL || '',
-  NEXT_PUBLIC_SUPABASE_KEY || ''
+ NEXT_PUBLIC_SUPABASE_URL || '',
+  SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
 const upsertProductRecord = async (product: Stripe.Product) => {

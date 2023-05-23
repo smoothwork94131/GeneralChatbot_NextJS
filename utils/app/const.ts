@@ -28,7 +28,7 @@ export const OPENAI_API_TYPE =
   process.env.OPENAI_API_TYPE || 'openai';
 
 export const OPENAI_API_KEY =
-  process.env.OPENAI_API_KEY || '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';
+  process.env.OPENAI_API_KEY || '';
 
 export const OPENAI_API_VERSION =
   process.env.OPENAI_API_VERSION || '2023-03-15-preview';

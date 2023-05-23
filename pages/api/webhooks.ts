@@ -1,14 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { Readable } from 'node:stream';
-import { STRIPE_WEBHOOK_SECRET } from '@/utils/app/const';
 import { buffer } from 'micro';
 import { stripe } from '@/utils/app/stripe';
 import {
   upsertProductRecord,
   upsertPriceRecord,
   manageSubscriptionStatusChange
-} from '@/utils/app/supabase-admin';
+} from '@/utils/server/supabase-admin';
 
 // Stripe requires the raw body to construct the event.
 export const config = {

@@ -6,7 +6,9 @@ import {
     Flex, 
     Space, 
     Text,
-    Box
+    Box,
+    Group,
+    Button
 } from '@mantine/core';
 import ChatInput from './ChatInput';
 import { Input, SelectedSearch, Utility } from '@/types/role';
@@ -52,7 +54,9 @@ const ChatContent: FC<Props> = ({
     const [inputContent,  setInputContent] = useState<string>('');
     const [historyConversation, setHistoryConversation] = useState<Conversation>();
     const [isModal, setIsModal] = useState<boolean>(false);
-    const [modalType, setModalType] = useState<string>('auth');
+    const [isLimitModal, setIsLimitModal] = useState<boolean>(false);
+
+    const [modalType, setModalType] = useState<string>('signin');
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [isSubscription , setSubscription ] = useState<boolean>(false);
     
@@ -91,9 +95,10 @@ const ChatContent: FC<Props> = ({
 
         const userTimes = await getUserTimes(user);
 
-        
-
-        
+        if(userTimes <= 0 ) {
+            setIsLimitModal(true);
+            return;
+        }
         
         if(selectedConversation) {
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
@@ -292,6 +297,9 @@ const ChatContent: FC<Props> = ({
     const closeModal = () => {
         setIsModal(false);
     }
+    const closelimitModal = () => {
+        setIsLimitModal(false);
+    }
     return (
         <Box
             sx={(theme) => ({
@@ -356,13 +364,59 @@ const ChatContent: FC<Props> = ({
                     
             </Box>
             
-            
             <MyModal
-                size={modalType == 'auth'?'sm':'xl'}
+                size={modalType == 'signin' || modalType == 'signup'?'  sm':'xl'}
                 isModal={isModal}
-                child={modalType == 'auth'? <AuthenticationForm />:<Subscription products={products}/>}
+                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription products={products}/>}
                 title=''
                 closeModal={closeModal}
+            />
+            <MyModal
+                size='sm'
+                isModal={isLimitModal}
+                child={<Box sx={(theme) => ({
+                    padding: theme.spacing.md,
+                    paddingTop: 0
+                })}>
+                    <Text sx={(theme) => ({
+                        textAlign: 'center',
+                        fontSize: theme.fontSizes.lg
+                    })}>
+                        You have reached free trial limit
+                    </Text>
+                    {
+                        !user?
+                        <Group position="right" sx={(theme) => ({
+                            marginTop: '15px',
+                        })}>
+                            
+                            <Button variant="outline" onClick={() => {
+                                setIsLimitModal(false);
+                                setModalType('signin');
+                                setIsModal(true);                                
+                            }}>
+                                Sign In
+                            </Button>
+                            <Button className='bg-sky-500/100' onClick={() => {
+                                setIsLimitModal(false);
+                                setModalType('signup');
+                                setIsModal(true);
+                            }}>
+                                Create Account
+                            </Button>
+    
+                        </Group>:
+                        <Button variant="outline" onClick={() => {
+                            setModalType('upgrade');
+                            setIsLimitModal(false);
+                            setIsModal(true);
+                        }}>
+                            Upgrade
+                        </Button>                        
+                    }
+                </Box>}
+                title=''
+                closeModal={closelimitModal}
             />
         </Box>
     )

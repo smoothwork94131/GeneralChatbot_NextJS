@@ -10,7 +10,6 @@ import { useEffect, useState, FC } from "react";
 import MyModal from "@/components/Account/Modal";
 import {AuthenticationForm} from "@/components/Account/AuthenticationForm";
 import Subscription from "@/components/Account/Subscription";
-import { Product } from "@/types/user";
 import { Conversation } from "@/types/chat";
 
 interface Props {
@@ -21,11 +20,10 @@ interface Props {
 const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
        
     const [isSubscription , setSubscription ] = useState<boolean>(true);
-    const [times, setTimes] = useState<number>();
+    const [times, setTimes] = useState<number>(-1);
     const [isModal, setIsModal] = useState<boolean>(false);
-    const [modalType, setModalType] = useState<string>('auth');
+    const [modalType, setModalType] = useState<string>('signin');
 
-    const [products, setProducts] = useState<Product[]>([]);
     const user = useUser();
     
     useEffect(() => {
@@ -39,8 +37,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     useEffect(() => {
         const fetchData = async() => {
             const is_subscription = await chkIsSubscription(user); 
-            const products = await getActiveProductsWithPrices();
-            setProducts(products);
+           
             setSubscription(is_subscription);
         }
         fetchData();
@@ -49,7 +46,9 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     const closeModal = () => {
         setIsModal(false);
     }
-    
+    useEffect(() => {
+        
+    }, [modalType])
     const showModal = (type) => {
         setModalType(type);
         setIsModal(true);
@@ -58,7 +57,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     return (
         <Group>
             {
-                !isSubscription && times?
+                !isSubscription && times >= 0?
                 <Text>
                     {
                         times
@@ -78,15 +77,20 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
                     </Group>:<></>
                 :
                 <Group>
-                    <Button variant="outline" size="xs" onClick={() => {showModal('auth')}}>
+                    <Button variant="outline" size="xs" onClick={() => {showModal('signin')}}>
                         Sign In
+                    </Button>
+                    <Button className='bg-sky-500/100 h-[2rem]' onClick={() => {
+                        showModal('signup')
+                    }}>
+                        Create Account
                     </Button>
                 </Group>:<></>
             }
             <MyModal
-                size={modalType == 'auth'?'sm':'xl'}
+                size={modalType == 'signin' || modalType == 'signup'?'sm':'xl'}
                 isModal={isModal}
-                child={modalType == 'auth'? <AuthenticationForm />:<Subscription products={products}/>}
+                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription />}
                 title=''
                 closeModal={closeModal}
             />

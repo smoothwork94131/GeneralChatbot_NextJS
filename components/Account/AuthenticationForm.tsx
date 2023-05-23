@@ -15,12 +15,24 @@ import {
 } from '@mantine/core';
 import { IconBrandGithub } from '@tabler/icons-react';
 import { supabase } from '@/utils/app/supabase-client';
-import { useState } from 'react';
+import { useState, FC } from 'react';
+import Subscription from '@/components/Account/Subscription';
 
-export function AuthenticationForm(props: PaperProps) {
 
-    const [type, toggle] = useToggle(['Sign In', 'Sign Up']);
+interface Props {
+    modalType: string,
+}
+
+export const AuthenticationForm:FC<Props> = ({modalType}) => {
+    let toggleGroup = ['Sign In', 'Sign Up'] ;
+ 
+    if(modalType == 'signup') {
+        toggleGroup = ['Sign Up', 'Sign In'];
+    }
+
+    const [type, toggle] = useToggle(toggleGroup);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [signUpstate, setSignUpState] = useState<boolean>(false);
 
     const form = useForm({
         initialValues: {
@@ -57,18 +69,21 @@ export function AuthenticationForm(props: PaperProps) {
             if(error) {  
                 setErrorMessage(error.message);
                 return;
-            } 
-            window.location.href='/';
+            }
+            setSignUpState(true);
         }
     }
-
+    
     const AuthWidthProvider = async(provider) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: provider,
         })
     }
     return (
-        <Paper radius="md" p="xl" withBorder {...props}>
+        signUpstate?
+        <Subscription />
+        :
+        <Paper radius="md" p="xl" withBorder >
             <Group grow mb="md" mt="md">
                 <Button  variant="default" color="gray"  leftIcon={<IconBrandGithub />} onClick={() => {AuthWidthProvider('github')}}>{type} with GitHub </Button>
             </Group>

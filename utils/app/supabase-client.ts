@@ -64,7 +64,7 @@ export const getUserTimes = async (user: User|null) => {
     .from('free')
     .select('*')
     .eq('visitorId', visitorId)
-    .order("id", { ascending: false });
+    .order("id", { ascending: true });
 
     if(data) {
       if(data.length == 0) {

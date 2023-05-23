@@ -11,7 +11,7 @@ if (!process.env.OPENAI_API_KEY)
   console.warn(
     'OPENAI_API_KEY has not been provided in this deployment environment. ' +
     'Will use the optional keys incoming from the client, which is not recommended.',
-  );
+);
 
 
 // helper functions
@@ -62,7 +62,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
     .from('free')
     .select('*')
     .eq('visitorId', fingerId)
-    .order("id", { ascending: false });
+    .order("id", { ascending: true });
 
     if(data) {
       if(data.length == 0) {
@@ -205,52 +205,65 @@ export interface ApiChatResponse {
   message: OpenAIAPI.Chat.Message;
 }
 
+let requestCounts: { [ip: string]: number } = {};
+
+// Keep track of when each IP address last made a request
+let requestLasts: { [ip: string]: number } = {};
 
 export default async function handler(req, res) {
-
+  
   try {
-    await rateLimiterMiddleware(req, res, async() => {
-      
-    });
-  }catch(e) {
+    const ip = req.headers['x-forwarded-for'];
+    const now = Date.now();
 
+    // Reset request count and timestamp when a new minute starts
+    if (!requestLasts[ip] || now - requestLasts[ip] >  1000) {
+      requestCounts[ip] = 0;
+      requestLasts[ip] = now;
+    }
+
+    // Check if the maximum number of requests has been reached for this IP address
+    if (requestCounts[ip] >= 1000) {
+      throw new Error('Rate limit exceeded');
+    }
+    
+    requestCounts[ip]++;
+
+  } catch (error: any) {
+    console.error(error);
+    return new NextResponse(`limited`, { status: 429 });
   }
   try{
-    
-      const userApi = await req.json();
-      const input = userApi.input;
-      const fingerId = userApi.fingerId;
-      const userId = userApi.userId;
-  
-      const userTimes = await getUserTimes(userId, fingerId);
-      const isSubscription = await getSubscriptions(userId);
-  
-      if(!userId && userTimes <=0) {
-          return new NextResponse(`user times `, { status: 401 });
-      } else {
-          if(userTimes <=0 && !isSubscription) {
-            return new NextResponse(`user subscription `, { status: 402 });  
-          }
-      }
+    const userApi = await req.json();
+    const input = userApi.input;
+    const fingerId = userApi.fingerId;
+    const userId = userApi.userId;
 
-      try {
-        const { api, ...rest } = await extractOpenaiChatInputs(input);
-        const payLoad = chatCompletionPayload(rest, false);
-        const response = await postToOpenAI(api, '/v1/chat/completions', payLoad);
-        const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
-        await decreaseUserTimes(userId, fingerId);
-        return new NextResponse(JSON.stringify({
-          message: completion.choices[0].message,
-        } as ApiChatResponse));
-  
-      } catch (error: any) {
-        return new NextResponse(`[Issue] ${error}`, { status: 400 });
-      }
-  }catch(e) {
+    const userTimes = await getUserTimes(userId, fingerId);
+    const isSubscription = await getSubscriptions(userId);
 
-  } 
+    if (!userId && userTimes <= 0) {
+      throw new Error("User times have expired.");
+    } else if (userTimes <= 0 && !isSubscription) {
+      throw new Error("User subscription required.");
+    }
+
+    const { api, ...rest } = await extractOpenaiChatInputs(input);
+    const payLoad = chatCompletionPayload(rest, false);
+    const response = await postToOpenAI(api, "/v1/chat/completions", payLoad);
+    const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
+    await decreaseUserTimes(userId, fingerId);
+    return new NextResponse(JSON.stringify({
+      message: completion.choices[0].message,
+    }));
+
+  }catch(error: any) {
+    console.log("[Issue]", error);
+    return new NextResponse(`[Issue] ${error.message}`, { status: 400 });
+  }
+  
+   
 }
-
 // noinspection JSUnusedGlobalSymbols
 export const config = {
   runtime: 'edge',

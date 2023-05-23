@@ -257,10 +257,11 @@ export default async function handler(req, res) {
     const { api, ...rest } = extractOpenaiChatInputs(input);
     const payLoad = chatCompletionPayload(rest, false);
     const response_ = postToOpenAI(api, "/v1/chat/completions", payLoad);
+    const completion_ = response_.then((res) => res.json());
     const decreaseUser = decreaseUserTimes(userId, fingerId, userTimes);
-    
-    const [response,_] = await Promise.all([response_, decreaseUser]);
-    const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
+
+    const [completion,_] :[OpenAIAPI.Chat.CompletionsResponse,any] = await Promise.all([completion_, decreaseUser]);
+    // const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
     
     return new NextResponse(JSON.stringify({
       message: completion.choices[0].message,

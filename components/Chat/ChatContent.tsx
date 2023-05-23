@@ -15,13 +15,14 @@ import { AssistantMessageState, Conversation, Message,  UserMessageState } from 
 import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT, USER_TIMES_LIMIT } from '@/utils/app/const';
 import { ApiChatInput } from '@/pages/api/openai/chat';
 import { useEffect } from 'react';
-import { getUserTimes, reducerUserTimes, getActiveProductsWithPrices,chkIsSubscription } from '@/utils/app/supabase-client';
+import { getUserTimes, getActiveProductsWithPrices,chkIsSubscription } from '@/utils/app/supabase-client';
 import { useRouter } from 'next/router';
 import { useUser } from '@supabase/auth-helpers-react';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
 import MyModal from '@/components/Account/Modal';
 import { ProductWithPrice } from '@/types/user';
+import { getFingerId } from '@/utils/app/FingerPrint';
 
 interface Props {
     selectedUtility: Utility;
@@ -85,19 +86,14 @@ const ChatContent: FC<Props> = ({
     }, [selectedUtility])
 
     const handleSend = async(message: string) => {
+        
+        const fingerId = await getFingerId();
+
         const userTimes = await getUserTimes(user);
 
-        if(!user && userTimes <=0) {
-            setModalType('auth');      
-            setIsModal(true); 
-            return;
-        } else {
-            if(userTimes <=0 && !isSubscription) {
-                setModalType('Subscription');
-                setIsModal(true); 
-                return;
-            }
-        }
+        
+
+        
         
         if(selectedConversation) {
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
@@ -159,7 +155,6 @@ const ChatContent: FC<Props> = ({
                 });
             });
 
-            
             const input: ApiChatInput = {
                 api: {
                     apiKey: OPENAI_API_KEY,
@@ -176,6 +171,17 @@ const ChatContent: FC<Props> = ({
             };
             
             
+            const req:{
+                input: ApiChatInput,
+                fingerId: string,
+                userId: string|null
+            } = {
+                input: input,
+                fingerId: fingerId,
+                userId: user?user.id:null
+            }
+            
+        
             user_message = {
                 role: 'user',
                 content: message,
@@ -184,17 +190,29 @@ const ChatContent: FC<Props> = ({
                 active: false
             };
             updatedConversation.messages.push([user_message, AssistantMessageState]);
-
+            
             saveSelectConverSation(updatedConversation);
+
             const response = await fetch('/api/openai/chat', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(input),
+                body: JSON.stringify(req),
             });
 
             if (!response.ok) {
+                if(response.status == 401) {
+                    setModalType('auth');      
+                    setIsModal(true); 
+                    setMessageIsStreaming(false);
+                    return;
+                } else if(response.status == 402) {
+                    setModalType('Subscription');
+                    setIsModal(true); 
+                    setMessageIsStreaming(false);
+                    return;
+                }
                 console.error('Error from API call: ', response.status, response.statusText);
                 return '';
             }
@@ -224,7 +242,6 @@ const ChatContent: FC<Props> = ({
                 datetime: today_datetime
             };
 
-            await reducerUserTimes(user);
 
             saveSelectConverSation(updatedConversation);
             setMessageIsStreaming(false);
@@ -348,7 +365,7 @@ const ChatContent: FC<Props> = ({
     )
 }
 
-interface ComponentProps {
+interface ComponentProps {  
     key: number;
     data?: string[] | undefined;
     defaultValue?: string | number | undefined;

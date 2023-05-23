@@ -37,6 +37,7 @@ const Settings:FC<Props> = ({isMobile, updateServerRoleData}) =>{
     const goLogin = async () => {
         if(user) {
             await supabase.auth.signOut();
+            // window.location.href='/';
         } else {
             window.location.href='/signin';
         }

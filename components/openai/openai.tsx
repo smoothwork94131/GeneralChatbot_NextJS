@@ -2,6 +2,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { initialState, OpenaiInitialState } from './openai.state';
 import OpenaiContext from './openai.context';
 import  Chat  from '@/components/Chat';
+import { getSheets } from '@/pages/api/googlesheets';
 
 import { 
     AppShell, 
@@ -21,6 +22,7 @@ import {
     useState, 
     FC,
  } from 'react';
+
 import { SpotlightProvider, SpotlightAction, SpotlightActionProps  } from '@mantine/spotlight';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
@@ -32,7 +34,6 @@ import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } 
 import { saveSelctedConversation } from '@/utils/app/conversation';
 import { IconSearch } from '@tabler/icons-react';
 import { RoleGroup } from '../../types/role';
-import { getSubscriptions, getUserInfo, getUserTimes } from '@/utils/app/supabase-client';
 
 interface Props {
     serverRoleData: RoleGroup[]
@@ -91,33 +92,36 @@ const OpenAi = ({
         dispatch,
     } = contextValue;
     useEffect(()=>{
-        updateServerRoleData();
+        dispatchServerRoleData(serverRoleData);
     },[]);
-    const updateServerRoleData = async() => {
-        
-        console.log("serverRoleData", serverRoleData);
 
-        if(serverRoleData) {
+    const dispatchServerRoleData = async(_rolData) => {
+        if(_rolData) {
             dispatch({
                 "field": "roleGroup",
-                "value": serverRoleData
+                "value": _rolData
             });
             dispatch({
                 "field": "selectedRole",
-                "value": serverRoleData[0]
+                "value": _rolData[0]
             })
             dispatch({
                 "field": "selectedUtility",
-                "value": serverRoleData[0].utilities_group[0].utilities[0]
+                "value": _rolData[0].utilities_group[0].utilities[0]
             })
             dispatch({
                 "field": "selectedUtilityGroup",
-                "value": serverRoleData[0].utilities_group
+                "value": _rolData[0].utilities_group
             })
         }
-        setUpdateDataLoader(false);
-        
     }
+
+    const updateServerRoleData = async() => {
+        const response = await fetch("/api/googlesheets");
+        const data = await response.json();
+        dispatchServerRoleData(data);
+    }
+
     useEffect(() => {   
         const _conversationHistory = localStorage.getItem("conversationHistory");
         if(_conversationHistory){
@@ -269,11 +273,14 @@ const OpenAi = ({
                     }
 
                     let timestamp: Date = new Date() ;
+                    
                     if(messages[0].datetime) {
                         timestamp = new Date(messages[0].datetime)
                     }
+
+                    const splitKey = conversation.key.split("_");
                     updatedHistoryActions.push({
-                        title: conversation.key.replaceAll("_", " > "),
+                        title: `${splitKey[1]} > ${splitKey[2]}`,
                         historyIndex: messagesIndex,
                         utilityKey: conversation.key,
                         timestamp: Math.floor(timestamp.getTime()/1000),
@@ -382,7 +389,9 @@ const OpenAi = ({
                         action.inputs.map((input, index) => {
                             if(input.type == "form") {
                                 return (
-                                    <Badge key={index}>
+                                    <Badge key={index}  sx={(theme) => ({
+                                        marginLeft: theme.spacing.xs
+                                    })}>
                                         {input.value}
                                     </Badge>
                                 )
@@ -390,6 +399,7 @@ const OpenAi = ({
                         })
                     }
                 </Text>
+                
             </Group>
             </UnstyledButton>
         );
@@ -450,7 +460,7 @@ const OpenAi = ({
                                 </MediaQuery>
                             </>
                         }
-                    >  
+                    >
                         <Chat 
                             handleShowSidebar={handleShowSidebar}
                             isMobile = {isMobile}

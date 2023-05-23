@@ -2,7 +2,6 @@ import { sheets as sheets_, auth } from '@googleapis/sheets';
 
 import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/app/const'
 import { RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
-import { NextRequest, NextResponse } from 'next/server';
 
 
 let roleData:any = [];
@@ -147,6 +146,10 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
     console.error('Error fetching data from Google Sheets:', error);
     throw error;
   }
+}
+export default async function handler(req, res){
+  const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
+  return res.json(roleData);
 }
 
 

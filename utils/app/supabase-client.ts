@@ -10,7 +10,7 @@ import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, F
 import moment from 'moment';
 
 export const supabase = createBrowserSupabaseClient<Database>();
-const supabaseAdmin = createClient<Database>(
+export const supabaseAdmin = createClient<Database>(
   NEXT_PUBLIC_SUPABASE_URL || '',
   NEXT_PUBLIC_SUPABASE_KEY || ''
 );
@@ -55,7 +55,7 @@ export const getSubscriptions = async (user: User) => {
 }
 
 export const getUserTimes = async (user: User|null) => {
-
+  
   const fp = await FingerprintJS.load({ debug: true })
   const { visitorId } = await fp.get();
   let times = 0;
@@ -85,19 +85,19 @@ export const getUserTimes = async (user: User|null) => {
     const subscription = await supabase
     .from('subscriptions')
     .select('*')
+    .eq("user_id", user.id)
     .gte('current_period_end', moment().format("YYYY-MM-D"));
+    const is_subscription = await chkIsSubscription(user);
     times = FREE_TIMES;
-    if(subscription.data) {
-      if(subscription.data?.length > 0) {
-        times = PAID_TIMES;
-      } 
+    if(is_subscription) {
+      times = PAID_TIMES;
     }
     
     const { data, error } = await supabase
     .from('users')
     .select('*')
     .eq('id', user.id)
-    .eq('chat_date', moment().format("MM/DD/YYYY"));
+    .eq('chat_date', moment().format("YYYY-MM-D"));
 
     if(data && data.length > 0) {
       times = data[0].times;
@@ -105,7 +105,7 @@ export const getUserTimes = async (user: User|null) => {
       const { data, error } = await supabase
       .from('users')
       .update([{
-        "chat_date": moment().format("MM/DD/YYYY"),
+        "chat_date": moment().format("YYYY-MM-D"),
         "times": times
       }])
       .eq('id', user.id);
@@ -151,6 +151,7 @@ export const chkIsSubscription = async(user: User| null) => {
   const { data, error } = await supabase
     .from('subscriptions')
     .select('*')
+    .eq("user_id", user.id)
     .gte('current_period_end', moment().format("YYYY-MM-D"));
 
   if(data) {

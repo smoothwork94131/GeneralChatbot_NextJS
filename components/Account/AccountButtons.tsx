@@ -21,13 +21,13 @@ interface Props {
 const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
        
     const [isSubscription , setSubscription ] = useState<boolean>(false);
-    const [times, setTimes] = useState<number>(0);
+    const [times, setTimes] = useState<number>();
     const [isModal, setIsModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<string>('auth');
 
     const [products, setProducts] = useState<Product[]>([]);
     const user = useUser();
-
+    
     useEffect(() => {
         const fetchData = async() => {
             const userTimes = await getUserTimes(user);
@@ -35,13 +35,16 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
         }
         fetchData();
     }, [selectedConversation]);
-
+    
     useEffect(() => {
         const fetchData = async() => {
-            const data = await chkIsSubscription(user);
+            const is_subscription = await chkIsSubscription(user); 
             const products = await getActiveProductsWithPrices();
+            const userTimes = await getUserTimes(user);
+            setTimes(userTimes);
             setProducts(products);
-            setSubscription(data);
+            setSubscription(is_subscription);
+            
         }
         fetchData();
     },[user])
@@ -49,14 +52,16 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     const closeModal = () => {
         setIsModal(false);
     }
+    
     const showModal = (type) => {
         setModalType(type);
         setIsModal(true);
     }
+
     return (
         <Group>
             {
-                !isSubscription?
+                !isSubscription && times?
                 <Text>
                     {
                         times

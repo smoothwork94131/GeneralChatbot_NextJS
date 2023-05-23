@@ -32,10 +32,11 @@ const Subscription: FC<Props> = ({ products }) => {
 
     const handleCheckout = async (price: Price) => {
         setPriceIdLoading(price.id);
+        const return_url = window.location.href;
         try {
             const { sessionId } = await postData({
                 url: '/api/create-checkout-session',
-                data: { price }
+                data: { price, return_url }
             });
             const stripe = await getStripe();
             stripe?.redirectToCheckout({ sessionId });

@@ -7,7 +7,7 @@ import { getURL } from '@/utils/app/helpers';
 
 const CreateCheckoutSession: NextApiHandler = async (req, res) => {
   if (req.method === 'POST') {
-    const { price, quantity = 1, metadata = {} } = req.body;
+    const { price, quantity = 1, metadata = {}, return_url } = req.body;
     try {
       const supabase = createServerSupabaseClient({ req, res });
       const {
@@ -36,8 +36,8 @@ const CreateCheckoutSession: NextApiHandler = async (req, res) => {
           trial_from_plan: true,
           metadata
         },
-        success_url: `${getURL()}/`,
-        cancel_url: `${getURL()}/`
+        success_url: return_url,
+        cancel_url: return_url
       });
 
       return res.status(200).json({ sessionId: session.id });

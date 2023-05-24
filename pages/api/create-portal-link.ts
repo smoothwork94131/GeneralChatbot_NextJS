@@ -6,6 +6,8 @@ import { getURL } from '@/utils/app/helpers';
 
 const CreatePortalLink: NextApiHandler = async (req, res) => {
   if (req.method === 'POST') {
+    const data = req.body;
+
     try {
       const supabase = createServerSupabaseClient({ req, res });
       const {
@@ -21,7 +23,7 @@ const CreatePortalLink: NextApiHandler = async (req, res) => {
       if (!customer) throw Error('Could not get customer');
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
-        return_url: `${getURL()}/account`
+        return_url: data.return_url
       });
 
       return res.status(200).json({ url });

@@ -56,7 +56,6 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                     cursor: 'pointer'
                                 })}
                             />
-                            
                                 <Link href='/pricing'>
                                     <Text
                                         sx={(theme) => ({
@@ -67,7 +66,16 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                         Pricing
                                     </Text>
                                 </Link>
-                            
+                                <Link href='/account'>
+                                    <Text
+                                        sx={(theme) => ({
+                                            fontWeight: 600,
+                                            cursor: 'pointer'
+                                        })}
+                                    >
+                                        Account
+                                    </Text>
+                                </Link>
                             <Text
                                 sx={(theme) => ({
                                     fontWeight: 600,

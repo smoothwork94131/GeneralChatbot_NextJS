@@ -13,7 +13,7 @@ interface Props {
 const Subscription: FC<Props> = ({ products }) => {
     return (
         <Box>
-            <SubscriptionPage products={products}/>
+            <SubscriptionPage />
         </Box>
     )
 };

@@ -57,17 +57,14 @@ const ChatContent: FC<Props> = ({
     const [isLimitModal, setIsLimitModal] = useState<boolean>(false);
 
     const [modalType, setModalType] = useState<string>('signin');
-    const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [isSubscription , setSubscription ] = useState<boolean>(false);
     
     const user = useUser();
     
     useEffect(() => {
         const fetchData = async() => {
-            const products = await getActiveProductsWithPrices();
-            const data = await chkIsSubscription(user);
-            setSubscription(data);
-            setProducts(products);
+            // const data = await chkIsSubscription(user);
+            // setSubscription(data);
         }
         fetchData();
     },[user]);
@@ -367,7 +364,7 @@ const ChatContent: FC<Props> = ({
             <MyModal
                 size={modalType == 'signin' || modalType == 'signup'?'  sm':'xl'}
                 isModal={isModal}
-                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription products={products}/>}
+                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription />}
                 title=''
                 closeModal={closeModal}
             />

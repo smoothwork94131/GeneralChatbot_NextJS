@@ -36,18 +36,21 @@ export const getUserInfo = async (user: User) => {
   const { data, error } = await supabase
     .from('user')
     .select('*')
-    .eq('email', user.email)
+    .eq('id', user.id)
   if (error) {
     console.log(error.message);
   }
   return (data as any) || [];
 }
 
+
 export const getSubscriptions = async (user: User) => {
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('*')
-    .eq('user_id', user.email)
+    .select('*, prices(*, products(*))')
+    .eq('user_id', user.id)
+    .eq('cancel_at_period_end', false)
+    .order("current_period_end", { ascending: false })
   if (error) {
     console.log(error.message);
   }
@@ -131,6 +134,7 @@ export const reducerUserTimes = async (user: User|null) => {
       visitorId: visitorId,
       times: Number(userTimes) - 1
     }]).eq("visitorId", visitorId);
+
     if (error) {
       console.log(error);
     }
@@ -152,6 +156,7 @@ export const chkIsSubscription = async(user: User| null) => {
     .from('subscriptions')
     .select('*')
     .eq("user_id", user.id)
+    .eq("cancel_at_period_end", false)
     .gte('current_period_end', moment().format("YYYY-MM-D"));
 
   if(data) {

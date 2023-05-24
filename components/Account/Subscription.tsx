@@ -1,4 +1,4 @@
-import { Card, Image, Text, Badge, Button, Group, Flex, Box, Space, Textarea, Loader } from '@mantine/core';
+import { Card, Image, Text, Badge, Button, Group, Flex, Box, Space, Textarea, Loader, Title } from '@mantine/core';
 import { FC, useState, useEffect } from 'react';
 import { Price, Product, ProductWithPrice } from '@/types/user';
 import { useUser } from '@/utils/app/useUser';
@@ -10,8 +10,8 @@ import { getActiveProductsWithPrices } from '@/utils/app/supabase-client';
 
 type BillingInterval = 'year' | 'month';
 
-
-const Subscription: FC<Props> = () => {
+const Subscription = () => {
+    
     const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
     const { user, isLoading, subscription } = useUser();
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
@@ -82,25 +82,32 @@ const Subscription: FC<Props> = () => {
 
                         return (
                             <Card shadow="sm" padding="lg" radius="md" withBorder key={key}>
-                                <Group position="apart" mt="md" mb="xs">
-                                    <Text weight={500}>{subscription?.prices?.products?.name}</Text>
+                                <Group position="apart" >
+                                    <Text weight={500} sx={(theme) =>({
+                                        fontSize: '25px'
+                                    })}>{product.name}</Text>
                                 </Group>
                                 <Space />
-                                <Text size="sm" color="dimmed">
+                                <Text size="md" color="dimmed" >
                                     {product.description}
                                 </Text>
                                 <Space />
-                                <Group>
+                                <Group
+                                    spacing={0}
+                                >
                                     <Text
                                         sx={(theme) => ({
-
+                                            fontSize: '40px',
+                                            marginTop: '20px',
+                                            
                                         })}
+                                        className='font-extrabold'
                                     >
                                         {priceString}
                                     </Text>
                                     <Text
                                         sx={(theme) => ({
-
+                                            paddingTop: '40px'
                                         })}
                                     >
                                         /{billingInterval}

@@ -5,7 +5,7 @@ import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
 import { supabaseAdmin } from '@/utils/app/supabase-client';
 import moment from 'moment';
 
-import {rateLimiterMiddleware} from '../middleware';
+import {limiter} from '../middleware';
 
 if (!process.env.OPENAI_API_KEY)
   console.warn(
@@ -226,7 +226,7 @@ export default async function handler(req, res) {
     if (requestCounts[ip] >= 1000) {
       throw new Error('Rate limit exceeded');
     }
-    
+
     requestCounts[ip]++;
 
   } catch (error: any) {

@@ -3,7 +3,7 @@ import { AuthenticationForm } from "@/components/Account/AuthenticationForm";
 const SignIn = () => {
   return (
     <Layout childrenSize='400px'>
-      <AuthenticationForm />
+      <AuthenticationForm modalType='signin'/>
     </Layout>
   )
 }

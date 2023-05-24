@@ -10,6 +10,7 @@ import MyModal from '@/components/Account/Modal';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
 import { Product, ProductWithPrice } from '@/types/user';
+import { postData } from '@/utils/app/helpers';
 
 interface Props {
     isMobile: boolean;
@@ -55,15 +56,15 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
         setIsModal(true);
     }
 
-    const goPricingPage = async () => {
+    const goPortalPage = async () => {
         if (user) {
-            window.location.href = '/pricing';
+            window.location.href='/account';
         } else {
             setModalType("signin");
             setIsModal(true);
         }
     }
-
+    
     const upgrade = () => {
         setModalType("upgrade");
         setIsModal(true);
@@ -107,9 +108,9 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                         
                         <Menu.Item
                             icon={<IconShoppingBag size={14} />}
-                            onClick={() => { goPricingPage() }}
+                            onClick={() => { goPortalPage() }}
                         >
-                            Pricing
+                            Account
                         </Menu.Item>
                         <Menu.Item
                             icon={<IconSettings size={14} />}
@@ -177,10 +178,10 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             onClick={() => { updateServerRoleData() }}
                         />
                         <NavLink
-                            label="Pricing"
+                            label="Account"
                             icon={<IconShoppingBag size="1rem" stroke={1.5} />}
                             variant="subtle"
-                            onClick={() => { window.location.href = '/pricing' }}
+                            onClick={() => { goPortalPage() }}
                         />
                         <NavLink
                             label="Upgrade"

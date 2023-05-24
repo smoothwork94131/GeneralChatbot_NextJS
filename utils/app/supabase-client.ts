@@ -18,12 +18,6 @@ export const supabaseAdmin = createClient<Database>(
 console.warn('NEXT_PUBLIC_SUPABASE_URL', NEXT_PUBLIC_SUPABASE_URL)
 console.warn('process.env.NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL)
 
-console.warn('OPENAI_API_KEY', OPENAI_API_KEY)
-console.warn('process.env.OPENAI_API_KEY', process.env.OPENAI_API_KEY)
-
-console.warn('STRIPE_WEBHOOK_SECRET', STRIPE_WEBHOOK_SECRET)
-console.warn('process.env.STRIPE_WEBHOOK_SECRET', process.env.STRIPE_WEBHOOK_SECRET)
-
 export const getActiveProductsWithPrices = async (): Promise<
   ProductWithPrice[]
 > => {

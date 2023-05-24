@@ -6,7 +6,7 @@ import type { Database } from '@/types/types_db';
 import { ProductWithPrice } from '@/types/user';
 import * as FingerprintJS from '@fingerprintjs/fingerprintjs'
 import { createClient } from '@supabase/supabase-js';
-import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES, OPENAI_API_KEY } from './const';
+import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES, OPENAI_API_KEY, STRIPE_WEBHOOK_SECRET } from './const';
 import moment from 'moment';
 
 export const supabase = createBrowserSupabaseClient<Database>();
@@ -20,6 +20,9 @@ console.warn('process.env.NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUP
 
 console.warn('OPENAI_API_KEY', OPENAI_API_KEY)
 console.warn('process.env.OPENAI_API_KEY', process.env.OPENAI_API_KEY)
+
+console.warn('STRIPE_WEBHOOK_SECRET', STRIPE_WEBHOOK_SECRET)
+console.warn('process.env.STRIPE_WEBHOOK_SECRET', process.env.STRIPE_WEBHOOK_SECRET)
 
 export const getActiveProductsWithPrices = async (): Promise<
   ProductWithPrice[]

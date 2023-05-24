@@ -76,7 +76,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
 
     if(data) {
       if(data.length == 0) {
-        times = NO_ACCOUNT_TIMES ;
+        times = NO_ACCOUNT_TIMES;
         const { data, error } = await supabaseAdmin
         .from('free')
         .insert([{

@@ -71,7 +71,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
     const { data, error } = await supabaseAdmin
     .from('free')
     .select('*')
-    .eq('visitorId', fingerId)
+    .eq('visitor_id', fingerId)
     .order("id", { ascending: true });
 
     if(data) {
@@ -81,7 +81,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
         .from('free')
         .insert([{
           times: times,
-          visitorId: fingerId
+          visitor_id: fingerId
         }])
       } else {
         times = data[0].times;
@@ -140,9 +140,9 @@ export const decreaseUserTimes = async (userId, fingerId, current_times=-1) => {
     const { error } = await supabaseAdmin
     .from('free')
     .update([{
-      visitorId: fingerId,
+      visitor_id: fingerId,
       times: Number(userTimes) - 1
-    }]).eq("visitorId", fingerId);
+    }]).eq("visitor_id", fingerId);
     if (error) {
       console.log(error);
     }

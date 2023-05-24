@@ -60,13 +60,13 @@ export const getSubscriptions = async (user: User) => {
 export const getUserTimes = async (user: User|null) => {
   
   const fp = await FingerprintJS.load({ debug: true })
-  const { visitorId } = await fp.get();
+  const { visitor_id } = await fp.get();
   let times = 0;
   if(!user) {
     const { data, error } = await supabase
     .from('free')
     .select('*')
-    .eq('visitorId', visitorId)
+    .eq('visitor_id', visitor_id)
     .order("id", { ascending: true });
 
     if(data) {
@@ -76,7 +76,7 @@ export const getUserTimes = async (user: User|null) => {
         // .from('free')
         // .insert([{
         //   times: times,
-        //   visitorId: visitorId
+        //   visitor_id: visitor_id
         // }])
       } else {
         times = data[0].times;
@@ -126,14 +126,14 @@ export const getUserTimes = async (user: User|null) => {
 //   }
 
 //   const fp = await FingerprintJS.load({ debug: true })
-//   const { visitorId } = await fp.get();
+//   const { visitor_id } = await fp.get();
 //   if(!user) {
 //     const { error } = await supabaseAdmin
 //     .from('free')
 //     .update([{
-//       visitorId: visitorId,
+//       visitor_id: visitor_id,
 //       times: Number(userTimes) - 1
-//     }]).eq("visitorId", visitorId);
+//     }]).eq("visitor_id", visitor_id);
 //     if (error) {
 //       console.log(error);
 //     }

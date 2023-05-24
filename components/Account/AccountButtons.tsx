@@ -11,6 +11,7 @@ import MyModal from "@/components/Account/Modal";
 import {AuthenticationForm} from "@/components/Account/AuthenticationForm";
 import Subscription from "@/components/Account/Subscription";
 import { Conversation } from "@/types/chat";
+import { PAID_TIMES } from "@/utils/app/const";
 
 interface Props {
     selectedConversation: Conversation,
@@ -62,7 +63,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     return (
         <Group>
             {
-                !isSubscription && times >= 0?
+                !isSubscription && (times >= 0 && times < PAID_TIMES)?
                 <Text>
                     {
                         times

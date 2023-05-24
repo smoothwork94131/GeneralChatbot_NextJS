@@ -1,36 +1,25 @@
 import Layout from "@/components/Account/Layout";
-import { GetStaticPropsResult } from 'next';
-import { Product, ProductWithPrice } from "@/types/user";
-import { FC,useEffect,useState } from 'react';
-import { getActiveProductsWithPrices } from '@/utils/app/supabase-client';
+import { FC, useEffect} from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
-import { useMediaQuery } from "@mantine/hooks";
-import { getSubscriptions } from "@/utils/app/supabase-client";
 import { 
   Box,
   Title,
   Card,
-  Group,
-  Text,
-  Button,
   Flex
  } from "@mantine/core";
 import Subscription from "@/components/Account/Subscription";
-import { useRouter } from 'next/router';
-
 interface Props {
 
 }
-
 const Pricing:FC<Props> = () => {
   
   const user = useUser();
-  const router = useRouter();
 
-  if(!user) {
-    router.replace("/signin");
-  }
-
+  useEffect(()=> {
+    if(!user) {
+      window.location.href='/signin';
+    }
+  },[])
   return (
     <Layout childrenSize='70%'>
       {/* <Subscription products={products}/> */}

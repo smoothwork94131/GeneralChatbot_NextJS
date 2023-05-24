@@ -16,6 +16,8 @@ import {
   Flex
  } from "@mantine/core";
 import Subscription from "@/components/Account/Subscription";
+import { useRouter } from 'next/router';
+
 interface Props {
 
 }
@@ -23,22 +25,11 @@ interface Props {
 const Pricing:FC<Props> = () => {
   
   const user = useUser();
-  const [subscription, setSubscription] = useState([]);
-  const [products, setProducts] = useState<Product[]>();
-  const isMobile = useMediaQuery(`(max-width: 800px)`);
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchData = async() => {
-      if(user) {
-        const subscription_ = await getSubscriptions(user);
-        const products_ = await getActiveProductsWithPrices();
-        console.log(subscription_);
-        setProducts(products_);
-        setSubscription(subscription_);
-      }
-    }
-    fetchData();
-  }, []);
+  if(!user) {
+    router.replace("/signin");
+  }
 
   return (
     <Layout childrenSize='70%'>
@@ -53,7 +44,7 @@ const Pricing:FC<Props> = () => {
               padding: theme.spacing.lg,
              
             })}>
-              <Subscription />    
+              <Subscription closeModal={function(){}}/>    
             </Box>
           </Flex>
         </Card>

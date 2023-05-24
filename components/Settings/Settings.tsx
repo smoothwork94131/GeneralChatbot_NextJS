@@ -21,10 +21,12 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
     const [isModal, setIsModal] = useState(false);
     const [isSubscription , setSubscription ] = useState<boolean>(true);
     const [modalType, setModalType] = useState('sigin');
+    
     const {
         state: { colorScheme, lightMode },
         dispatch: homeDispatch,
     } = useContext(HomeContext);
+
     const closeModal = () => {
         setIsModal(false);
     }
@@ -34,6 +36,10 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
             setSubscription(is_subscription);
         }
         fetchData();
+        if(modalType == "signup" && user) {
+            setModalType('subscription');
+            setIsModal(true);
+        }
     }, [user])
 
     const handleColorScheme = () => {
@@ -111,13 +117,17 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                         >
                             Updates & FAQ
                         </Menu.Item>
+                        {
+                            user?
+                            <Menu.Item
+                                icon={<IconShoppingBag size={14} />}
+                                onClick={() => { goPortalPage() }}
+                            >
+                                Account
+                            </Menu.Item>
+                            :<></>    
+                        }
                         
-                        <Menu.Item
-                            icon={<IconShoppingBag size={14} />}
-                            onClick={() => { goPortalPage() }}
-                        >
-                            Account
-                        </Menu.Item>
                         {
                             user && !isSubscription?
                             <Menu.Item
@@ -187,12 +197,15 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             variant="subtle"
                             onClick={() => { updateServerRoleData() }}
                         />
-                        <NavLink
-                            label="Account"
-                            icon={<IconShoppingBag size="1rem" stroke={1.5} />}
-                            variant="subtle"
-                            onClick={() => { goPortalPage() }}
-                        />
+                        {
+                            user?
+                            <NavLink
+                                label="Account"
+                                icon={<IconShoppingBag size="1rem" stroke={1.5} />}
+                                variant="subtle"
+                                onClick={() => { goPortalPage() }}
+                            />:<></>
+                        }
                         {
                             user && !isSubscription?
                             <NavLink
@@ -226,7 +239,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
             <MyModal
                 size={modalType == 'signin' || modalType == 'signup'?'sm':'xl'}
                 isModal={isModal}
-                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription />}
+                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType} closeModal={closeModal}/>:<Subscription closeModal={closeModal}/>}
                 title=''
                 closeModal={closeModal}
             />

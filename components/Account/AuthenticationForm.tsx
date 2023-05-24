@@ -16,14 +16,15 @@ import {
 import { IconBrandGithub } from '@tabler/icons-react';
 import { supabase } from '@/utils/app/supabase-client';
 import { useState, FC } from 'react';
-import Subscription from '@/components/Account/Subscription';
 
 
 interface Props {
     modalType: string,
+    closeModal: ()=>void;
 }
 
-export const AuthenticationForm:FC<Props> = ({modalType}) => {
+export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
+
     let toggleGroup = ['Sign In', 'Sign Up'] ;
  
     if(modalType == 'signup') {
@@ -32,7 +33,6 @@ export const AuthenticationForm:FC<Props> = ({modalType}) => {
 
     const [type, toggle] = useToggle(toggleGroup);
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const [signUpstate, setSignUpState] = useState<boolean>(false);
 
     const form = useForm({
         initialValues: {
@@ -50,7 +50,7 @@ export const AuthenticationForm:FC<Props> = ({modalType}) => {
     const Auth = async( type ) => {
         const email = form.values.email;
         const password = form.values.password;
-
+        
         if(type == "Sign In") {
             const {data, error} = await supabase.auth.signInWithPassword({
                 email: email,
@@ -60,7 +60,6 @@ export const AuthenticationForm:FC<Props> = ({modalType}) => {
                 setErrorMessage(error.message);
                 return;
             }           
-            window.location.href='/';
         }  else if( type == "Sign Up") {
             const { data, error } = await supabase.auth.signUp({
                 email: email,
@@ -70,19 +69,17 @@ export const AuthenticationForm:FC<Props> = ({modalType}) => {
                 setErrorMessage(error.message);
                 return;
             }
-            setSignUpState(true);
         }
+        closeModal();
     }
-    
+
     const AuthWidthProvider = async(provider) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: provider,
         })
     }
     return (
-        signUpstate?
-        <Subscription />
-        :
+        
         <Paper radius="md" p="xl" withBorder >
             <Group grow mb="md" mt="md">
                 <Button  variant="default" color="gray"  leftIcon={<IconBrandGithub />} onClick={() => {AuthWidthProvider('github')}}>{type} with GitHub </Button>
@@ -152,6 +149,7 @@ export const AuthenticationForm:FC<Props> = ({modalType}) => {
                     <Button  variant="outline" onClick={()=>{Auth(type)}}>{type}</Button>
                 </Group>
             </form>
+         
         </Paper>
     );
 }

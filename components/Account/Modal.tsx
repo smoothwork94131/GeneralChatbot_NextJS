@@ -7,7 +7,7 @@ interface Props {
     closeModal: ()=>void;
     size: string;
 }
-const MyModal:FC<Props> = ({isModal, child, title,closeModal, size}) =>{
+const MyModal:FC<Props> = ({isModal, child, title, closeModal, size}) =>{
     return (
         <>
             <Modal opened={isModal} onClose={()=>{closeModal()}}  size={size}>

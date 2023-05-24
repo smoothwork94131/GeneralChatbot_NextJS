@@ -9,18 +9,21 @@ import { useRouter } from 'next/router';
 import { getActiveProductsWithPrices } from '@/utils/app/supabase-client';
 
 type BillingInterval = 'year' | 'month';
-
-const Subscription = () => {
+interface Props {
+    closeModal: ()=>void;
+}
+const Subscription:FC<Props> = ({closeModal}) => {
     
     const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
     const { user, isLoading, subscription } = useUser();
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [priceIdLoading, setPriceIdLoading] = useState<string>();
     const router = useRouter();
-    
+
     const setSeg = (value) => {
         setBillingInterval(value);
     }
+    
     useEffect(() => {
         const fetchData = async() => {
             const res = await getActiveProductsWithPrices();
@@ -28,6 +31,7 @@ const Subscription = () => {
         }
         fetchData();
     }, []);
+    
     const handleCheckout = async (price: Price) => {
         setPriceIdLoading(price.id);
         const return_url = window.location.href;

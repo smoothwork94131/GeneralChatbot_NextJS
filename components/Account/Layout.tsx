@@ -4,6 +4,7 @@ import { Box, Flex, Group, Button, Text } from '@mantine/core';
 import { AppShell, Header } from "@mantine/core";
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from '@mantine/hooks';
+import { IconStarFilled } from "@tabler/icons-react";
 import Link from 'next/link';
 import { FC } from "react";
 import { supabase } from "@/utils/app/supabase-client";
@@ -16,10 +17,10 @@ interface Props {
     childrenSize: string
 }
 const Layout: FC<Props> = ({ children, childrenSize }) => {
-
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const {user} = useUser();
     const router = useRouter();
+    
     const sign = async() => {
         if(user) {
             await supabase.auth.signOut();
@@ -66,16 +67,20 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                         Pricing
                                     </Text>
                                 </Link>
-                                <Link href='/account'>
-                                    <Text
-                                        sx={(theme) => ({
-                                            fontWeight: 600,
-                                            cursor: 'pointer'
-                                        })}
-                                    >
-                                        Account
-                                    </Text>
-                                </Link>
+                                {
+                                    user?
+                                    <Link href='/account'>
+                                        <Text
+                                            sx={(theme) => ({
+                                                fontWeight: 600,
+                                                cursor: 'pointer'
+                                            })}
+                                        >
+                                            Account
+                                        </Text>
+                                    </Link>:<></>
+                                }
+                                
                             <Text
                                 sx={(theme) => ({
                                     fontWeight: 600,
@@ -88,20 +93,12 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                         <Group>
                             {
                                 user ?
-                                <Link href='/signin'>
-                                    <Button variant="outline" size="xs" onClick={()=>{sign}}>
-                                        Sign Out
-                                    </Button>
-                                </Link>
-                                :
-                                <Button variant="outline" size="xs" onClick={()=>{sign}}>
-                                    Sign In
-                                </Button>        
-                           
+                                <Button variant="outline" size="xs" onClick={()=>{sign()}}>
+                                    Sign Out
+                                </Button>:<></>
                            }
 
                         </Group>
-                        
                     </Flex>
                 </Box>
             </Header>}

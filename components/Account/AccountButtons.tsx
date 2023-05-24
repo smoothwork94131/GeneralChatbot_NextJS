@@ -35,12 +35,16 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     }, [selectedConversation, isSubscription, user]);
     
     useEffect(() => {
+        
         const fetchData = async() => {
             const is_subscription = await chkIsSubscription(user); 
-           
             setSubscription(is_subscription);
         }
         fetchData();
+        if(modalType == "signup" && user) {
+            setModalType('subscription');
+            setIsModal(true);
+        }
     },[user]);
 
     const closeModal = () => {
@@ -49,6 +53,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     useEffect(() => {
         
     }, [modalType])
+
     const showModal = (type) => {
         setModalType(type);
         setIsModal(true);
@@ -90,7 +95,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
             <MyModal
                 size={modalType == 'signin' || modalType == 'signup'?'sm':'xl'}
                 isModal={isModal}
-                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription />}
+                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}  closeModal={closeModal}/>:<Subscription closeModal={closeModal}/>}
                 title=''
                 closeModal={closeModal}
             />

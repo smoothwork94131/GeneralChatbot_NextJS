@@ -80,7 +80,7 @@ const Account = ({ user }: { user: User }) => {
             {
               subscription
                 ? `You are currently on the ${subscription?.prices?.products?.name} plan.`
-                : ''
+                : 'You are currently on the Free plan'
             }
           </Text>
           <Title 
@@ -95,7 +95,7 @@ const Account = ({ user }: { user: User }) => {
             ) : subscription ? (
               `${subscriptionPrice}/${subscription?.prices?.interval}`
             ) : (
-              <Link href="/pricing">Choose your plan</Link>
+              <Link href="/pricing"><Button variant='outline'>Choose your plan</Button></Link>
             )}
 
           </Title>

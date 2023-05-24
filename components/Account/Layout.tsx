@@ -4,7 +4,6 @@ import { Box, Flex, Group, Button, Text } from '@mantine/core';
 import { AppShell, Header } from "@mantine/core";
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconStarFilled } from "@tabler/icons-react";
 import Link from 'next/link';
 import { FC } from "react";
 import { supabase } from "@/utils/app/supabase-client";
@@ -17,16 +16,17 @@ interface Props {
     childrenSize: string
 }
 const Layout: FC<Props> = ({ children, childrenSize }) => {
+
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
-    const user = useUser();
+    const {user} = useUser();
     const router = useRouter();
-    
     const sign = async() => {
         if(user) {
             await supabase.auth.signOut();
         }   
         router.replace('/signin');
     }
+
     return (
         <AppShell
             padding="md"
@@ -88,20 +88,20 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                         <Group>
                             {
                                 user ?
-                                    <Link href='/signin'>
-                                        <Button variant="outline" size="xs" onClick={()=>{sign}}>
-                                            Sign Out
-                                        </Button>
-                                    </Link>
-                                    :
+                                <Link href='/signin'>
                                     <Button variant="outline" size="xs" onClick={()=>{sign}}>
-                                        Sign In
+                                        Sign Out
                                     </Button>
-                                             
+                                </Link>
+                                :
+                                <Button variant="outline" size="xs" onClick={()=>{sign}}>
+                                    Sign In
+                                </Button>        
                            
                            }
 
                         </Group>
+                        
                     </Flex>
                 </Box>
             </Header>}

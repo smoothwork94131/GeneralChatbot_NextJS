@@ -5,12 +5,11 @@ import { spotlight } from '@mantine/spotlight';
 import HomeContext from 'state/index.context';
 import { useUser } from '@/utils/app/useUser';
 import { useRouter } from 'next/router';
-import { getActiveProductsWithPrices, supabase } from '@/utils/app/supabase-client';
+import { chkIsSubscription, getActiveProductsWithPrices, supabase } from '@/utils/app/supabase-client';
 import MyModal from '@/components/Account/Modal';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
-import { Product, ProductWithPrice } from '@/types/user';
-import { postData } from '@/utils/app/helpers';
+
 
 interface Props {
     isMobile: boolean;
@@ -20,6 +19,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
 
     const { user } = useUser();
     const [isModal, setIsModal] = useState(false);
+    const [isSubscription , setSubscription ] = useState<boolean>(true);
     const [modalType, setModalType] = useState('sigin');
     const {
         state: { colorScheme, lightMode },
@@ -28,7 +28,13 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
     const closeModal = () => {
         setIsModal(false);
     }
-    
+    useEffect(()=> {
+        const fetchData = async() => {
+            const is_subscription = await chkIsSubscription(user);
+            setSubscription(is_subscription);
+        }
+        fetchData();
+    }, [user])
 
     const handleColorScheme = () => {
         homeDispatch({
@@ -112,12 +118,16 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                         >
                             Account
                         </Menu.Item>
-                        <Menu.Item
-                            icon={<IconSettings size={14} />}
-                            onClick={() => { upgrade() }}
-                        >
-                            Upgrade
-                        </Menu.Item>
+                        {
+                            user && !isSubscription?
+                            <Menu.Item
+                                icon={<IconSettings size={14} />}
+                                onClick={() => { upgrade() }}
+                            >
+                                Upgrade
+                            </Menu.Item>:<></>
+                        }
+                        
                         <Menu.Item
                             icon={user ? <IconLogout size={14} /> : <IconLogin size={14} />}
                             onClick={() => goLogin()}
@@ -183,12 +193,16 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             variant="subtle"
                             onClick={() => { goPortalPage() }}
                         />
-                        <NavLink
-                            label="Upgrade"
-                            icon={<IconSettings size="1rem" stroke={1.5} />}
-                            variant="subtle"
-                            onClick={() => {upgrade() }}
-                        />
+                        {
+                            user && !isSubscription?
+                            <NavLink
+                                label="Upgrade  "
+                                icon={<IconSettings size="1rem" stroke={1.5} />}
+                                variant="subtle"
+                                onClick={() => {upgrade() }}
+                            />:<></>
+                        }
+                        
                         <NavLink
                             label={
                                 user ? 'Sign out' : 'Sign in'
@@ -197,6 +211,15 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             variant="subtle"
                             onClick={() => goLogin()}
                         />
+                        {
+                            !user?
+                            <NavLink
+                                label='Create Account'
+                                icon={user ? <IconUser size="1rem" stroke={1.5} /> : <IconLogin size="1rem" stroke={1.5} />}
+                                variant="subtle"
+                                onClick={() => signUp()}
+                            />:<></>
+                        }
                     </Flex>
             }
 

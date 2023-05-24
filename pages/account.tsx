@@ -12,7 +12,6 @@ import Layout from "@/components/Account/Layout";
 import {
   Title,
   Card,
-  Group,
   Box,
   Text,
   Button,
@@ -106,6 +105,7 @@ const Account = ({ user }: { user: User }) => {
             align='center'
           >
             <Text>
+
             </Text>
             <Button className='bg-sky-500/100'
               disabled={loading || !subscription}

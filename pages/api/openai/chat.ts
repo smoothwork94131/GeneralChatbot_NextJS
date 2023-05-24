@@ -1,11 +1,22 @@
 import {  NextResponse } from 'next/server';
 import { OpenAIAPI } from '@/types/openai';
-import { supabase } from '@/utils/app/supabase-client';
+import { createClient } from '@supabase/supabase-js';
 import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
-import { supabaseAdmin } from '@/utils/app/supabase-client';
+
 import moment from 'moment';
 
-import {limiter} from '../middleware';
+import { OPENAI_API_KEY } from '@/utils/server/const';
+
+import { NEXT_PUBLIC_SUPABASE_URL } from '@/utils/app/const';
+import { SUPABASE_SERVICE_ROLE_KEY } from '@/utils/server/const';
+import { Database } from '@/types/types_db';
+
+// Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
+// as it has admin priviliges and overwrites RLS policies!
+const supabaseAdmin = createClient<Database>(
+ NEXT_PUBLIC_SUPABASE_URL || '',
+  SUPABASE_SERVICE_ROLE_KEY || ''
+);
 
 if (!process.env.OPENAI_API_KEY)
   console.warn(
@@ -13,10 +24,9 @@ if (!process.env.OPENAI_API_KEY)
     'Will use the optional keys incoming from the client, which is not recommended.',
 );
 
-
 // helper functions
 
-export async function extractOpenaiChatInputs(req: ApiChatInput): Promise<ApiChatInput> {
+export function extractOpenaiChatInputs(req: ApiChatInput): ApiChatInput {
 
   const {
     api: userApi = {},
@@ -30,7 +40,7 @@ export async function extractOpenaiChatInputs(req: ApiChatInput): Promise<ApiCha
     throw new Error('Missing required parameters: api, model, messages');
 
   const api: OpenAIAPI.Configuration = {
-    apiKey: (userApi.apiKey || process.env.OPENAI_API_KEY || '').trim(),
+    apiKey: (userApi.apiKey || process.env.OPENAI_API_KEY || OPENAI_API_KEY).trim(),
     apiHost: (userApi.apiHost || process.env.OPENAI_API_HOST || 'api.openai.com').trim().replaceAll('https://', ''),
     apiOrganizationId: (userApi.apiOrganizationId || process.env.OPENAI_API_ORG_ID || '').trim(),
   };
@@ -58,20 +68,20 @@ export const chatCompletionPayload = (input: Omit<ApiChatInput, 'api'>, stream: 
 const getUserTimes = async (userId: string|null, fingerId: string) => {
   let times = 0;
   if(!userId) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
     .from('free')
     .select('*')
-    .eq('visitorId', fingerId)
+    .eq('visitor_id', fingerId)
     .order("id", { ascending: true });
 
     if(data) {
       if(data.length == 0) {
-        times = NO_ACCOUNT_TIMES ;
-        const { data, error } = await supabase
+        times = NO_ACCOUNT_TIMES;
+        const { data, error } = await supabaseAdmin
         .from('free')
         .insert([{
           times: times,
-          visitorId: fingerId
+          visitor_id: fingerId
         }])
       } else {
         times = data[0].times;
@@ -80,7 +90,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
   }
 
   if(userId){
-    const subscription = await supabase
+    const subscription = await supabaseAdmin
     .from('subscriptions')
     .select('*')
     .gte('current_period_end', moment().format("YYYY-MM-D"));
@@ -91,7 +101,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
       } 
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
     .from('users')
     .select('*')
     .eq('id', userId)
@@ -100,7 +110,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
     if(data && data.length > 0) {
       times = data[0].times;
     } else {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
       .from('users')
       .update([{
         "chat_date": moment().format("MM/DD/YYYY"),
@@ -113,19 +123,26 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
   return times;
 }
 
-export const decreaseUserTimes = async (userId, fingerId) => {
-  const userTimes = await getUserTimes(userId, fingerId);
+export const decreaseUserTimes = async (userId, fingerId, current_times=-1) => {
+  let userTimes
+  
+  if(current_times === -1){
+    userTimes = await getUserTimes(userId, fingerId);
+  } else {
+    userTimes = current_times;
+  }
 
   if(userTimes == 0) {
     return;
   }
+
   if(!userId) {
     const { error } = await supabaseAdmin
     .from('free')
     .update([{
-      visitorId: fingerId,
+      visitor_id: fingerId,
       times: Number(userTimes) - 1
-    }]).eq("visitorId", fingerId);
+    }]).eq("visitor_id", fingerId);
     if (error) {
       console.log(error);
     }
@@ -165,7 +182,7 @@ export async function getOpenAIJson<TJson extends object>(api: OpenAIAPI.Configu
 
 export const getSubscriptions = async (user_id) => {
   if(!user_id) return false;
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('subscriptions')
     .select('*')
     .eq("user_id", user_id)
@@ -239,8 +256,7 @@ export default async function handler(req, res) {
     const fingerId = userApi.fingerId;
     const userId = userApi.userId;
 
-    const userTimes = await getUserTimes(userId, fingerId);
-    const isSubscription = await getSubscriptions(userId);
+    let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
 
     if (!userId && userTimes <= 0) {
       throw new Error("User times have expired.");
@@ -248,11 +264,15 @@ export default async function handler(req, res) {
       throw new Error("User subscription required.");
     }
 
-    const { api, ...rest } = await extractOpenaiChatInputs(input);
+    const { api, ...rest } = extractOpenaiChatInputs(input);
     const payLoad = chatCompletionPayload(rest, false);
-    const response = await postToOpenAI(api, "/v1/chat/completions", payLoad);
-    const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
-    await decreaseUserTimes(userId, fingerId);
+    const response_ = postToOpenAI(api, "/v1/chat/completions", payLoad);
+    const completion_ = response_.then((res) => res.json());
+    const decreaseUser = decreaseUserTimes(userId, fingerId, userTimes);
+
+    const [completion,_] :[OpenAIAPI.Chat.CompletionsResponse,any] = await Promise.all([completion_, decreaseUser]);
+    // const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
+    
     return new NextResponse(JSON.stringify({
       message: completion.choices[0].message,
     }));

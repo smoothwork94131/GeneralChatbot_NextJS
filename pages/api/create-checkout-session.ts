@@ -2,7 +2,7 @@ import { NextApiHandler } from 'next';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 import { stripe } from '@/utils/app/stripe';
-import { createOrRetrieveCustomer } from '@/utils/app/supabase-admin';
+import { createOrRetrieveCustomer } from '@/utils/server/supabase-admin';
 import { getURL } from '@/utils/app/helpers';
 
 const CreateCheckoutSession: NextApiHandler = async (req, res) => {

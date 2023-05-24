@@ -71,7 +71,7 @@ export const getUserTimes = async (user: User|null) => {
 
     if(data) {
       if(data.length == 0) {
-        // times = NO_ACCOUNT_TIMES ;
+        times = NO_ACCOUNT_TIMES ;
         // const { data, error } = await supabase
         // .from('free')
         // .insert([{

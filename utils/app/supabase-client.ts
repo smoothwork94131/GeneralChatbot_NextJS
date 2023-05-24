@@ -71,13 +71,13 @@ export const getUserTimes = async (user: User|null) => {
 
     if(data) {
       if(data.length == 0) {
-        times = NO_ACCOUNT_TIMES ;
-        const { data, error } = await supabase
-        .from('free')
-        .insert([{
-          times: times,
-          visitorId: visitorId
-        }])
+        // times = NO_ACCOUNT_TIMES ;
+        // const { data, error } = await supabase
+        // .from('free')
+        // .insert([{
+        //   times: times,
+        //   visitorId: visitorId
+        // }])
       } else {
         times = data[0].times;
       }
@@ -105,49 +105,49 @@ export const getUserTimes = async (user: User|null) => {
     if(data && data.length > 0) {
       times = data[0].times;
     } else {
-      const { data, error } = await supabase
-      .from('users')
-      .update([{
-        "chat_date": moment().format("YYYY-MM-D"),
-        "times": times
-      }])
-      .eq('id', user.id);
-      times = times;
+      // const { data, error } = await supabase
+      // .from('users')
+      // .update([{
+      //   "chat_date": moment().format("YYYY-MM-D"),
+      //   "times": times
+      // }])
+      // .eq('id', user.id);
+      // times = times;
     }
   }
   return times;
 }
 
-export const reducerUserTimes = async (user: User|null) => {
-  const userTimes = await getUserTimes(user);
+// export const reducerUserTimes = async (user: User|null) => {
+//   const userTimes = await getUserTimes(user);
 
-  if(userTimes == 0) {
-    return;
-  }
+//   if(userTimes == 0) {
+//     return;
+//   }
 
-  const fp = await FingerprintJS.load({ debug: true })
-  const { visitorId } = await fp.get();
-  if(!user) {
-    const { error } = await supabaseAdmin
-    .from('free')
-    .update([{
-      visitorId: visitorId,
-      times: Number(userTimes) - 1
-    }]).eq("visitorId", visitorId);
-    if (error) {
-      console.log(error);
-    }
-  } else {  
-    const { error } = await supabaseAdmin
-    .from('users')
-    .update([{
-      times: Number(userTimes) - 1
-    }]).eq("id", user.id);
-    if (error) {
-      console.log(error);
-    }
-  }
-}
+//   const fp = await FingerprintJS.load({ debug: true })
+//   const { visitorId } = await fp.get();
+//   if(!user) {
+//     const { error } = await supabaseAdmin
+//     .from('free')
+//     .update([{
+//       visitorId: visitorId,
+//       times: Number(userTimes) - 1
+//     }]).eq("visitorId", visitorId);
+//     if (error) {
+//       console.log(error);
+//     }
+//   } else {  
+//     const { error } = await supabaseAdmin
+//     .from('users')
+//     .update([{
+//       times: Number(userTimes) - 1
+//     }]).eq("id", user.id);
+//     if (error) {
+//       console.log(error);
+//     }
+//   }
+// }
 
 export const chkIsSubscription = async(user: User| null) => {
   if(!user) return false;

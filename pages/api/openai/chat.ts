@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local'})
 import {  NextResponse } from 'next/server';
 import { OpenAIAPI } from '@/types/openai';
 // import { supabase } from '@/utils/app/supabase-client';
@@ -7,6 +5,7 @@ import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
 import { supabaseAdmin } from '@/utils/app/supabase-client';
 import moment from 'moment';
 
+import { OPENAI_API_KEY } from '@/utils/server/const';
 
 import {rateLimiterMiddleware} from '../middleware';
 
@@ -15,7 +14,6 @@ if (!process.env.OPENAI_API_KEY)
     'OPENAI_API_KEY has not been provided in this deployment environment. ' +
     'Will use the optional keys incoming from the client, which is not recommended.',
 );
-
 
 // helper functions
 
@@ -33,7 +31,7 @@ export function extractOpenaiChatInputs(req: ApiChatInput): ApiChatInput {
     throw new Error('Missing required parameters: api, model, messages');
 
   const api: OpenAIAPI.Configuration = {
-    apiKey: (userApi.apiKey || process.env.OPENAI_API_KEY || '').trim(),
+    apiKey: (userApi.apiKey || process.env.OPENAI_API_KEY || OPENAI_API_KEY).trim(),
     apiHost: (userApi.apiHost || process.env.OPENAI_API_HOST || 'api.openai.com').trim().replaceAll('https://', ''),
     apiOrganizationId: (userApi.apiOrganizationId || process.env.OPENAI_API_ORG_ID || '').trim(),
   };

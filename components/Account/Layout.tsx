@@ -25,7 +25,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
         if(user) {
             await supabase.auth.signOut();
         }   
-        router.replace('/signin');
+        window.location.href = '/signin';
     }
 
     return (

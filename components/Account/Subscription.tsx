@@ -13,12 +13,11 @@ interface Props {
     closeModal: ()=>void;
 }
 const Subscription:FC<Props> = ({closeModal}) => {
-    
+    const { user } = useUser();
+
     const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
-    const { user, isLoading, subscription } = useUser();
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [priceIdLoading, setPriceIdLoading] = useState<string>();
-    const router = useRouter();
 
     const setSeg = (value) => {
         setBillingInterval(value);
@@ -33,6 +32,10 @@ const Subscription:FC<Props> = ({closeModal}) => {
     }, []);
     
     const handleCheckout = async (price: Price) => {
+        if(!user) {
+            window.location.href = '/signin';
+            return;
+        }
         setPriceIdLoading(price.id);
         const return_url = window.location.href;
         try {

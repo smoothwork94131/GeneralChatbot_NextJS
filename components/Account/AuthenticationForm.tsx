@@ -59,7 +59,12 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
             if(error) {  
                 setErrorMessage(error.message);
                 return;
-            }           
+            }   
+            if(window.location.pathname == "/signin") {
+                window.location.href = "/pricing";
+            } else {
+                closeModal();
+            }
         }  else if( type == "Sign Up") {
             const { data, error } = await supabase.auth.signUp({
                 email: email,
@@ -69,8 +74,9 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
                 setErrorMessage(error.message);
                 return;
             }
+            closeModal();
         }
-        closeModal();
+        
     }
 
     const AuthWidthProvider = async(provider) => {

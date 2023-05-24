@@ -93,6 +93,7 @@ const getUserTimes = async (userId: string|null, fingerId: string) => {
     const subscription = await supabaseAdmin
     .from('subscriptions')
     .select('*')
+    .eq('user_id', userId)
     .gte('current_period_end', moment().format("YYYY-MM-D"));
     times = FREE_TIMES;
     if(subscription.data) {

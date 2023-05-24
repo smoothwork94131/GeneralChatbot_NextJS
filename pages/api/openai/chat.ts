@@ -1,13 +1,22 @@
 import {  NextResponse } from 'next/server';
 import { OpenAIAPI } from '@/types/openai';
-// import { supabase } from '@/utils/app/supabase-client';
+import { createClient } from '@supabase/supabase-js';
 import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
-import { supabaseAdmin } from '@/utils/app/supabase-client';
+
 import moment from 'moment';
 
 import { OPENAI_API_KEY } from '@/utils/server/const';
 
-import {rateLimiterMiddleware} from '../middleware';
+import { NEXT_PUBLIC_SUPABASE_URL } from '@/utils/app/const';
+import { SUPABASE_SERVICE_ROLE_KEY } from '@/utils/server/const';
+import { Database } from '@/types/types_db';
+
+// Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
+// as it has admin priviliges and overwrites RLS policies!
+const supabaseAdmin = createClient<Database>(
+ NEXT_PUBLIC_SUPABASE_URL || '',
+  SUPABASE_SERVICE_ROLE_KEY || ''
+);
 
 if (!process.env.OPENAI_API_KEY)
   console.warn(

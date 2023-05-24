@@ -16,7 +16,7 @@ import {
 import { IconBrandGithub } from '@tabler/icons-react';
 import { supabase } from '@/utils/app/supabase-client';
 import { useState, FC } from 'react';
-
+import { useRouter } from 'next/router';
 
 interface Props {
     modalType: string,
@@ -26,7 +26,7 @@ interface Props {
 export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
 
     let toggleGroup = ['Sign In', 'Sign Up'] ;
- 
+    const router = useRouter();
     if(modalType == 'signup') {
         toggleGroup = ['Sign Up', 'Sign In'];
     }
@@ -61,7 +61,7 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
                 return;
             }   
             if(window.location.pathname == "/signin") {
-                window.location.href = "/pricing";
+                router.replace("/pricing");
             } else {
                 closeModal();
             }

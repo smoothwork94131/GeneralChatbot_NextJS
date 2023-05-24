@@ -67,6 +67,10 @@ const ChatContent: FC<Props> = ({
             // setSubscription(data);
         }
         fetchData();
+        if(modalType == "signup" && user) {
+            setModalType('subscription');
+            setIsModal(true);
+        }
     },[user]);
 
     useEffect(() => {
@@ -358,13 +362,12 @@ const ChatContent: FC<Props> = ({
                     selectedSearch={selectedSearch}
                     clearSelectedSearch={clearSelectedSearch}
                 />
-                    
             </Box>
             
             <MyModal
                 size={modalType == 'signin' || modalType == 'signup'?'  sm':'xl'}
                 isModal={isModal}
-                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType}/>:<Subscription />}
+                child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType} closeModal={closeModal}/>:<Subscription closeModal={closeModal} />}
                 title=''
                 closeModal={closeModal}
             />
@@ -401,10 +404,9 @@ const ChatContent: FC<Props> = ({
                             }}>
                                 Create Account
                             </Button>
-    
                         </Group>:
                         <Button variant="outline" onClick={() => {
-                            setModalType('upgrade');
+                            setModalType('subscription');
                             setIsLimitModal(false);
                             setIsModal(true);
                         }}>

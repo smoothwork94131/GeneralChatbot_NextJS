@@ -21,6 +21,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
     const [isModal, setIsModal] = useState(false);
     const [isSubscription , setSubscription ] = useState<boolean>(true);
     const [modalType, setModalType] = useState('sigin');
+    const router = useRouter();
     
     const {
         state: { colorScheme, lightMode },
@@ -70,7 +71,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
 
     const goPortalPage = async () => {
         if (user) {
-            window.location.href='/account';
+            router.replace('/account');
         } else {
             setModalType("signin");
             setIsModal(true);

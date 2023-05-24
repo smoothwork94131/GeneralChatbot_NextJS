@@ -56,7 +56,6 @@ const OpenAi = ({
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
     const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
-    const [userTimes, setUserTimes] = useState<number>(0);
 
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
@@ -225,7 +224,8 @@ const OpenAi = ({
         setOpenedSiebar(false);
     };
     const handleShowSidebar = () => {
-        setOpenedSiebar(!openedSidebar);
+        if(isMobile)
+            setOpenedSiebar(!openedSidebar);
     };
     const handleInputSearch = (event) => {
         const searchKey = event.target.value;

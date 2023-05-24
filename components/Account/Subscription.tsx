@@ -1,6 +1,6 @@
-import { Card, Image, Text, Badge, Button, Group, Flex, Box, Space, Textarea, Loader, Title } from '@mantine/core';
+import { Card, Text, Button, Group, Flex, Box, Space, Loader } from '@mantine/core';
 import { FC, useState, useEffect } from 'react';
-import { Price, Product, ProductWithPrice } from '@/types/user';
+import { Price, ProductWithPrice } from '@/types/user';
 import { useUser } from '@/utils/app/useUser';
 import { SegmentedControl } from '@mantine/core';
 import { getStripe } from '@/utils/app/stripe-client';
@@ -14,7 +14,7 @@ interface Props {
 }
 const Subscription:FC<Props> = ({closeModal}) => {
     const { user } = useUser();
-
+    const router = useRouter();
     const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [priceIdLoading, setPriceIdLoading] = useState<string>();
@@ -33,7 +33,7 @@ const Subscription:FC<Props> = ({closeModal}) => {
     
     const handleCheckout = async (price: Price) => {
         if(!user) {
-            window.location.href = '/signin';
+            router.replace('/signin');
             return;
         }
         setPriceIdLoading(price.id);

@@ -4,7 +4,6 @@ import { Box, Flex, Group, Button, Text } from '@mantine/core';
 import { AppShell, Header } from "@mantine/core";
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconStarFilled } from "@tabler/icons-react";
 import Link from 'next/link';
 import { FC } from "react";
 import { supabase } from "@/utils/app/supabase-client";
@@ -25,14 +24,13 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
         if(user) {
             await supabase.auth.signOut();
         }   
-        window.location.href = '/signin';
+        router.replace('/signin');
     }
 
     return (
         <AppShell
             padding="md"
             header={<Header height={60} p="xs"
-
         >
                 <Box
                     sx={(theme) => ({

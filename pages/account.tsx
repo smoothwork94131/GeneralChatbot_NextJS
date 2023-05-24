@@ -21,6 +21,7 @@ import {
 } from "@mantine/core";
 import { getSubscriptions } from "@/utils/app/supabase-client";
 import { Subscription } from '@/types/user';
+import { useRouter } from 'next/router';
 
 interface Props {
   title: string;
@@ -33,11 +34,11 @@ const Account = ({ user }: { user: User }) => {
   const [loading, setLoading] = useState(false);
   const { isLoading } = useUser();
   const [subscription, setSubscription] = useState<Subscription>();
+  const router = useRouter();
 
   if(!user) {
-    window.location.href='/signin';
+    router.replace('/signin');
   }
-  
   const redirectToCustomerPortal = async () => {
     setLoading(true);
     try {
@@ -95,7 +96,7 @@ const Account = ({ user }: { user: User }) => {
             ) : subscription ? (
               `${subscriptionPrice}/${subscription?.prices?.interval}`
             ) : (
-              <Link href="/pricing"><Button variant='outline'>Choose your plan</Button></Link>
+              <Link href="/pricing" ><Button variant='outline'>Choose your plan</Button></Link>
             )}
 
           </Title>

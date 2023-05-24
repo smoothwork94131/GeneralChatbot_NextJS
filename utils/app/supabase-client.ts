@@ -60,13 +60,13 @@ export const getSubscriptions = async (user: User) => {
 export const getUserTimes = async (user: User|null) => {
   
   const fp = await FingerprintJS.load({ debug: true })
-  const { visitor_id } = await fp.get();
+  const { visitorId } = await fp.get();
   let times = 0;
   if(!user) {
     const { data, error } = await supabase
     .from('free')
     .select('*')
-    .eq('visitor_id', visitor_id)
+    .eq('visitor_id', visitorId)
     .order("id", { ascending: true });
 
     if(data) {

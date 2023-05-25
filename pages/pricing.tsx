@@ -23,13 +23,11 @@ const Pricing:FC<Props> = () => {
           <Card.Section>
             <Title  order={1} ></Title>
           </Card.Section>
-          <Flex>
             <Box sx={(theme)=> ({
               padding: theme.spacing.lg,
             })}>
               <Subscription closeModal={function(){}}/>  
             </Box>
-          </Flex>
         </Card>
       </Box>
       

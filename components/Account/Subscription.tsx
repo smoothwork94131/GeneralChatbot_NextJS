@@ -19,19 +19,21 @@ const Subscription:FC<Props> = ({closeModal}) => {
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [priceIdLoading, setPriceIdLoading] = useState<string>();
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const setSeg = (value) => {
         setBillingInterval(value);
     }
     
     useEffect(() => {
         const fetchData = async() => {
+            setIsLoading(true);
             const res = await getActiveProductsWithPrices();
             if(user) {
                 const subscriptions = await getSubscriptions(user);
                 setSubscriptions(subscriptions);
             }
             setProducts(res);
+            setIsLoading(false);
         }
         fetchData();
     }, []);
@@ -76,17 +78,33 @@ const Subscription:FC<Props> = ({closeModal}) => {
             sx={(theme) => ({
                 padding: theme.spacing.xs,
             })}
-        >
-            <SegmentedControl
-                value={billingInterval}
-                onChange={setSeg}
-                data={[
-                    { label: 'Montly billing', value: 'month' },
-                    { label: 'Yearly billing', value: 'year' },
-                ]}
-            />
-
+        >   
+            {
+                isLoading?
+                    <Box sx={(theme) =>({
+                        textAlign: 'center',
+                    })}>
+                        <Loader variant='dots' />
+                    </Box>:<></>
+            }
+            
             {products.length > 0 ? (
+            <Box>
+                <Box
+                    sx={(theme) => ({
+                        textAlign: 'center'
+                    })}
+                >
+                    <SegmentedControl
+                        value={billingInterval}
+                        onChange={setSeg}
+                        data={[
+                            { label: 'Montly billing', value: 'month' },
+                            { label: 'Yearly billing', value: 'year' },
+                        ]}
+                    />    
+                </Box>
+                
                 <Flex
                     justify='center'
                     gap={`sm`}
@@ -155,6 +173,7 @@ const Subscription:FC<Props> = ({closeModal}) => {
                         );
                     })}
                 </Flex>
+            </Box>
             ) : (
                 <Box></Box>
             )}

@@ -165,7 +165,8 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                         wrap="wrap"
                         sx={(theme) => ({
                             borderTop: `1px solid ${theme.colorScheme == 'dark' ? theme.colors.gray[8] : theme.colors.gray[1]}`,
-                            paddingTop: theme.spacing.md
+                            paddingTop: theme.spacing.md,
+                            width: '100%'
                         })}
                     >
 

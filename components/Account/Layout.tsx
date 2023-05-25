@@ -55,28 +55,33 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                     cursor: 'pointer'
                                 })}
                             />
-                                <Link href='/pricing'>
+                                {/* <Link href='/pricing'> */}
                                     <Text
                                         sx={(theme) => ({
                                             fontWeight: 600,
                                             cursor: 'pointer'
                                         })}
+                                        onClick={() => {router.replace("/pricing")}}
                                     >
                                         Pricing
                                     </Text>
-                                </Link>
+                                {/* </Link> */}
                                 {
                                     user?
-                                    <Link href='/account'>
+                                    // <Link href='/account'>
                                         <Text
                                             sx={(theme) => ({
                                                 fontWeight: 600,
                                                 cursor: 'pointer'
                                             })}
+                                            onClick={() => {router.replace("/account")}}
+
                                         >
                                             Account
                                         </Text>
-                                    </Link>:<></>
+                                    // </Link>
+                                    :
+                                    <></>
                                 }
                                 
                             <Text

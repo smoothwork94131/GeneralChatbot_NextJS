@@ -80,8 +80,10 @@ const Account = ({ user }: { user: User }) => {
           <Title order={2}>Your Plan</Title>
           <Text size="sm" color="dimmed">
             {
+              isLoading?
+              <></>:
               subscription
-                ? `You are currently on the ${subscription?.prices?.products?.name} plan.`
+                ? `You are currently on the ${subscription?.prices?.products?.name}.`
                 : 'You are currently on the Free plan'
             }
           </Text>

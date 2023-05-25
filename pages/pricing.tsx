@@ -1,4 +1,3 @@
-import Layout from "@/components/Account/Layout";
 import { FC, useEffect} from 'react';
 import { useUser } from "@/utils/app/useUser";
 import { 
@@ -7,7 +6,12 @@ import {
   Card,
   Flex
  } from "@mantine/core";
-import Subscription from "@/components/Account/Subscription";
+
+ import dynamic from 'next/dynamic'
+
+const Subscription = dynamic(() => import('@/components/Account/Subscription'), { ssr: false })
+const Layout = dynamic(() => import('@/components/Account/Layout'), { ssr: false })
+
 interface Props {
   
 }
@@ -22,13 +26,13 @@ const Pricing:FC<Props> = () => {
           <Flex>
             <Box sx={(theme)=> ({
               padding: theme.spacing.lg,
-             
             })}>
-              <Subscription closeModal={function(){}}/>    
+              <Subscription closeModal={function(){}}/>  
             </Box>
           </Flex>
         </Card>
       </Box>
+      
     </Layout>
   )
 }

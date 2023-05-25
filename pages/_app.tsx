@@ -4,7 +4,7 @@ import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { appWithTranslation } from 'next-i18next';
 import type { AppProps } from 'next/app';
 import { Inter } from 'next/font/google';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Database } from '@/types/types_db';
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { MantineProvider, ColorSchemeProvider, MantineThemeOverride } from '@mantine/core';
@@ -34,6 +34,7 @@ function App({ Component, pageProps }: AppProps<{}>) {
       chatInputPadding: '40px'
     }
   };
+  
   return (
     <div className={inter.className}>
       <SessionContextProvider supabaseClient={supabaseClient}>

@@ -49,7 +49,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                         <Group>
                             <Image
                                 src='/favicon.ico'
-                                maw={30} mx="auto"
+                                maw={30}
                                 onClick={() =>{router.replace("/")}}
                                 sx={(theme) => ({
                                     cursor: 'pointer'

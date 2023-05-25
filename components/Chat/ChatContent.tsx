@@ -365,12 +365,13 @@ const ChatContent: FC<Props> = ({
             </Box>
             
             <MyModal
-                size={modalType == 'signin' || modalType == 'signup'?'  sm':'xl'}
+                size={modalType == 'signin' || modalType == 'signup'?'  sm':'sm'}
                 isModal={isModal}
                 child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType} closeModal={closeModal}/>:<Subscription closeModal={closeModal} />}
                 title=''
                 closeModal={closeModal}
             />
+            
             <MyModal
                 size='sm'
                 isModal={isLimitModal}

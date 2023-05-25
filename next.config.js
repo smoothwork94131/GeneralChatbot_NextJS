@@ -3,6 +3,9 @@
 
 const nextConfig = {
   reactStrictMode: true,
+  compiler: {
+    styledComponents: true,
+  },
   env: {
     // defaults to TRUE, unless API Keys are set at build time; this flag is used by the UI
     HAS_SERVER_KEY_OPENAI: !!process.env.OPENAI_API_KEY,

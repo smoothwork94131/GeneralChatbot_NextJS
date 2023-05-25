@@ -8,7 +8,8 @@ import {
 
 import { useUser } from '@/utils/app/useUser';
 import { postData } from '@/utils/app/helpers';
-import Layout from "@/components/Account/Layout";
+import dynamic from 'next/dynamic'
+const Layout = dynamic(() => import('@/components/Account/Layout'), { ssr: false });
 import {
   Title,
   Card,

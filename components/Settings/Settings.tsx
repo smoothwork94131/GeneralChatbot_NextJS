@@ -238,7 +238,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
             }
 
             <MyModal
-                size={modalType == 'signin' || modalType == 'signup'?'sm':'xl'}
+                size={modalType == 'signin' || modalType == 'signup'?'sm':'sm'}
                 isModal={isModal}
                 child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType} closeModal={closeModal}/>:<Subscription closeModal={closeModal}/>}
                 title=''

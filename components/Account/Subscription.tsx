@@ -1,12 +1,12 @@
 import { Card, Text, Button, Group, Flex, Box, Space, Loader } from '@mantine/core';
 import { FC, useState, useEffect } from 'react';
-import { Price, ProductWithPrice } from '@/types/user';
+import { Price, ProductWithPrice, Subscription } from '@/types/user';
 import { useUser } from '@/utils/app/useUser';
 import { SegmentedControl } from '@mantine/core';
 import { getStripe } from '@/utils/app/stripe-client';
 import { postData } from '@/utils/app/helpers';
 import { useRouter } from 'next/router';
-import { getActiveProductsWithPrices } from '@/utils/app/supabase-client';
+import { getActiveProductsWithPrices, getSubscriptions } from '@/utils/app/supabase-client';
 
 type BillingInterval = 'year' | 'month';
 interface Props {
@@ -18,6 +18,7 @@ const Subscription:FC<Props> = ({closeModal}) => {
     const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
     const [products, setProducts] = useState<ProductWithPrice[]>([]);
     const [priceIdLoading, setPriceIdLoading] = useState<string>();
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 
     const setSeg = (value) => {
         setBillingInterval(value);
@@ -26,6 +27,10 @@ const Subscription:FC<Props> = ({closeModal}) => {
     useEffect(() => {
         const fetchData = async() => {
             const res = await getActiveProductsWithPrices();
+            if(user) {
+                const subscriptions = await getSubscriptions(user);
+                setSubscriptions(subscriptions);
+            }
             setProducts(res);
         }
         fetchData();
@@ -36,7 +41,12 @@ const Subscription:FC<Props> = ({closeModal}) => {
             router.replace('/signin');
             return;
         }
+        
+        if(chkProductStatus(price.product_id)) {           
+            return router.replace("/account");
+        }
         setPriceIdLoading(price.id);
+
         const return_url = window.location.href;
         try {
             const { sessionId } = await postData({
@@ -54,6 +64,13 @@ const Subscription:FC<Props> = ({closeModal}) => {
             setPriceIdLoading(undefined);
         }
     };
+    const chkProductStatus = (product_id) => {
+        if(subscriptions.length  == 0) {
+            return false;
+        } else {
+            return subscriptions.filter((product) => product.prices?.products?.id == product_id);
+        }
+    }
     return (
         <Box
             sx={(theme) => ({
@@ -71,6 +88,7 @@ const Subscription:FC<Props> = ({closeModal}) => {
 
             {products.length > 0 ? (
                 <Flex
+                    justify='center'
                     gap={`sm`}
                     sx={(theme) => ({
                         padding: theme.spacing.md
@@ -128,7 +146,9 @@ const Subscription:FC<Props> = ({closeModal}) => {
                                 >
                                     {
                                         priceIdLoading?
-                                        <Loader size={`sm`} variant="dots"/>:'Subscribe'
+                                        <Loader size={`sm`} variant="dots"/>:
+                                            chkProductStatus(product.id)?
+                                            'Manage':'Subscribe'
                                     }
                                 </Button>
                             </Card>

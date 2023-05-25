@@ -1,4 +1,4 @@
-import { Modal} from '@mantine/core';
+import { Box, Modal} from '@mantine/core';
 import { FC } from 'react';
 interface Props {
     isModal: boolean;

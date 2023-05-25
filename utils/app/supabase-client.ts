@@ -92,7 +92,7 @@ export const getUserTimes = async (user: User|null) => {
     .from('subscriptions')
     .select('*')
     .eq("user_id", user.id)
-    .gte('current_period_end', moment().format("YYYY-MM-D"));
+    .gte('current_period_end', moment.utc().format("YYYY-MM-D"));
     const is_subscription = await chkIsSubscription(user);
     times = FREE_TIMES;
     if(is_subscription) {
@@ -103,7 +103,7 @@ export const getUserTimes = async (user: User|null) => {
     .from('users')
     .select('*')
     .eq('id', user.id)
-    .eq('chat_date', moment().format("YYYY-MM-D"));
+    .eq('chat_date', moment.utc().format("YYYY-MM-D"));
 
     if(data && data.length > 0) {
       times = data[0].times;
@@ -111,7 +111,7 @@ export const getUserTimes = async (user: User|null) => {
       // const { data, error } = await supabase
       // .from('users')
       // .update([{
-      //   "chat_date": moment().format("YYYY-MM-D"),
+      //   "chat_date": moment.utc().format("YYYY-MM-D"),
       //   "times": times
       // }])
       // .eq('id', user.id);
@@ -159,7 +159,7 @@ export const chkIsSubscription = async(user: User| null) => {
     .select('*')
     .eq("user_id", user.id)
     .eq("cancel_at_period_end", false)
-    .gte('current_period_end', moment().format("YYYY-MM-D"));
+    .gte('current_period_end', moment.utc().format("YYYY-MM-D"));
 
   if(data) {
     if(data.length > 0) {

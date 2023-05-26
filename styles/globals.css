@@ -29,7 +29,5 @@
 }
 .mantine-Textarea-input {
     max-height: 100px;
-    overflow-y: auto;
+    overflow-y: auto !important;
 }
-
-

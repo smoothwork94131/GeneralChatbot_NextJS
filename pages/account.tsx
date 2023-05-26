@@ -35,6 +35,7 @@ const Account = ({ user }: { user: User }) => {
   const [loading, setLoading] = useState(false);
   const { isLoading } = useUser();
   const [subscription, setSubscription] = useState<Subscription>();
+  
   const router = useRouter();
 
   if(!user) {
@@ -56,11 +57,13 @@ const Account = ({ user }: { user: User }) => {
     setLoading(false);
   };
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
       const subscription_ = await getSubscriptions(user);
       if (subscription_.length > 0) {
         setSubscription(subscription_[0]);
-      }
+      } 
+      setLoading(false);
     }
     fetchData();
   }, [])
@@ -78,48 +81,53 @@ const Account = ({ user }: { user: User }) => {
       <Box>
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Title order={2}>Your Plan</Title>
-          <Text size="sm" color="dimmed">
-            {
-              isLoading?
-              <></>:
-              subscription
-                ? `You are currently on the ${subscription?.prices?.products?.name}.`
-                : 'You are currently on the Free plan'
-            }
-          </Text>
-          <Title 
-            order={4}
-          sx={(theme) => ({
-            marginTop: '15px'
-          })}>
-            {isLoading ? (
-              <div className="h-12 mb-2 text-center">
-                <Loader variant='dots' />
-              </div>
-            ) : subscription ? (
-              `${subscriptionPrice}/${subscription?.prices?.interval}`
-            ) : (
-              <Link href="/pricing" ><Button variant='outline'>Choose your plan</Button></Link>
-            )}
+          {
+              loading?
+              <Loader variant='dots' mt={20} ml={20}/>:
+              <Box>
+                <Text size="sm" color="dimmed">
+                {
+                  subscription
+                    ? `You are currently on the ${subscription?.prices?.products?.name}.`
+                    : 'You are currently on the Free plan'
+                }
+              </Text>
+              <Title 
+                order={4}
+                sx={(theme) => ({
+                  marginTop: '15px'
+                })}>
+                {isLoading ? (
+                  <div className="h-12 mb-2 text-center">
+                    <Loader variant='dots' />
+                  </div>
+                ) : subscription ? (
+                  `${subscriptionPrice}/${subscription?.prices?.interval}`
+                ) : (
+                  <Link href="/pricing" ><Button variant='outline'>Choose your plan</Button></Link>
+                )}
+              </Title>
+              <Divider my="sm" variant="dashed" />
+              <Flex
+                justify='space-between'
+                align='center'
+              >
+                <Text>
 
-          </Title>
-          <Divider my="sm" variant="dashed" />
-          <Flex
-            justify='space-between'
-            align='center'
-          >
-            <Text>
-
-            </Text>
-            <Button className='bg-sky-500/100'
-              disabled={loading || !subscription}
-              onClick={() => {
-                redirectToCustomerPortal()
-              }}
-            >
-              Open Customer Portal
-            </Button>
-          </Flex>
+                </Text>
+                <Button className='bg-sky-500/100'
+                  disabled={loading || !subscription}
+                  onClick={() => {
+                    redirectToCustomerPortal()
+                  }}
+                >
+                  Open Customer Portal
+                </Button>
+              </Flex>
+              </Box>
+          }
+          
+          
         </Card>
         <Card shadow="sm" padding="lg" radius="md" withBorder mt={20}>
           <Title order={2}>Your Email</Title>

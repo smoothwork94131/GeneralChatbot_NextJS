@@ -27,5 +27,9 @@
 .mantine-Spotlight-content {
     min-width: 70%;
 }
+.mantine-Textarea-input {
+    max-height: 100px;
+    overflow-y: auto;
+}
 
 

@@ -10,7 +10,7 @@ import { getActiveProductsWithPrices, getSubscriptions } from '@/utils/app/supab
 
 type BillingInterval = 'year' | 'month';
 interface Props {
-    closeModal: ()=>void;
+    closeModal?: ()=>void;
 }
 const Subscription:FC<Props> = ({closeModal}) => {
     const { user } = useUser();

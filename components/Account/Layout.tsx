@@ -4,17 +4,18 @@ import { Box, Flex, Group, Button, Text } from '@mantine/core';
 import { AppShell, Header } from "@mantine/core";
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from '@mantine/hooks';
-import Link from 'next/link';
 import { FC } from "react";
 import { supabase } from "@/utils/app/supabase-client";
 import { useUser } from '@/utils/app/useUser';
 import { useRouter } from 'next/router';
 import { Image } from '@mantine/core';
+import Link from "next/link";
 
 interface Props {
     children: JSX.Element,
     childrenSize: string
 }
+
 const Layout: FC<Props> = ({ children, childrenSize }) => {
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const {user} = useUser();
@@ -26,12 +27,11 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
         }   
         router.replace('/signin');
     }
-
     return (
         <AppShell
             padding="md"
-            header={<Header height={60} p="xs"
-        >
+            header={
+            <Header height={60} p="xs">   
                 <Box
                     sx={(theme) => ({
                         width: isMobile ? '95%' : '70%',
@@ -55,31 +55,31 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                     cursor: 'pointer'
                                 })}
                             />
-                                {/* <Link href='/pricing'> */}
+                                <Link href='/pricing'>
                                     <Text
                                         sx={(theme) => ({
                                             fontWeight: 600,
                                             cursor: 'pointer'
                                         })}
-                                        onClick={() => {router.replace("/pricing")}}
+                                       
                                     >
                                         Pricing
                                     </Text>
-                                {/* </Link> */}
+                                </Link>
                                 {
                                     user?
-                                    // <Link href='/account'>
+                                    <Link href='/account'>
                                         <Text
                                             sx={(theme) => ({
                                                 fontWeight: 600,
                                                 cursor: 'pointer'
                                             })}
-                                            onClick={() => {router.replace("/account")}}
+                                            
 
                                         >
                                             Account
                                         </Text>
-                                    // </Link>
+                                    </Link>
                                     :
                                     <></>
                                 }

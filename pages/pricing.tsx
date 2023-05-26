@@ -26,7 +26,7 @@ const Pricing:FC<Props> = () => {
             <Box sx={(theme)=> ({
               padding: theme.spacing.lg,
             })}>
-              <Subscription closeModal={function(){}}/>  
+              <Subscription />  
             </Box>
         </Card>
       </Box>

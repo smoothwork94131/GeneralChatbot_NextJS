@@ -5,7 +5,7 @@ import {
     MutableRefObject,
     useEffect
 } from 'react';
-import { Flex, Image } from '@mantine/core';
+import { Box, Flex, Image } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { Textarea } from '@mantine/core';
 import { LoaderIcon } from 'react-hot-toast';
@@ -64,20 +64,23 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
                 autosize
-                minRows={1}
+                minRows={2}
                 maxRows={4}
                 rightSection={
-                    // <IconSend size="1rem" className="opacity-[0.5] display-block;" />
-                    messageIsStreaming?
-                    <LoaderIcon style={{width: '20px', height: '20px'}}></LoaderIcon>:
-                    <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={handleSend}/>
+                    <Box
+                        pr={20}
+                    >
+                        {
+                            messageIsStreaming?
+                            <LoaderIcon style={{width: '20px', height: '20px'}}></LoaderIcon>:
+                            <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={handleSend}/>
+                        }
+                    </Box>
                 }
                 value={inputContent}
                 ref={textareaRef}
-                sx={(theme) => ({
-                })}
                 error={textError}
-                withAsterisk
+                
             />
         </Flex>
     )

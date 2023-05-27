@@ -77,7 +77,6 @@ const Account = ({ user }: { user: User }) => {
     }).format((subscription?.prices?.unit_amount || 0) / 100);
 
   return (
-    <Layout childrenSize='700px'>
       <Box>
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Title order={2}>Your Plan</Title>
@@ -153,7 +152,6 @@ const Account = ({ user }: { user: User }) => {
         </Card>
       </Box>
 
-    </Layout>
   )
 }
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {

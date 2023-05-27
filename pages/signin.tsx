@@ -6,9 +6,7 @@ const SignIn = () => {
 
   }
   return (
-    <Layout childrenSize='400px'>
       <AuthenticationForm modalType='signin' closeModal={closeModal}/>
-    </Layout>
   )
 }
 export default SignIn;

@@ -12,9 +12,10 @@ import { initialState, HomeInitialState } from '@/state/index.state';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import HomeContext from '@/state/index.context';
 import '@/styles/globals.css';
+import Layout from '@/components/Account/Layout';
 
 const inter = Inter({ subsets: ['latin'] });
-function App({ Component, pageProps }: AppProps<{}>) {
+function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
 
   const [supabaseClient] = useState(() =>
     createBrowserSupabaseClient<Database>()
@@ -34,7 +35,7 @@ function App({ Component, pageProps }: AppProps<{}>) {
       chatInputPadding: '40px'
     }
   };
-  
+ 
   return (
     <div className={inter.className}>
       <SessionContextProvider supabaseClient={supabaseClient}>
@@ -48,6 +49,13 @@ function App({ Component, pageProps }: AppProps<{}>) {
           >
             <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={() => { }}>
               <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
+                {
+                  [`/`].includes(appProps.router.pathname)?
+                  <Component {...pageProps} />:
+                  <Layout childrenSize={[`/signin`].includes(appProps.router.pathname)?'400px':'700px'}>
+                    <Component {...pageProps} />
+                  </Layout>
+                }
                 <Component {...pageProps} />
               </MantineProvider>
             </ColorSchemeProvider>

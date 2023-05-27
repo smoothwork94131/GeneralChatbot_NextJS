@@ -1,7 +1,5 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { AuthenticationForm } from "@/components/Account/AuthenticationForm";
 import { Box, Flex, Group, Button, Text } from '@mantine/core';
-import { AppShell, Header } from "@mantine/core";
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from '@mantine/hooks';
 import { FC } from "react";
@@ -10,6 +8,10 @@ import { useUser } from '@/utils/app/useUser';
 import { useRouter } from 'next/router';
 import { Image } from '@mantine/core';
 import Link from "next/link";
+import dynamic from 'next/dynamic';
+
+const AppShell = dynamic(() => import('@mantine/core').then((mod) => mod.AppShell), { ssr: false });
+const Header = dynamic(() => import('@mantine/core').then((mod) => mod.Header), { ssr: false });
 
 interface Props {
     children: JSX.Element,
@@ -73,6 +75,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                             sx={(theme) => ({
                                                 fontWeight: 600,
                                                 cursor: 'pointer'
+                                                
                                             })}
                                             
 
@@ -83,7 +86,6 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                     :
                                     <></>
                                 }
-                                
                             <Text
                                 sx={(theme) => ({
                                     fontWeight: 600,

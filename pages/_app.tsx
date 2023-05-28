@@ -56,7 +56,6 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
                     <Component {...pageProps} />
                   </Layout>
                 }
-                <Component {...pageProps} />
               </MantineProvider>
             </ColorSchemeProvider>
           </HomeContext.Provider>

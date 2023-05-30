@@ -370,6 +370,7 @@ const ChatContent: FC<Props> = ({
                 child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType} closeModal={closeModal}/>:<Subscription closeModal={closeModal} />}
                 title=''
                 closeModal={closeModal}
+                withCloseButton={false}
             />
             
             <MyModal

@@ -9,6 +9,7 @@ import { chkIsSubscription, getActiveProductsWithPrices, supabase } from '@/util
 import MyModal from '@/components/Account/Modal';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
+import { ProductWithPrice } from '@/types/user';
 
 
 interface Props {
@@ -17,11 +18,15 @@ interface Props {
 }
 const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
 
-    const { user } = useUser();
+    const { user, isSubscriptionActive: isSubscription, isLoading } = useUser();
     const [isModal, setIsModal] = useState(false);
-    const [isSubscription , setSubscription ] = useState<boolean>(true);
-    const [modalType, setModalType] = useState('sigin');
+    // const [isSubscription , setSubscription ] = useState<boolean>(true);
+    const [modalType, setModalType] = useState('signin');
     const router = useRouter();
+
+    console.log("user", user)
+    console.log("isSubscription", isSubscription)
+    console.log("isLoading", isLoading)
     
     const {
         state: { colorScheme, lightMode },
@@ -32,11 +37,12 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
         setIsModal(false);
     }
     useEffect(()=> {
-        const fetchData = async() => {
-            const is_subscription = await chkIsSubscription(user);
-            setSubscription(is_subscription);
-        }
-        fetchData();
+        // const fetchData = async() => {
+        //     const is_subscription = await chkIsSubscription(user);
+        //     setSubscription(is_subscription);
+        // }
+        // fetchData();
+        
         if(modalType == "signup" && user) {
             setModalType('subscription');
             setIsModal(true);
@@ -71,7 +77,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
 
     const goPortalPage = async () => {
         if (user) {
-            router.replace('/account');
+            router.push('/account');
         } else {
             setModalType("signin");
             setIsModal(true);
@@ -84,11 +90,12 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
     }
 
     return (
+        isLoading ? <div></div> :
         <Group>
             {
                 isMobile ?
                     <Menu.Dropdown>
-                        <Menu.Item
+                        {/* <Menu.Item
                             icon={<IconStar size={14} />}
                         >
                             Favourited charts
@@ -97,7 +104,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             icon={<IconTrash size={14} />}
                         >
                             Clear Conversation
-                        </Menu.Item>
+                        </Menu.Item> */}
                         <Menu.Item
                             icon={
                                 colorScheme == "dark" ? <IconSun size={14} /> : <IconMoon size={14} />
@@ -170,7 +177,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                         })}
                     >
 
-                        <NavLink
+                        {/* <NavLink
                             label="Favourited charts"
                             icon={<IconStar size="1rem" stroke={1.5} />}
                             variant="subtle"
@@ -180,7 +187,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             label="Clear Conversation"
                             icon={<IconTrash size="1rem" stroke={1.5} />}
                             variant="subtle"
-                        />
+                        /> */}
                         <NavLink
                             label={`${colorScheme == "dark" ? "Light" : "Dark"}`}
                             icon={colorScheme == "dark" ? <IconSun size="1rem" stroke={1.5} /> : <IconMoon size="1rem" stroke={1.5} />}
@@ -230,7 +237,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             !user?
                             <NavLink
                                 label='Create Account'
-                                icon={user ? <IconUser size="1rem" stroke={1.5} /> : <IconLogin size="1rem" stroke={1.5} />}
+                                icon={user ? <IconUser size="1rem" stroke={1.5} /> : <IconUser size="1rem" stroke={1.5} />}
                                 variant="subtle"
                                 onClick={() => signUp()}
                             />:<></>
@@ -244,6 +251,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                 child={modalType == 'signin' || modalType == 'signup'? <AuthenticationForm modalType={modalType} closeModal={closeModal}/>:<Subscription closeModal={closeModal}/>}
                 title=''
                 closeModal={closeModal}
+                withCloseButton={false}
             />
         </Group>
     )

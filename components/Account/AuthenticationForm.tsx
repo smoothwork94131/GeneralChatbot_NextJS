@@ -14,9 +14,11 @@ import {
     Text
 } from '@mantine/core';
 import { IconBrandGithub } from '@tabler/icons-react';
+import { IconBrandGoogle } from '@tabler/icons-react';
 import { supabase } from '@/utils/app/supabase-client';
 import { useState, FC } from 'react';
 import { useRouter } from 'next/router';
+import { getURL } from '@/utils/app/helpers';
 
 interface Props {
     modalType: string,
@@ -82,24 +84,33 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
     const AuthWidthProvider = async(provider) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: provider,
+            options: {
+                redirectTo: getURL()
+            }
         })
+        console.log(process.env.NEXT_PUBLIC_VERCEL_URL)
+        console.log(process.env.NEXT_PUBLIC_SITE_URL)
+        console.log(getURL())
     }
     return (
         
         <Paper radius="md" p="xl" withBorder >
             <Group grow mb="md" mt="md">
-                <Button  variant="default" color="gray"  leftIcon={<IconBrandGithub />} onClick={() => {AuthWidthProvider('github')}}>{type} with GitHub </Button>
+                {/* <Button  variant="default" color="gray"  leftIcon={<IconBrandGithub />} onClick={() => {AuthWidthProvider('github')}}>{type} with GitHub </Button> */}
+                <Button  variant="default" color="gray"  leftIcon={<IconBrandGoogle />} onClick={() => {AuthWidthProvider('google')}}>{type} with Google </Button>
             </Group>
             <Divider label="Or continue with email" labelPosition="center" my="lg" />
-            <form onSubmit={form.onSubmit(() => { })}>
+            <form onSubmit={form.onSubmit(() => {Auth(type)})}>
                 <Stack>
                     {type === 'Sign Up' && (
                         <TextInput
+                            required
                             label="Name"
                             placeholder="Your name"
                             value={form.values.name}
                             onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
                             radius="md"
+                            data-autofocus
                         />
                     )}
 
@@ -111,6 +122,7 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
                         onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
                         error={form.errors.email && 'Invalid email'}
                         radius="md"
+                        data-autofocus
                     />
 
                     <PasswordInput
@@ -152,7 +164,7 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
                     })}>
                         {errorMessage}
                     </Text>
-                    <Button  variant="outline" onClick={()=>{Auth(type)}}>{type}</Button>
+                    <Button type='submit' variant="outline" /* onClick={()=>{Auth(type)}} */>{type}</Button>
                 </Group>
             </form>
          

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Box, Flex, Group, Button, Text } from '@mantine/core';
+import { Box, Flex, Group, Button, Text, AppShell, Header } from '@mantine/core';
 import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
 import { useMediaQuery } from '@mantine/hooks';
 import { FC } from "react";
@@ -10,8 +10,8 @@ import { Image } from '@mantine/core';
 import Link from "next/link";
 import dynamic from 'next/dynamic';
 
-const AppShell = dynamic(() => import('@mantine/core').then((mod) => mod.AppShell), { ssr: false });
-const Header = dynamic(() => import('@mantine/core').then((mod) => mod.Header), { ssr: false });
+// const AppShell = dynamic(() => import('@mantine/core').then((mod) => mod.AppShell), { ssr: true });
+// const Header = dynamic(() => import('@mantine/core').then((mod) => mod.Header), { ssr: true });
 
 interface Props {
     children: JSX.Element,
@@ -52,7 +52,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                             <Image
                                 src='/favicon.ico'
                                 maw={30}
-                                onClick={() =>{router.replace("/")}}
+                                onClick={() =>{router.push("/")}}
                                 sx={(theme) => ({
                                     cursor: 'pointer'
                                 })}

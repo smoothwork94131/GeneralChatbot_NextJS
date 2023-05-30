@@ -59,6 +59,7 @@ const ChatMessage: FC<Props> = ({
     const history_count = selectedMessages?.length?selectedMessages?.length:0;
     const [activeGroup, setActiveGroup] = useState<string[]>([]);
     const [collapse, setCollpase] = useState<boolean>(false);
+    // cosnt [copied, setCopied] = useState<boolean>(false);
     
     useEffect(() => {
         let updatedActive: string[] = [];
@@ -127,11 +128,12 @@ const ChatMessage: FC<Props> = ({
     const handleCopyToClipboard = (message: string) => {
         copyToClipboard(message);
     };
-      function copyToClipboard(text: string) {
+    function copyToClipboard(text: string) {
         if (typeof navigator !== 'undefined')
           navigator.clipboard.writeText(text)
             .then(() => console.log('Message copied to clipboard'))
             .catch((err) => console.error('Failed to copy message: ', err));
+        
     }
 
     const setInputs = (index) => {

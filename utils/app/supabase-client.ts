@@ -10,10 +10,10 @@ import { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, NO_ACCOUNT_TIMES, F
 import moment from 'moment';
 
 export const supabase = createBrowserSupabaseClient<Database>();
-export const supabaseAdmin = createClient<Database>(
-  NEXT_PUBLIC_SUPABASE_URL || '',
-  NEXT_PUBLIC_SUPABASE_KEY || ''
-);
+// export const supabaseAdmin = createClient<Database>(
+//   NEXT_PUBLIC_SUPABASE_URL || '',
+//   NEXT_PUBLIC_SUPABASE_KEY || ''
+// );
 
 console.warn('NEXT_PUBLIC_SUPABASE_URL', NEXT_PUBLIC_SUPABASE_URL)
 console.warn('process.env.NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL)
@@ -52,8 +52,8 @@ export const getSubscriptions = async (user: User) => {
     .from('subscriptions')
     .select('*, prices(*, products(*))')
     .eq('user_id', user.id)
-    .eq('cancel_at_period_end', false)
-    .order("current_period_end", { ascending: false })
+    .eq('subscription_status', 'active')
+    // .order("current_period_end", { ascending: false })
   if (error) {
     console.log(error.message);
   }
@@ -62,7 +62,7 @@ export const getSubscriptions = async (user: User) => {
 
 export const getUserTimes = async (user: User|null) => {
   
-  const fp = await FingerprintJS.load({ debug: true })
+  const fp = await FingerprintJS.load(/* { debug: true } */)
   const { visitorId } = await fp.get();
   let times = 0;
   if(!user) {

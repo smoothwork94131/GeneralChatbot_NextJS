@@ -8,8 +8,8 @@ import {
 
 import { useUser } from '@/utils/app/useUser';
 import { postData } from '@/utils/app/helpers';
-import dynamic from 'next/dynamic'
-const Layout = dynamic(() => import('@/components/Account/Layout'), { ssr: false });
+
+
 import {
   Title,
   Card,
@@ -20,8 +20,6 @@ import {
   Loader,
   Divider
 } from "@mantine/core";
-import { getSubscriptions } from "@/utils/app/supabase-client";
-import { Subscription } from '@/types/user';
 import { useRouter } from 'next/router';
 
 interface Props {
@@ -32,9 +30,8 @@ interface Props {
 }
 
 const Account = ({ user }: { user: User }) => {
-  const [loading, setLoading] = useState(false);
-  const { isLoading } = useUser();
-  const [subscription, setSubscription] = useState<Subscription>();
+  const { isLoading, subscription } = useUser();
+  // const [subscription, setSubscription] = useState<Subscription>();
   
   const router = useRouter();
 
@@ -42,7 +39,7 @@ const Account = ({ user }: { user: User }) => {
     router.replace('/signin');
   }
   const redirectToCustomerPortal = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const { url, error } = await postData({
         url: '/api/create-portal-link',
@@ -54,19 +51,25 @@ const Account = ({ user }: { user: User }) => {
     } catch (error) {
       if (error) return alert((error as Error).message);
     }
-    setLoading(false);
+    // setLoading(false);
   };
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
-      const subscription_ = await getSubscriptions(user);
-      if (subscription_.length > 0) {
-        setSubscription(subscription_[0]);
-      } 
-      setLoading(false);
-    }
-    fetchData();
-  }, [])
+  // useEffect(() => {
+  //   setLoading(true);
+  //   const fetchData = async () => {
+  //     const subscription_ = await getSubscriptions(user);
+  //     if (subscription_.length > 0) {
+  //       setSubscription(subscription_[0]);
+  //     } 
+  //     setLoading(false);
+  //   }
+  //   fetchData();
+  // }, [])
+
+  // useEffect(() => {
+  //   if (subscription) {
+  //     setLoading(false);
+  //   }
+  // }, [subscription]);
 
   const subscriptionPrice =
     subscription &&
@@ -81,7 +84,7 @@ const Account = ({ user }: { user: User }) => {
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Title order={2}>Your Plan</Title>
           {
-              loading?
+              isLoading?
               <Loader variant='dots' mt={20} ml={20}/>:
               <Box>
                 <Text size="sm" color="dimmed">
@@ -115,7 +118,7 @@ const Account = ({ user }: { user: User }) => {
 
                 </Text>
                 <Button className='bg-sky-500/100'
-                  disabled={loading || !subscription}
+                  disabled={isLoading || !subscription}
                   onClick={() => {
                     redirectToCustomerPortal()
                   }}

@@ -230,6 +230,7 @@ export async function getUtilityInfo(utilityKey){
   if(Global.utilites_group.length == 0) {
     Global.utilites_group = await getUpdatedBackend();
   }
+  
   const roleGroup_ = Global.utilites_group;
   let utilityInfo: Utility = UtilityState;
   for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {

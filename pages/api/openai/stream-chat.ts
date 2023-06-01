@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createParser } from 'eventsource-parser';
 
-import { ApiChatInput, chatCompletionPayload, extractOpenaiChatInputs, getSubscriptions, getUserTimes, getUtilityInfo, postToOpenAI } from './chat';
+import { ApiChatInput, chatCompletionPayload, decreaseUserTimes, extractOpenaiChatInputs, getSubscriptions, getUserTimes, getUtilityInfo, postToOpenAI } from './chat';
 import { OpenAIAPI } from '@/types/openai';
 
 import { getUpdatedBackend } from '../updated_backend';
@@ -140,7 +140,7 @@ export default async function handler(req, res) {
     const responseMessages = userApi.response_messages;
     const inputs = userApi.inputs;
     const utilityInfo = await getUtilityInfo(utilityKey);
-    const message = userApi.message;
+    const message = userApi.message;  
 
     let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
@@ -156,9 +156,11 @@ export default async function handler(req, res) {
       }
     });
 
+   
     if(user_prompt) {
         user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
     }
+    
     if(system_prompt){
         system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
         messages =[{role: 'system', content: system_prompt}];
@@ -169,6 +171,8 @@ export default async function handler(req, res) {
     });
 
     let user_message: Message = UserMessageState ;
+    console.log(user_prompt);
+
     user_message = {...user_message, 
         content: user_prompt?user_prompt:message, 
         // datetime: today_datetime,
@@ -185,10 +189,10 @@ export default async function handler(req, res) {
     }
     
     const apiChatInput = await extractOpenaiChatInputs({messages: messages, model: OPENAI_MODELID});
-    
     const stream: ReadableStream = await chatStreamRepeater(apiChatInput, req.signal);
+    const decreaseUser = await decreaseUserTimes(userId, fingerId, userTimes);
     return new NextResponse(stream);
-  
+
   } catch (error: any) {
     if (error.name === 'AbortError') {
       console.log('Fetch request aborted in handler');

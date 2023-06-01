@@ -51,28 +51,54 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
     const [showMenu, setShowMenu] = useState<boolean>(false);
 
     useEffect(() => {
-        const roleOrderStr:string|null = localStorage.getItem("roleOrder");
-        if(roleOrderStr) {
-            const roleOrder = JSON.parse(roleOrderStr);
-            if(roleOrder.length > 0) {            
-                setRoleOrder(roleOrder);
-            }else {
-                initRoleOrder();
-            }
-        } else {
-            initRoleOrder();
-        }
+        initRoleOrder();
+    }, [roleGroup]);
+
+    useEffect(() => {
+        initRoleOrder();
     }, []);
+    
     
     useEffect(()=> {
         
         if(roleGroup.length == 0) return; 
         localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
-
+        
     }, [roleOrder]);
 
     const [className, setClassName] = useState('');
     const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } });
+
+    const initRoleOrder = () => {
+        const roleOrderStr:string|null = localStorage.getItem("roleOrder");
+        if(roleOrderStr) {
+            const roleOrder = JSON.parse(roleOrderStr);
+            if(roleOrder.length > 0) {            
+                setRoleOrder(roleOrder);
+            } else {
+                let order:RoleOrderItem[] = [];
+                roleGroup.map((item, index) => {
+                    order.push({
+                        key: index.toString(),
+                        label: item.name,
+                        children:''
+                    })
+                })
+                setRoleOrder(order);
+            }
+        } else {
+            let order:RoleOrderItem[] = [];
+            roleGroup.map((item, index) => {
+                order.push({
+                    key: index.toString(),
+                    label: item.name,
+                    children:''
+                })
+            })
+            setRoleOrder(order);
+        }
+        
+    }
     const onDragEnd = ({ active, over }: DragEndEvent) => {
         if (active.id !== over?.id) {
             setRoleOrder((prev) => {
@@ -89,17 +115,6 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
     const clickMobileTab = (key: string) => {
         handleSelectRole(Number(key));
         setShowMenu(false);
-    }
-    const initRoleOrder = () => {
-        let order:RoleOrderItem[] = [];
-        roleGroup.map((item, index) => {
-            order.push({
-                key: index.toString(),
-                label: item.name,
-                children:''
-            })
-        })
-        setRoleOrder(order);
     }
     const sensors = useSensors(
         useSensor(PointerSensor),

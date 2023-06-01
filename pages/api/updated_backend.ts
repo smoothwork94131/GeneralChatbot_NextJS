@@ -16,14 +16,14 @@ export const getUpdatedBackend = async() => {
     const { data, error } = await supabaseAdmin
       .from('updated_backend')
       .select('*')
-      .eq('name', "utilites_group")
+      .eq('name', "default")
 
     if (error) {
       console.log(error)
       return []
     } else {
         if(data.length > 0) {
-            return JSON.parse(data[0].content);
+            return data[0].json_data;
         } else {
             return [];
         }
@@ -33,12 +33,12 @@ export const getUpdatedBackend = async() => {
 export const updateData = async(content) => {    
     // const exist_table = await checkIfTableExists('update_data');
     // if(exist_table) {
-    if(await checkIfName('utilities_group')) {    
+    if(!(await checkIfName('default'))) {    
         const { data, error } = await supabaseAdmin
         .from('updated_backend')
         .insert([{
-            name: 'utilites_group',
-            content: JSON.stringify(content)
+            name: 'default',
+            json_data: content
         }])
 
         if(error) {
@@ -52,10 +52,10 @@ export const updateData = async(content) => {
         const { data, error } = await supabaseAdmin
         .from('updated_backend')
         .update([{
-            name: 'utilites_group',
-            content: JSON.stringify(content)
+            name: 'default',
+            json_data: content
         }])
-        .eq("name", "utilites_group");
+        .eq("name", "default");
 
         if(error) {
             console.log(error);

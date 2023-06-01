@@ -57,23 +57,18 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
             if(roleOrder.length > 0) {            
                 setRoleOrder(roleOrder);
             }else {
-                
-                let order:RoleOrderItem[] = [];
-                roleGroup.map((item, index) => {
-                    order.push({
-                        key: index.toString(),
-                        label: item.name,
-                        children:''
-                    })
-                })
-                setRoleOrder(order);
+                initRoleOrder();
             }
-        } 
+        } else {
+            initRoleOrder();
+        }
     }, []);
-
+    
     useEffect(()=> {
+        
         if(roleGroup.length == 0) return; 
         localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
+
     }, [roleOrder]);
 
     const [className, setClassName] = useState('');
@@ -95,7 +90,17 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         handleSelectRole(Number(key));
         setShowMenu(false);
     }
-    
+    const initRoleOrder = () => {
+        let order:RoleOrderItem[] = [];
+        roleGroup.map((item, index) => {
+            order.push({
+                key: index.toString(),
+                label: item.name,
+                children:''
+            })
+        })
+        setRoleOrder(order);
+    }
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -113,7 +118,6 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         }
     }
 
-   
 
     const mobileRoleOrder = () => {
         let parse_order = roleOrder.map((item) => {

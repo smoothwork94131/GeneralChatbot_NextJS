@@ -18,7 +18,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const systemPrompt = getFieldValue(row, headers, 'Utility_System_Prompt');
     const includePromptHistory = getFieldValue(row, headers, 'Include_Prompt_History');
     const input_align = getFieldValue(row, headers, `Input_Align`);
-    let streamming = getFieldValue(row, headers, `Streamming`) == ""? true:true;
+    let streamming = getFieldValue(row, headers, `Streamming`) == ""? false:true;
     
     let role_index = chkExistObject(roleData, roleName);
     

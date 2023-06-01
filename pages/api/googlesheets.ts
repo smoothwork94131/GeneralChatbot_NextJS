@@ -18,6 +18,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const systemPrompt = getFieldValue(row, headers, 'Utility_System_Prompt');
     const includePromptHistory = getFieldValue(row, headers, 'Include_Prompt_History');
     const input_align = getFieldValue(row, headers, `Input_Align`);
+    let streamming = getFieldValue(row, headers, `Streamming`) == ""? true:true;
     
     let role_index = chkExistObject(roleData, roleName);
     
@@ -62,10 +63,11 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
         summary: utilitySummary?utilitySummary:'',
         user_prompt: userPrompt?userPrompt:'',
         system_prompt: systemPrompt?systemPrompt:DEFAULT_SYSTEM_PROMPT,
-        include_prompt_history: includePromptHistory=='TRUE' || includePromptHistory==1? true:false,
+        include_prompt_history: includePromptHistory=='TRUE' || includePromptHistory=="1"? true:false,
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',
+        streamming: streamming
       })
     }
     utilities_group[utilities_group_index].utilities = utilities;
@@ -84,12 +86,13 @@ function chkExistObject(object: RoleGroup[] | UtilitiesGroup[] | Utility[], obje
   return index;
 }
 function getFieldValue(row, headers, fieldName){
-  let value: string|boolean = '';
+  let value: string | boolean = '';
   headers.map((item, index) => {
     if(item == fieldName) {
       value = row[index];
     }
   });
+
   return value;
 }
 

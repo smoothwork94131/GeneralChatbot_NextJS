@@ -13,7 +13,8 @@ import {
     Flex
  } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { SelectedSearch, UtilitiesGroup } from '@/types/role';
+import { SelectedSearch, UtilitiesGroup, Utility } from '@/types/role';
+import SearchList from '../Utils/SearchList';
 
 interface Props {
     isMobile: boolean
@@ -48,7 +49,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
         handleSelectUtility,
         dispatch: openAiDispatch
     } = useContext(OpenaiContext);
-    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>(selectedUtilityGroup);
+    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     
     
@@ -58,33 +59,37 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
     
     useEffect(()=> {
         let updatedUtilityGroup: UtilitiesGroup[] = [];
-        for(let k=0; k<selectedUtilityGroup.length;k++){
-            let group_item = selectedUtilityGroup[k];
-            const filter_utilities = group_item.utilities.filter((u_item) => {
-                const searchable = u_item.name.toLowerCase() +
-                ' '+u_item.summary.toLowerCase();
-                return searchable.includes(searchKeyword.toLowerCase())
-            })
-
-            if(filter_utilities.length > 0) {
-                group_item = {
-                    ...group_item,
-                    utilities: filter_utilities,
-                    active: (searchKeyword !="") ||
-                            (group_item.active)? true:false
+        roleGroup.map((r_item) => {
+            const utilitiesGroup = r_item.utilities_group;
+            for(let k=0; k<utilitiesGroup.length;k++){
+                let group_item = utilitiesGroup[k];
+                const filter_utilities = group_item.utilities.filter((u_item) => {
+                    const searchable = u_item.name.toLowerCase() +
+                    ' '+u_item.summary.toLowerCase();
+                    return searchable.includes(searchKeyword.toLowerCase())
+                })
+    
+                if(filter_utilities.length > 0) {
+                    group_item = {
+                        ...group_item,
+                        utilities: filter_utilities,
+                        active: (searchKeyword !="") ||
+                                (group_item.active)? true:false
+                    }
+                    updatedUtilityGroup.push(group_item);
                 }
-                updatedUtilityGroup.push(group_item);
             }
-        }
+        })
+        
         setFilterUtilityGroup(updatedUtilityGroup);
-    },[searchKeyword, selectedUtilityGroup, roleGroup])
+    },[searchKeyword])
 
     useEffect(()=> {
 
     },[])
 
     const collpaseUtiltyGroup = (group_name: string) => {
-        let updatedUtilityGroup = filterUtilityGroup;
+        let updatedUtilityGroup = selectedUtilityGroup;
         updatedUtilityGroup = updatedUtilityGroup.map((item) =>{
             if(item.name == group_name){
                 item = {
@@ -111,7 +116,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
             value: updated_role_Group
         })
     }
-
+    
     const [collapsed, handlers] = useDisclosure(false);
     const { classes, cx } = useStyles({ collapsed });
     return (
@@ -144,12 +149,22 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
                     onSearchUtility = {onSearchUtility}
                 />
             }
-            <Utils 
-                selectedUtilityGroup = { filterUtilityGroup }
-                handleSelectUtility = {handleSelectUtility}
-                selectedUtility = {selectedUtility}
-                collpaseUtiltyGroup = {collpaseUtiltyGroup}
-            />
+            
+            {
+                searchKeyword !== ""?
+                <SearchList 
+                    utilityGroup={filterUtilityGroup}
+                    searchKeyword={searchKeyword}
+                    handleSelectUtility={handleSelectUtility}
+                />:
+                <Utils 
+                    selectedUtilityGroup = { selectedUtilityGroup }
+                    handleSelectUtility = {handleSelectUtility}
+                    selectedUtility = {selectedUtility}
+                    collpaseUtiltyGroup = {collpaseUtiltyGroup}
+                />
+            }
+            
             {
                 !isMobile?
                 <Settings 

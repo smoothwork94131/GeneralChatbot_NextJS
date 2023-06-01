@@ -28,10 +28,10 @@ const Utils: FC<Props> = ({
                    fontSize: 14,
                     textAlign:'center'
                 })}>
-                    <IconMistOff size={30} className="mx-auto mb-3"/>
+                    {/* <IconMistOff size={30} className="mx-auto mb-3"/>
                     <text>
                         No data.
-                    </text>
+                    </text> */}
                 </Box>:
                 selectedUtilityGroup.map((group_item, group_index) => 
                    <NavLink
@@ -55,8 +55,6 @@ const Utils: FC<Props> = ({
                                 label={
                                     utility_item.name
                                 }
-
-                                
                                 onClick={() => handleSelectUtility(utility_item.key)}
                                 active={
                                     selectedUtility.key == utility_item.key 

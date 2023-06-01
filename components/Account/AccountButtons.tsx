@@ -1,7 +1,9 @@
 import { 
     Group,
     Button, 
-    Text
+    Text,
+    Popover,
+    
 } from "@mantine/core";
 
 
@@ -13,6 +15,7 @@ import Subscription from "@/components/Account/Subscription";
 import { Conversation } from "@/types/chat";
 import { PAID_TIMES } from "@/utils/app/const";
 import { useUser } from "@/utils/app/useUser";
+import { useDisclosure } from '@mantine/hooks';
 
 interface Props {
     selectedConversation: Conversation,
@@ -25,7 +28,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     const [times, setTimes] = useState<number>(-1);
     const [isModal, setIsModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<string>('signin');
-
+    const [opened, { close, open }] = useDisclosure(false);
     const { user, isSubscriptionActive: isSubscription, isLoading } = useUser();
     
     useEffect(() => {
@@ -37,12 +40,6 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     }, [selectedConversation, isSubscription, user]);
     
     useEffect(() => {
-        
-        // const fetchData = async() => {
-        //     const is_subscription = await chkIsSubscription(user); 
-        //     setSubscription(is_subscription);
-        // }
-        // fetchData();
         if(modalType == "signup" && user) {
             setModalType('subscription');
             setIsModal(true);
@@ -66,6 +63,19 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
         <Group>
             {
                 !isSubscription && (times >= 0 && times < PAID_TIMES)?
+                isMobile?
+                
+                <Popover width={190} position="bottom" withArrow shadow="md" opened={opened}>
+                    <Popover.Target>
+                        <Text onMouseEnter={open} onMouseLeave={close} size='lg'>
+                            {times}
+                        </Text>
+                    </Popover.Target>
+                    <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                        <Text size="lg" >Prompts remaining</Text>
+                    </Popover.Dropdown>
+                </Popover>
+                :
                 <Text>
                     {
                         times

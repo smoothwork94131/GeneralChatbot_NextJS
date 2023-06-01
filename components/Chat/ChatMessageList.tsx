@@ -44,7 +44,7 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
                     if (children[0] == '▍') {
                       return <span className="animate-pulse cursor-default mt-1">▍</span>
                     }
-
+                    
                     children[0] = (children[0] as string).replace("`▍`", "▍")
                   }
 
@@ -90,8 +90,6 @@ const ChatMessageList: FC<Props> = ({message, messageIsStreaming, cursor, index}
                 cursor
               }
             </MemoizedReactMarkdown>
-            
-            
         </Flex>
     )
 }

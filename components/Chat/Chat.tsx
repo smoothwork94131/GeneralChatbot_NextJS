@@ -77,6 +77,11 @@ const Chat:FC<Props> = ({isMobile,
             "value": updatedHistory
         });
     }
+    const deleteConversation = (index: number) => {
+        let updatedConversation = JSON.parse(JSON.stringify(selectedConversation));
+        updatedConversation.messages.splice(index, 1);
+        saveSelectConverSation(updatedConversation);
+    }
     return (
         <Box  
             sx={(theme) =>({
@@ -114,6 +119,7 @@ const Chat:FC<Props> = ({isMobile,
                 isMobile={isMobile}
                 selectedSearch={selectedSearch}
                 clearSelectedSearch={clearSelectedSearch}
+                deleteConversation={deleteConversation}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

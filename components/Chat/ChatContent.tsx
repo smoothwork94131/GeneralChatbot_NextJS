@@ -14,16 +14,13 @@ import ChatInput from './ChatInput';
 import { Input, SelectedSearch, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
 import { AssistantMessageState, Conversation, Message,  UserMessageState } from '@/types/chat';
-import { OPENAI_API_HOST, OPENAI_API_KEY, OPENAI_API_MAXTOKEN, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT, USER_TIMES_LIMIT } from '@/utils/app/const';
-import { ApiChatInput } from '@/pages/api/openai/chat';
 import { useEffect } from 'react';
-import { getUserTimes, getActiveProductsWithPrices,chkIsSubscription } from '@/utils/app/supabase-client';
+import { getUserTimes } from '@/utils/app/supabase-client';
 import { useRouter } from 'next/router';
 import { useUser } from '@supabase/auth-helpers-react';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
 import MyModal from '@/components/Account/Modal';
-import { ProductWithPrice } from '@/types/user';
 import { getFingerId } from '@/utils/app/FingerPrint';
 
 interface Props {
@@ -35,6 +32,7 @@ interface Props {
     conversationHistory: Conversation[],
     selectedSearch: SelectedSearch,
     clearSelectedSearch: () =>void;
+    deleteConversation: (index: number)=>void;
 } 
 
 const ChatContent: FC<Props> = ({
@@ -46,8 +44,8 @@ const ChatContent: FC<Props> = ({
         conversationHistory,
         selectedSearch,
         clearSelectedSearch,
+        deleteConversation
     }) =>{
-    const router = useRouter();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageIsStreaming, setMessageIsStreaming] = useState(false);
@@ -105,28 +103,10 @@ const ChatContent: FC<Props> = ({
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
             
-            let system_prompt = Object.keys(selectedUtility).includes("system_prompt")? selectedUtility.system_prompt:DEFAULT_SYSTEM_PROMPT;
-            let user_prompt = Object.keys(selectedUtility).includes("user_prompt")? selectedUtility.user_prompt:'';
             
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
-            let index=0;
-
-            inputs.map((input: Input) => {
-                if(input.type == "form" && user_prompt){
-                    user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
-                    index++;
-                }
-            });
-
-            if(user_prompt) {
-                user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
-            }
-
-            if(system_prompt){
-                system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
-                messages =[{role: 'system', content: system_prompt}];
-            }
+            
             
             let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = 
             [...selectedMessagesHistory, 
@@ -140,73 +120,64 @@ const ChatContent: FC<Props> = ({
                 });    
             }
             
-            let user_message: Message = UserMessageState ;
-            
-            user_message = {...user_message, 
-                content: user_prompt?user_prompt:message, 
-                datetime: today_datetime,
-            };
-            
-            messages.push(user_message);
-            
-            
+        
             setMessageIsStreaming(true);
             
-            const request_messages: Message[] = [];
+            const response_messages: Message[] = [];
             
             messages.map((item) => {
-                request_messages.push({
+                response_messages.push({
                     role:item.role,
                     content: item.content
                 });
             });
 
-            const input: ApiChatInput = {
-                api: {
-                    apiKey: OPENAI_API_KEY,
-                    apiHost: OPENAI_API_HOST,
-                    apiOrganizationId:''
-                },
-                model: OPENAI_MODELID,
-                messages: request_messages.map((item) => {
+            const input: {
+                response_messages: Message[],
+                utilityKey: string,
+                message: string,
+                inputs: Input[],
+                fingerId: string,
+                userId: string|null
+            } = {   
+                response_messages: response_messages.map((item) => {
                     if(item.datetime) delete item?.datetime;
                     if(item.inputs) delete item?.inputs;
                     return item;
                 }),
-                max_tokens: OPENAI_API_MAXTOKEN,
-            };
-            
-            
-            const req:{
-                input: ApiChatInput,
-                fingerId: string,
-                userId: string|null
-            } = {
-                input: input,
+                utilityKey: selectedUtility.key,
+                message: message,
+                inputs: inputs,
                 fingerId: fingerId,
                 userId: user?user.id:null
-            }
-            
-        
-            user_message = {
+            };
+
+            const user_message: Message = {    
                 role: 'user',
                 content: message,
                 inputs: inputs,
                 datetime: today_datetime,
                 active: false
             };
-            updatedConversation.messages.push([user_message, AssistantMessageState]);
-            
-            saveSelectConverSation(updatedConversation);
 
-            const response = await fetch('/api/openai/chat', {
+            updatedConversation.messages.push([user_message, AssistantMessageState]);
+            saveSelectConverSation(updatedConversation);
+            const controller = new AbortController();
+            const signal = controller.signal;
+            let endpoint = 'chat';
+            if(selectedUtility.streamming) {
+                endpoint = 'stream-chat';
+            }
+
+            const response = await fetch('/api/openai/'+endpoint, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(req),
+                body: JSON.stringify(input),
+                signal
             });
-
+            
             if (!response.ok) {
                 if(response.status == 401) {
                     setModalType('auth');      
@@ -227,34 +198,84 @@ const ChatContent: FC<Props> = ({
                 return '';
             }
             
-            const data = await response.json();
-            const assistant_message: Message = data.message;
-            
-            const updatedMessages: Message[][] =
-            updatedConversation.messages.map((message, index) => {    
-                if (index === updatedConversation.messages.length-1) {
-                    message = message.map((role_message) => {
-                        if(role_message.role == "assistant") {
-                            role_message = assistant_message;
-                            role_message = {
-                                ...role_message,
-                                datetime: today_datetime,
-                            }
+            if(selectedUtility.streamming) {
+                let first = true;
+                if(response.body) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let text = "";
+                    let done = false;
+                    
+                    while (!done) {
+                        if(first) {
+                            first = false;
+                            continue;
                         }
-                        return role_message;
-                    });
-                }
-                return message;
-            });
-            updatedConversation = { 
-                ...updatedConversation,
-                messages: updatedMessages,
-                datetime: today_datetime
-            };
 
-            saveSelectConverSation(updatedConversation);
-            setMessageIsStreaming(false);
-            
+                        const { value, done: doneReading } = await reader.read();
+                        done = doneReading;
+                        const chunkValue = decoder.decode(value);
+                        
+                        if (chunkValue) {
+                        text += chunkValue.replace(JSON.stringify({"model":"gpt-3.5-turbo-0301"}), "");
+                        const assistant_message: Message = {role: 'assistant', content: text};
+                        const updatedMessages: Message[][] =
+                            updatedConversation.messages.map((message, index) => {    
+                                if (index === updatedConversation.messages.length-1) {
+                                    message = message.map((role_message) => {
+                                        if(role_message.role == "assistant") {
+                                            role_message = assistant_message;
+                                            role_message = {
+                                                ...role_message,
+                                                datetime: today_datetime,
+                                            }
+                                        }
+                                        return role_message;
+                                    });
+                                }
+                                return message;
+                            });
+                            updatedConversation = { 
+                                ...updatedConversation,
+                                messages: updatedMessages,
+                                datetime: today_datetime
+                            };
+    
+                            saveSelectConverSation(updatedConversation);
+                            setMessageIsStreaming(false);
+                        }
+                        
+                    }
+                }
+            } else {
+                const data = await response.json();
+                const assistant_message: Message = data.message;
+                
+                const updatedMessages: Message[][] =
+                updatedConversation.messages.map((message, index) => {    
+                    if (index === updatedConversation.messages.length-1) {
+                        message = message.map((role_message) => {
+                            if(role_message.role == "assistant") {
+                                role_message = assistant_message;
+                                role_message = {
+                                    ...role_message,
+                                    datetime: today_datetime,
+                                }
+                            }
+                            return role_message;
+                        });
+                    }
+                    return message;
+                });
+                updatedConversation = { 
+                    ...updatedConversation,
+                    messages: updatedMessages,
+                    datetime: today_datetime
+                };
+
+                saveSelectConverSation(updatedConversation);
+                setMessageIsStreaming(false);
+            }
         }
     }
     
@@ -361,6 +382,8 @@ const ChatContent: FC<Props> = ({
                     handleChangeUtilityInputsValue = {handleChangeUtilityInputsValue}
                     selectedSearch={selectedSearch}
                     clearSelectedSearch={clearSelectedSearch}
+                    selectedUtility={selectedUtility}
+                    deleteConversation={deleteConversation}
                 />
             </Box>
             

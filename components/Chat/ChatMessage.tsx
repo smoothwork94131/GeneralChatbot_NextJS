@@ -6,15 +6,21 @@ import { Box,
     Flex,
     Text,
     Tooltip,
-    Badge } from '@mantine/core';
+    Badge,
+    Popover
+} from '@mantine/core';
 import ChatMessageList  from '@/components/Chat/ChatMessageList';
 import { Conversation, ConversationState, Message } from '@/types/chat';
 import TimeAgo from 'react-timeago';
 import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 import { IconArrowBackUp,
-    IconChevronRight} from '@tabler/icons-react';
-import { Input, SelectedSearch } from '@/types/role';
+    IconCheck,
+    IconChevronRight,
+    IconTrash} from '@tabler/icons-react';
+
+import { Input, SelectedSearch, Utility } from '@/types/role';
 import { IconCopy } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
 
 interface Props {
     historyConversation: Conversation | undefined;
@@ -24,7 +30,9 @@ interface Props {
     isMobile: boolean;
     handleChangeUtilityInputsValue: (input_index: number, value: string)=>void,
     selectedSearch: SelectedSearch,
-    clearSelectedSearch: () =>void
+    clearSelectedSearch: () =>void,
+    selectedUtility: Utility,
+    deleteConversation: (index: number)=>void;
 }
 const ChatMessage: FC<Props> = ({
         historyConversation, 
@@ -34,7 +42,9 @@ const ChatMessage: FC<Props> = ({
         isMobile,
         handleChangeUtilityInputsValue,
         selectedSearch,
-        clearSelectedSearch
+        clearSelectedSearch,
+        selectedUtility,
+        deleteConversation
     }) => {
     const L10nsStrings = {
         prefixAgo: null,
@@ -59,11 +69,14 @@ const ChatMessage: FC<Props> = ({
     const history_count = selectedMessages?.length?selectedMessages?.length:0;
     const [activeGroup, setActiveGroup] = useState<string[]>([]);
     const [collapse, setCollpase] = useState<boolean>(false);
-    // cosnt [copied, setCopied] = useState<boolean>(false);
+    const [copied, setCopied] = useState<number>(-1);
+    const [reuse, setReuse] = useState<number>(-1);
+    const [timeAgo, setTimeAgo] = useState<number>(-1);
+
     
     useEffect(() => {
+        
         let updatedActive: string[] = [];
-    
         historyConversation?.messages.map((message, index) => {
             if( message[0].active ||
                 ((index == 0 || 
@@ -80,8 +93,8 @@ const ChatMessage: FC<Props> = ({
         }
         setActiveGroup(updatedActive);
         setCollpase(false); 
+        setTimeout(goSelectedSection, 2000);
 
-        setTimeout(goSelectedSection, 1000);
     },[historyConversation, selectedSearch])
     
     useEffect(() => {
@@ -125,8 +138,12 @@ const ChatMessage: FC<Props> = ({
         saveSelctedConversation(updatedConversation);
     }
     
-    const handleCopyToClipboard = (message: string) => {
+    const handleCopyToClipboard = (message: string, index: number) => {
         copyToClipboard(message);
+        setCopied(index);
+        setTimeout(function(){
+            setCopied(-1);
+        }, 1000);
     };
     function copyToClipboard(text: string) {
         if (typeof navigator !== 'undefined')
@@ -151,8 +168,11 @@ const ChatMessage: FC<Props> = ({
                 }
             }
         }
+        setReuse(index);
+        setTimeout(function() {
+            setReuse(-1);
+        }, 2000);
     }
-    
     return (
         <Box
             sx={{
@@ -221,7 +241,6 @@ const ChatMessage: FC<Props> = ({
                                                             
                                                         >{input.value}</Badge>:<></>
                                                     )
-                                                    
                                                 }
                                             </Box>
                                         </Flex>                 
@@ -229,31 +248,45 @@ const ChatMessage: FC<Props> = ({
                                             gap="xs"
                                             align='flex-end'
                                         >
-                                            <IconArrowBackUp color='gray' size={isMobile?18:22} onClick={(event) => {
-                                                event.stopPropagation();
-                                                setInputs(index);
-                                            }}/>
-                                            {
-                                                <Box
-                                                    sx={(theme) => ({
-                                                        '&:hover > time': { display: 'none' },
-                                                        '&:hover > .date': { display: 'block' },
-                                                    })}
+                                            <Tooltip label={reuse == index? 'Copied to Input':'Re-use'} opened={reuse == index?true:false}>
+                                                {
+                                                    reuse == index ?
+                                                    <IconCheck color='gray' size={isMobile?'15px':'18px'}/>
+                                                    :
+                                                    <IconArrowBackUp color='gray' size={isMobile?'15px':'18px'} onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        setInputs(index);
+                                                    }}/>
+                                                }
+                                            </Tooltip>
+                                            <Tooltip label='Delete'>
+                                                {
+                                                    <IconTrash color='gray' size={isMobile?'15px':'18px'} onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        deleteConversation(selectedMessages.length-index-1)
+                                                    }}/>
+                                                }
+                                            </Tooltip>
+                                            <Tooltip label={selectedMessages[history_count-index-1][1].datetime} 
+                                                opened={timeAgo == index? true:false} 
+                                                onMouseEnter={() =>{setTimeAgo(index)}}
+                                                onMouseLeave={()=>{setTimeAgo(-1)}}
+                                            >   
+                                                <Box onClick={(event) => {event.stopPropagation(); 
+                                                            setTimeAgo(index);
+                                                        }
+                                                    }
+                                                    p={0}
                                                 >
-                                                    <Text  className='date' sx={(theme) =>({
-                                                        display: 'none',
-                                                        fontSize: theme.fontSizes.xs
-                                                    })}>
-                                                        {selectedMessages[history_count-index-1][1].datetime}
-                                                    </Text>
-                                                    <TimeAgo  
+                                                    <TimeAgo
                                                         date={selectedMessages[history_count-index-1][1].datetime} 
                                                         formatter={formatter} 
-                                                        style={{color: 'gray', fontSize:'12px',}}
+                                                        style={{color: 'gray', fontSize: isMobile?'12px':'15px',}}
                                                         locale={'en'}
                                                     />
                                                 </Box>
-                                            }
+                                            </Tooltip>
+                                            
                                         </Flex>
                                     </Flex>
                                 </Accordion.Control>
@@ -268,22 +301,28 @@ const ChatMessage: FC<Props> = ({
                                         })}
                                         className='copy-assistant'
                                     >
-                                        <Tooltip label='Copy'>
-                                            <IconCopy 
-                                                style={{color: 'gray',}}
-                                                onClick={(event) => {
-                                                        handleCopyToClipboard(selectedMessages[history_count-index-1][1].content)
-                                                        event.stopPropagation();
+                                        <Tooltip label={copied == index? 'Copied':'Copy'} opened={copied == index?true:false}>
+                                            {
+                                                copied == index ?
+                                                <IconCheck 
+                                                    style={{color: 'gray',}}
+                                                />:
+                                                <IconCopy 
+                                                    style={{color: 'gray',}}
+                                                    onClick={(event) => {
+                                                            handleCopyToClipboard(selectedMessages[history_count-index-1][1].content, index)
+                                                            event.stopPropagation();
+                                                        }
                                                     }
-                                                }
-                                            />      
+                                                />
+                                            }
                                         </Tooltip>
                                     </Box>
                                     <ChatMessageList
                                         key = {index}
-                                        cursor={`${selectedMessages[history_count-index-1][1].content}${
+                                        cursor={`${selectedMessages[history_count-index-1][1].content} ${
                                             messageIsStreaming 
-                                            && index == 0
+                                            && (index == 0 || selectedUtility.streamming)
                                             ? '`▍`': ''
                                         }`}
                                         index={index}
@@ -295,7 +334,6 @@ const ChatMessage: FC<Props> = ({
                         }
                     </Box>        
                 )
-                
             }
             </Accordion>
         </Box>

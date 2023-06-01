@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createParser } from 'eventsource-parser';
 
-import { ApiChatInput, chatCompletionPayload, extractOpenaiChatInputs, postToOpenAI } from './chat';
+import { ApiChatInput, chatCompletionPayload, extractOpenaiChatInputs, getSubscriptions, getUserTimes, getUtilityInfo, postToOpenAI } from './chat';
 import { OpenAIAPI } from '@/types/openai';
 
+import { getUpdatedBackend } from '../updated_backend';
+import { Global } from 'global';
+import { Input, Utility, UtilityState } from '@/types/role';
+import { Message, UserMessageState } from '@/types/chat';
+import { DEFAULT_SYSTEM_PROMPT, OPENAI_MODELID } from '@/utils/app/const';
 
 async function chatStreamRepeater(input: ApiChatInput, signal: AbortSignal): Promise<ReadableStream> {
 
@@ -14,8 +19,8 @@ async function chatStreamRepeater(input: ApiChatInput, signal: AbortSignal): Pro
 
   // begin event streaming from the OpenAI API
   const encoder = new TextEncoder();
-
   let upstreamResponse: Response;
+
   try {
     upstreamResponse = await postToOpenAI(input.api, '/v1/chat/completions', chatCompletionPayload(input, true), signal);
   } catch (error: any) {
@@ -28,7 +33,7 @@ async function chatStreamRepeater(input: ApiChatInput, signal: AbortSignal): Pro
       },
     });
   }
-
+  
   // decoding and re-encoding loop
 
   const onReadableStreamStart = async (controller: ReadableStreamDefaultController) => {
@@ -82,11 +87,12 @@ async function chatStreamRepeater(input: ApiChatInput, signal: AbortSignal): Pro
       upstreamParser.feed(decoder.decode(upstreamChunk, { stream: true }));
 
   };
-
+  
   return new ReadableStream({
     start: onReadableStreamStart,
     cancel: (reason) => console.log('chatStreamRepeater cancelled', reason),
   });
+
 }
 
 
@@ -98,12 +104,91 @@ async function chatStreamRepeater(input: ApiChatInput, signal: AbortSignal): Pro
 export interface ApiChatFirstOutput {
   model: string;
 }
+let requestLasts: { [ip: string]: number } = {};
+let requestCounts: { [ip: string]: number } = {};
 
-export default async function handler(req: NextRequest): Promise<Response> {
+export default async function handler(req, res) {
+
   try {
-    const apiChatInput = await extractOpenaiChatInputs(req);
+    const ip = req.headers['x-forwarded-for'];
+    const now = Date.now();
+
+    // Reset request count and timestamp when a new minute starts
+    if (!requestLasts[ip] || now - requestLasts[ip] >  1000) {
+      requestCounts[ip] = 0;
+      requestLasts[ip] = now;
+    }
+
+    // Check if the maximum number of requests has been reached for this IP address
+    if (requestCounts[ip] >= 1000) {
+      throw new Error('Rate limit exceeded');
+    }
+
+    requestCounts[ip]++;
+
+  } catch (error: any) {
+    console.error(error);
+    return new NextResponse(`limited`, { status: 429 });
+  }
+
+  try {
+    
+    const userApi = await req.json();
+    const utilityKey = userApi.utilityKey;
+    const fingerId = userApi.fingerId;
+    const userId = userApi.userId;
+    const responseMessages = userApi.response_messages;
+    const inputs = userApi.inputs;
+    const utilityInfo = await getUtilityInfo(utilityKey);
+    const message = userApi.message;
+
+    let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
+    let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
+    
+    const today_datetime = new Date().toUTCString();
+    let messages: Message[] = [];
+    let index=0;
+    
+    inputs.map((input: Input) => {
+      if(input.type == "form" && user_prompt){
+          user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
+          index++;
+      }
+    });
+
+    if(user_prompt) {
+        user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
+    }
+    if(system_prompt){
+        system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+        messages =[{role: 'system', content: system_prompt}];
+    }
+
+    responseMessages.map((item) => {
+      messages = [...messages, item];
+    });
+
+    let user_message: Message = UserMessageState ;
+    user_message = {...user_message, 
+        content: user_prompt?user_prompt:message, 
+        // datetime: today_datetime,
+    };
+
+    messages.push(user_message);
+    
+
+    let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
+    if (!userId && userTimes <= 0) {
+      throw new Error("User times have expired.");
+    } else if (userTimes <= 0 && !isSubscription) {
+      throw new Error("User subscription required.");
+    }
+    
+    const apiChatInput = await extractOpenaiChatInputs({messages: messages, model: OPENAI_MODELID});
+    
     const stream: ReadableStream = await chatStreamRepeater(apiChatInput, req.signal);
     return new NextResponse(stream);
+  
   } catch (error: any) {
     if (error.name === 'AbortError') {
       console.log('Fetch request aborted in handler');

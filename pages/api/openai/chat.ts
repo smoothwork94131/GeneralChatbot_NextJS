@@ -1,7 +1,7 @@
 import {  NextResponse } from 'next/server';
 import { OpenAIAPI } from '@/types/openai';
 import { createClient } from '@supabase/supabase-js';
-import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES } from '@/utils/app/const';
+import {  NO_ACCOUNT_TIMES, FREE_TIMES, PAID_TIMES, OPENAI_MODELID, DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 
 import moment from 'moment';
 
@@ -10,7 +10,10 @@ import { OPENAI_API_KEY } from '@/utils/server/const';
 import { NEXT_PUBLIC_SUPABASE_URL } from '@/utils/app/const';
 import { SUPABASE_SERVICE_ROLE_KEY } from '@/utils/server/const';
 import { Database } from '@/types/types_db';
-
+import { getUpdatedBackend } from '../updated_backend';
+import { Global } from 'global';
+import { Input, Utility, UtilityState } from '@/types/role';
+import { Message, UserMessageState } from '@/types/chat';
 // Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
 // as it has admin priviliges and overwrites RLS policies!
 const supabaseAdmin = createClient<Database>(
@@ -26,7 +29,7 @@ if (!process.env.OPENAI_API_KEY)
 
 // helper functions
 
-export function extractOpenaiChatInputs(req: ApiChatInput): ApiChatInput {
+export function extractOpenaiChatInputs(ApiChatInput): ApiChatInput {
 
   const {
     api: userApi = {},
@@ -34,15 +37,15 @@ export function extractOpenaiChatInputs(req: ApiChatInput): ApiChatInput {
     messages,
     temperature = 0.5,
     max_tokens = 1024,
-  } = req;
+  } = ApiChatInput;
 
   if (!model || !messages)
     throw new Error('Missing required parameters: api, model, messages');
 
   const api: OpenAIAPI.Configuration = {
-    apiKey: (userApi.apiKey || process.env.OPENAI_API_KEY || OPENAI_API_KEY).trim(),
-    apiHost: (userApi.apiHost || process.env.OPENAI_API_HOST || 'api.openai.com').trim().replaceAll('https://', ''),
-    apiOrganizationId: (userApi.apiOrganizationId || process.env.OPENAI_API_ORG_ID || '').trim(),
+    apiKey: (process.env.OPENAI_API_KEY || OPENAI_API_KEY).trim(),
+    apiHost: (process.env.OPENAI_API_HOST || 'api.openai.com').trim().replaceAll('https://', ''),
+    apiOrganizationId: (process.env.OPENAI_API_ORG_ID || '').trim(),
   };
   if (!api.apiKey)
     throw new Error('Missing OpenAI API Key. Add it on the client side (Settings icon) or server side (your deployment).');
@@ -65,7 +68,7 @@ export const chatCompletionPayload = (input: Omit<ApiChatInput, 'api'>, stream: 
   n: 1,
 });
 
-const getUserTimes = async (userId: string|null, fingerId: string) => {
+export const getUserTimes = async (userId: string|null, fingerId: string) => {
   let times = 0;
   if(!userId) {
     const { data, error } = await supabaseAdmin
@@ -222,7 +225,25 @@ export interface ApiChatInput {
 export interface ApiChatResponse {
   message: OpenAIAPI.Chat.Message;
 }
-
+export async function getUtilityInfo(utilityKey){
+  
+  if(Global.utilites_group.length == 0) {
+    Global.utilites_group = await getUpdatedBackend();
+  }
+  const roleGroup_ = Global.utilites_group;
+  let utilityInfo: Utility = UtilityState;
+  for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
+    for(let g_index = 0 ; g_index <roleGroup_[r_index].utilities_group.length; g_index++) {
+        for(let u_index = 0 ; u_index < roleGroup_[r_index].utilities_group[g_index].utilities.length; u_index++){
+          if(utilityKey == roleGroup_[r_index].utilities_group[g_index].utilities[u_index].key 
+              ) {
+                utilityInfo = roleGroup_[r_index].utilities_group[g_index].utilities[u_index];
+          }
+      }
+    }
+  }
+  return utilityInfo;
+}
 let requestCounts: { [ip: string]: number } = {};
 
 // Keep track of when each IP address last made a request
@@ -253,19 +274,54 @@ export default async function handler(req, res) {
   }
   try{
     const userApi = await req.json();
-    const input = userApi.input;
+    const utilityKey = userApi.utilityKey;
     const fingerId = userApi.fingerId;
     const userId = userApi.userId;
+    const responseMessages = userApi.response_messages;
+    const inputs = userApi.inputs;
+    const utilityInfo = await getUtilityInfo(utilityKey);
+    const message = userApi.message;
 
+    let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
+    let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
+    
+    const today_datetime = new Date().toUTCString();
+    let messages: Message[] = [];
+    let index=0;
+    
+    inputs.map((input: Input) => {
+      if(input.type == "form" && user_prompt){
+          user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
+          index++;
+      }
+    });
+
+    if(user_prompt) {
+        user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
+    }
+    if(system_prompt){
+        system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+        messages =[{role: 'system', content: system_prompt}];
+    }
+
+    responseMessages.map((item) => {
+      messages = [...messages, item];
+    });
+    let user_message: Message = UserMessageState ;
+    user_message = {...user_message, 
+        content: user_prompt?user_prompt:message, 
+    };
+
+    messages.push(user_message);
+    
     let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
-
     if (!userId && userTimes <= 0) {
       throw new Error("User times have expired.");
     } else if (userTimes <= 0 && !isSubscription) {
       throw new Error("User subscription required.");
     }
-
-    const { api, ...rest } = extractOpenaiChatInputs(input);
+    
+    const { api, ...rest } = extractOpenaiChatInputs({messages: messages, model: OPENAI_MODELID});
     const payLoad = chatCompletionPayload(rest, false);
     const response_ = postToOpenAI(api, "/v1/chat/completions", payLoad);
     const completion_ = response_.then((res) => res.json());

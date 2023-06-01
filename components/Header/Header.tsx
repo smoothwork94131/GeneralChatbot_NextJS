@@ -10,6 +10,8 @@ import OpenaiContext from '@/components/openai/openai.context';
 import Role from '../Role';
 import AccountButtons from '@/components/Account/AccountButtons';
 import { Conversation } from '@/types/chat';
+import { IconSearch } from '@tabler/icons-react';
+import { spotlight } from '@mantine/spotlight';
 
 interface Props {
     handleShowSidebar: ()=>void;
@@ -53,12 +55,12 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile, upd
                 </Group>
                 <Group>
                     <AccountButtons selectedConversation={selectedConversation} isMobile={true}/>
+                    <IconSearch 
+                        onClick={() => spotlight.open()}
+                    />
                     <Menu shadow="md" width={200}>
                         <Menu.Target>
-                            <Avatar 
-                                src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=255&q=80" alt="avatar" 
-                                size='md' radius="xl"
-                            />
+                            <Avatar color="cyan" radius="xl">JM</Avatar>
                         </Menu.Target>
                         <Settings 
                             isMobile={isMobile}

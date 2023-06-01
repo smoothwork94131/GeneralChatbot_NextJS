@@ -210,7 +210,7 @@ function RenderCode(props: { codeBlock: CodeBlock, sx?: SxProps }) {
         {hasReplitLanguage &&
           <OpenInReplit codeBlock={{ code: props.codeBlock.code, language: props.codeBlock.language || undefined }} />
         }
-        <Tooltip title='Copy Code' variant='solid'>
+        <Tooltip title='Copy Code' variant='solid' >
           <IconButton variant='outlined' color='neutral' onClick={handleCopyToClipboard}>
             <ContentCopyIcon />
           </IconButton>

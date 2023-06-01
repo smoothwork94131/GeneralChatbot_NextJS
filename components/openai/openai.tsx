@@ -2,7 +2,8 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { initialState, OpenaiInitialState } from './openai.state';
 import OpenaiContext from './openai.context';
 import  Chat  from '@/components/Chat';
-import { getSheets } from '@/pages/api/googlesheets';
+import TimeAgo from 'react-timeago';
+import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
 
 import { 
     AppShell, 
@@ -15,7 +16,8 @@ import {
     Box,
     rem,
     Loader, 
-    Badge
+    Badge,
+    Flex
 } from '@mantine/core';
 import { 
     useEffect, 
@@ -27,9 +29,9 @@ import { SpotlightProvider, SpotlightAction, SpotlightActionProps  } from '@mant
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
-import { MOBILE_LIMIT_WIDTH } from '@/utils/app/const';
+import { DESTKTOP_SEACH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
-import { Conversation } from '@/types/chat';
+import { Conversation, Role } from '@/types/chat';
 import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } from '@/types/role';
 import { saveSelctedConversation } from '@/utils/app/conversation';
 import { IconSearch } from '@tabler/icons-react';
@@ -56,7 +58,26 @@ const OpenAi = ({
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
     const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
-
+    const [selectedRoleIndex, setSelectedRoleIndex] = useState<number>(0);
+    const L10nsStrings = {
+        prefixAgo: null,
+        prefixFromNow: null,
+        suffixAgo: '',
+        suffixFromNow: '',
+        seconds: '1m ago',
+        minute: '1m ago',
+        minutes: '%dm ago',
+        hour: '1h',
+        hours: '%dh ago',
+        day: '1d ago',
+        days: '%dd ago',
+        month: '1mo',
+        months: '%dmo ago',
+        year: '1yr ago',
+        years: '%dyr ago',
+        wordSeparator: ' ',
+    }
+    const formatter = buildFormatter(L10nsStrings);
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
     });
@@ -86,6 +107,7 @@ const OpenAi = ({
             conversationHistory,
             selectedUtility,
             selectedSearch,
+            selectedUtilityGroup,
             selectedConversation
         },
         dispatch,
@@ -94,23 +116,52 @@ const OpenAi = ({
         dispatchServerRoleData(serverRoleData);
     },[]);
 
-    const dispatchServerRoleData = async(_rolData) => {
+    const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
+        const response = await fetch('/api/updated_backend', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(_rolData)
+        });
+
+        
+        
         if(_rolData) {
+            let selectedRolIndex = 0;
+            let selectedGroupIndex = 0;
+            let utilityIndex = 0;
+
+            _rolData.map((role_item, role_index) => {
+                if(role_item.name == selectedRole.name) {
+                    selectedRolIndex = role_index;
+                }
+                role_item.utilities_group.map((group_item, gropu_index) => {
+                    group_item.utilities.map((utility, utility_index) => {
+                        if(utility.name == selectedUtility.name) {
+                            utilityIndex = utility_index;
+                            selectedGroupIndex = gropu_index;
+                        }
+                    })
+                })
+            })
+            
             dispatch({
                 "field": "roleGroup",
                 "value": _rolData
             });
+            
             dispatch({
                 "field": "selectedRole",
-                "value": _rolData[0]
+                "value": _rolData[selectedRolIndex]
             })
             dispatch({
                 "field": "selectedUtility",
-                "value": _rolData[0].utilities_group[0].utilities[0]
+                "value": _rolData[selectedRolIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
             })
             dispatch({
                 "field": "selectedUtilityGroup",
-                "value": _rolData[0].utilities_group
+                "value": _rolData[selectedRolIndex].utilities_group
             })
         }
     }
@@ -132,7 +183,7 @@ const OpenAi = ({
         }
 
     },[roleGroup]);
-
+    
     useEffect(() => {
         let updateConversation:Conversation;
         const filterConversation = conversationHistory.filter(item => item.key == selectedUtility.key);
@@ -157,6 +208,8 @@ const OpenAi = ({
             (r, r_index) => r_index == index
         );
         
+        setSelectedRoleIndex(index);
+
         if(updatedRole.length > 0) {
             let utility;
             for(let g_index = 0; g_index < roleGroup[index].utilities_group.length; g_index++){
@@ -187,18 +240,26 @@ const OpenAi = ({
 
     const handleSelectUtility = (utility_key:string) => {
         let updatedUtility: Utility[] = [];
-        for(let k = 0 ; k<selectedRole?.utilities_group.length; k++){
-            updatedUtility = selectedRole?.utilities_group[k].utilities.filter((utility) => utility.key == utility_key);
-            if(updatedUtility.length > 0) break;
+        let updatedRole:RoleGroup ={name:'',utilities_group:[]};
+        for(let r_index = 0; r_index < roleGroup.length; r_index++) {
+            for(let k = 0 ; k<roleGroup[r_index].utilities_group.length; k++){
+                updatedUtility = roleGroup[r_index].utilities_group[k].utilities.filter((utility) => utility.key == utility_key);
+                if(updatedUtility.length > 0) { break;}
+            }
+            if(updatedUtility.length > 0) { 
+                updatedRole = roleGroup[r_index];
+                break;
+                
+            }
         }
         
         if(updatedUtility && updatedUtility.length > 0) {
             
             let roleGroup_ = roleGroup;
             const updatedUtility_ = updatedUtility[updatedUtility?.length - 1];
-            
+
             for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
-                if(selectedRole.name == roleGroup_[r_index].name) {            
+                if(updatedRole.name == roleGroup_[r_index].name) {            
                     for(let g_index = 0 ; g_index <roleGroup_[r_index].utilities_group.length; g_index++) {
                         for(let u_index = 0 ; u_index < roleGroup_[r_index].utilities_group[g_index].utilities.length; u_index++){
                             if(updatedUtility_.key == roleGroup_[r_index].utilities_group[g_index].utilities[u_index].key 
@@ -211,7 +272,10 @@ const OpenAi = ({
                     }
                 }    
             }
-
+            dispatch({
+                field: "selectedRole",
+                value: updatedRole
+            });
             dispatch({
                 field: "selectedUtility",
                 value: updatedUtility_
@@ -239,10 +303,14 @@ const OpenAi = ({
             nextText: string;
             description: string;
             roleName: string;
-            inputs: Input[]
+            inputs: Input[],
+            datetime: string|undefined
         }[] = [];
         let searchHistoryActions:SpotlightAction[] = [];
-        
+        let preview_length = DESTKTOP_SEACH_PREVIEW_LENGTH;
+        if(isMobile) {
+            preview_length = MOBILE_SEACH_PREVIEW_LENGTH;
+        }
         conversationHistory.map((conversation, conversationIndex) => {
             conversation.messages.map((messages, messagesIndex) => {
                 let flag = false;
@@ -254,17 +322,17 @@ const OpenAi = ({
                     const searchIndex = content.toLowerCase().indexOf(searchKey.toLowerCase());
                     let prevText = ''; let nextText = '';
                     
-                    if(searchIndex > 25) {
-                        prevText = "..."+content.substr(searchIndex-25, 25);        
+                    if(searchIndex > preview_length) {
+                        prevText = "..."+content.substr(searchIndex-preview_length, preview_length);        
                     } else {
                         prevText = content.substr(0, searchIndex);
                     }
-                    if(content.length - (searchIndex + searchKey.length) > 25) {
-                        nextText = content.substr((searchIndex + searchKey.length), 25)+"...";
+                    if(content.length - (searchIndex + searchKey.length) > preview_length) {
+                        nextText = content.substr((searchIndex + searchKey.length), preview_length)+"...";
                     } else {
                         nextText = content.substr((searchIndex + searchKey.length), content.length - (searchIndex + searchKey.length));
                         if(messageIndex == 0) {
-                            if(messages[1].content.length > 25) {
+                            if(messages[1].content.length > preview_length) {
                                 nextText = nextText+"..."+messages[1].content.substr(0, 25)+"...";
                             } else {
                                 nextText = nextText+"..."+messages[1].content.substr(0, messages[1].content.length-1);
@@ -285,6 +353,7 @@ const OpenAi = ({
                         historyIndex: messagesIndex,
                         utilityKey: conversation.key,
                         timestamp: Math.floor(timestamp.getTime()/1000),
+                        datetime: messages[0].datetime,
                         searchKey: searchKey,
                         nextText: nextText,
                         inputs: messages[0].inputs?messages[0].inputs:[],
@@ -306,6 +375,8 @@ const OpenAi = ({
                 prevText: item.prevText,
                 roleName: item.roleName,
                 inputs: item.inputs,
+                timestamp: item.timestamp,
+                datetime: item.datetime,
                 onTrigger: () => {
                     onTriggarSearch(item.utilityKey, item.historyIndex)
                 },
@@ -388,12 +459,22 @@ const OpenAi = ({
                 </Box>
                 <Text color={`${hovered?'white':'dimmed'}`}>
                     {
-                        <Badge>
-                            {action.roleName}
-                        </Badge>
+                        <Flex direction="column" gap="10px">
+                            <Badge size="md" radius="sm">
+                                {action.roleName}
+                            </Badge>
+                            <Text size="xs" align='right'>
+                                <TimeAgo
+                                    date={new Date(action.datetime)} 
+                                    formatter={formatter} 
+                                    style={{fontSize:'12px'}}
+                                    locale={'en'}
+                                />
+                            </Text>
+
+                        </Flex>
                     }
                 </Text>
-                
             </Group>
             </UnstyledButton>
         );

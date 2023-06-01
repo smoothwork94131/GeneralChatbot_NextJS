@@ -5,12 +5,10 @@ import { spotlight } from '@mantine/spotlight';
 import HomeContext from 'state/index.context';
 import { useUser } from '@/utils/app/useUser';
 import { useRouter } from 'next/router';
-import { chkIsSubscription, getActiveProductsWithPrices, supabase } from '@/utils/app/supabase-client';
+import { supabase } from '@/utils/app/supabase-client';
 import MyModal from '@/components/Account/Modal';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
-import { ProductWithPrice } from '@/types/user';
-
 
 interface Props {
     isMobile: boolean;
@@ -20,14 +18,9 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
 
     const { user, isSubscriptionActive: isSubscription, isLoading } = useUser();
     const [isModal, setIsModal] = useState(false);
-    // const [isSubscription , setSubscription ] = useState<boolean>(true);
     const [modalType, setModalType] = useState('signin');
     const router = useRouter();
 
-    console.log("user", user)
-    console.log("isSubscription", isSubscription)
-    console.log("isLoading", isLoading)
-    
     const {
         state: { colorScheme, lightMode },
         dispatch: homeDispatch,
@@ -90,21 +83,11 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
     }
 
     return (
-        isLoading ? <div></div> :
+        // isLoading ? <div></div> :
         <Group>
             {
                 isMobile ?
                     <Menu.Dropdown>
-                        {/* <Menu.Item
-                            icon={<IconStar size={14} />}
-                        >
-                            Favourited charts
-                        </Menu.Item>
-                        <Menu.Item
-                            icon={<IconTrash size={14} />}
-                        >
-                            Clear Conversation
-                        </Menu.Item> */}
                         <Menu.Item
                             icon={
                                 colorScheme == "dark" ? <IconSun size={14} /> : <IconMoon size={14} />
@@ -176,18 +159,6 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             width: '100%'
                         })}
                     >
-
-                        {/* <NavLink
-                            label="Favourited charts"
-                            icon={<IconStar size="1rem" stroke={1.5} />}
-                            variant="subtle"
-                        />
-
-                        <NavLink
-                            label="Clear Conversation"
-                            icon={<IconTrash size="1rem" stroke={1.5} />}
-                            variant="subtle"
-                        /> */}
                         <NavLink
                             label={`${colorScheme == "dark" ? "Light" : "Dark"}`}
                             icon={colorScheme == "dark" ? <IconSun size="1rem" stroke={1.5} /> : <IconMoon size="1rem" stroke={1.5} />}

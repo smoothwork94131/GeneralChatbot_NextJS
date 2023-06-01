@@ -31,3 +31,9 @@
     max-height: 100px;
     overflow-y: auto !important;
 }
+.ant-tabs-nav-operations {
+    display: none !important;
+}
+.mantine-Menu-dropdown {
+    z-index: 1;
+}

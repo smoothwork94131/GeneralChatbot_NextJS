@@ -179,6 +179,3 @@ export async function getSheets(){
   return roleData;
 }
 
-export const config = {
-  runtime: 'edge',
-};

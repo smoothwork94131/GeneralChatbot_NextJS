@@ -24,7 +24,7 @@ export interface Utility {
     system_prompt?: string;
     user_prompt?: string;
     include_prompt_history: boolean;
-    streamming?: boolean;
+    streaming?: boolean;
 }
 
 export const  UtilityState:Utility = {

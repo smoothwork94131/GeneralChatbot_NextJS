@@ -64,7 +64,7 @@ async function checkIfName(name) {
     const { data, error } = await supabaseAdmin
     .from('updated_backend')
     .select('*')
-    .eq("name", "utilites_group");
+    .eq("name", name);
     if(error) {
         return false;
     } else {

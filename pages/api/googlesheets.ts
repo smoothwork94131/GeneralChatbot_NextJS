@@ -18,7 +18,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const systemPrompt = getFieldValue(row, headers, 'Utility_System_Prompt');
     const includePromptHistory = getFieldValue(row, headers, 'Include_Prompt_History');
     const input_align = getFieldValue(row, headers, `Input_Align`);
-    let streamming = getFieldValue(row, headers, `Streamming`) == ""? false:true;
+    const streaming = getFieldValue(row, headers, `Streaming`);
     
     let role_index = chkExistObject(roleData, roleName);
     
@@ -67,7 +67,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',
-        streamming: streamming
+        streaming: streaming=='TRUE' || streaming=="1"? true:false,
       })
     }
     utilities_group[utilities_group_index].utilities = utilities;

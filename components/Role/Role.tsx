@@ -59,7 +59,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
             return JSON.parse(roleOrderStr);
         }
     }
-
+    
     const [roleOrder, setRoleOrder] = useState<RoleOrderItem[]>(getStorageOrder());
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState(false);

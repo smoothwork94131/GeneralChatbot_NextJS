@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NEXT_PUBLIC_SUPABASE_URL } from '@/utils/app/const';
 import { SUPABASE_SERVICE_ROLE_KEY } from '@/utils/server/const';
 import { Database } from '@/types/types_db';
+import { getSheets } from './googlesheets';
 
 const supabaseAdmin = createClient<Database>(
     NEXT_PUBLIC_SUPABASE_URL || '',
@@ -65,6 +66,7 @@ async function checkIfName(name) {
     .from('updated_backend')
     .select('*')
     .eq("name", name);
+    console.log(data);
     if(error) {
         return false;
     } else {
@@ -74,6 +76,12 @@ async function checkIfName(name) {
             return false;
         }
     }
+}
+
+export default async function handler(req, res){
+    const sheetData = getSheets();
+    const result = await updateData(sheetData);
+    return res.json({status: result});
 }
 
 // export default async function handler(req, res){

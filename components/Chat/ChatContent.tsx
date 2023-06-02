@@ -170,7 +170,7 @@ const ChatContent: FC<Props> = ({
             const controller = new AbortController();
             const signal = controller.signal;
             let endpoint = 'chat';
-            if(selectedUtility.streaming) {
+            if(selectedUtility.streamming) {
                 endpoint = 'stream-chat';
             }
 
@@ -203,7 +203,7 @@ const ChatContent: FC<Props> = ({
                 return '';
             }
             
-            if(selectedUtility.streaming) {
+            if(selectedUtility.streamming) {
                 let first = true;
                 if(response.body) {
                     const reader = response.body.getReader();
@@ -245,7 +245,7 @@ const ChatContent: FC<Props> = ({
                                 messages: updatedMessages,
                                 datetime: today_datetime
                             };
-    
+                            
                             saveSelectConverSation(updatedConversation);
                         }
                         

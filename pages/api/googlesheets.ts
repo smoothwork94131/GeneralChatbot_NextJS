@@ -3,7 +3,7 @@ import { sheets as sheets_, auth } from '@googleapis/sheets';
 import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/server/const'
 import { Input, RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
-import { updateBackendData } from './updated_backend';
+import { getUpdatedBackend, updateData } from './updated_backend';
 
 let roleData:RoleGroup[] = [];
 function mapRowToCustomData(row: string[], headers: string[]): void {
@@ -18,7 +18,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
     const systemPrompt = getFieldValue(row, headers, 'Utility_System_Prompt');
     const includePromptHistory = getFieldValue(row, headers, 'Include_Prompt_History');
     const input_align = getFieldValue(row, headers, `Input_Align`);
-    const streaming = getFieldValue(row, headers, `Streaming`);
+    let streamming = getFieldValue(row, headers, `Streamming`) == ""? false:true;
     
     let role_index = chkExistObject(roleData, roleName);
     
@@ -67,7 +67,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',
-        streaming: streaming=='TRUE' || streaming=="1"? true:false,
+        streamming: streamming
       })
     }
     utilities_group[utilities_group_index].utilities = utilities;
@@ -176,7 +176,7 @@ export default async function handler(req, res){
 
 export  async function getSheets(){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-  await updateBackendData(roleData);
+  await updateData(roleData);
   const convertedRoleData = removePropmptFromRole();
   return convertedRoleData;
 }

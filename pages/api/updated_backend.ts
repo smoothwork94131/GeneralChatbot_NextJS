@@ -36,7 +36,6 @@ export const updateData = async(content) => {
             name: 'default',
             json_data: content
         }])
-        .eq("name", "utilites_group");
 
         if(error) {
             return "Error";

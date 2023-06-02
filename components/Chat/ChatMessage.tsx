@@ -322,7 +322,7 @@ const ChatMessage: FC<Props> = ({
                                         key = {index}
                                         cursor={`${selectedMessages[history_count-index-1][1].content} ${
                                             messageIsStreaming 
-                                            && (index == 0 || selectedUtility.streaming)
+                                            && (index == 0 || selectedUtility.streamming)
                                             ? '`▍`': ''
                                         }`}
                                         index={index}

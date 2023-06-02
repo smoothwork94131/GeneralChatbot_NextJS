@@ -184,35 +184,22 @@ export const getUpdatedBackend = async() => {
 export const updateData = async(content) => {    
     // const exist_table = await checkIfTableExists('update_data');
     // if(exist_table) {
-    if(!(await checkIfName('default'))) {    
-        const { data, error } = await supabaseAdmin
-        .from('updated_backend')
-        .insert([{
-            name: 'default',
-            json_data: content
-        }])
+    
+    const { data, error } = await supabaseAdmin
+    .from('updated_backend')
+    .update([{
+        name: 'default',
+        json_data: content
+    }])
+    .eq("name", "default");
 
-        if(error) {
-            return "Error";
-        } else {
-            return "Success";
-        }
+    if(error) {
+        console.log(error);
+        return "Error";
     } else {
-        const { data, error } = await supabaseAdmin
-        .from('updated_backend')
-        .update([{
-            name: 'default',
-            json_data: content
-        }])
-        .eq("name", "default");
-
-        if(error) {
-            console.log(error);
-            return "Error";
-        } else {
-            return "Success";
-        }
+        return "Success";
     }
+    
 }
 
 async function checkIfName(name) {
@@ -236,9 +223,9 @@ async function checkIfName(name) {
 export default async function handler(req, res){
     // const sheetData = await getSheets();
     const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-
+    
     const status = await updateData(roleData);
-    return res.json({status: result});
+    return res.json({status: status});
 }
 
 // export default async function handler(req, res){

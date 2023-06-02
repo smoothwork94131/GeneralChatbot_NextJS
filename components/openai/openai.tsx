@@ -360,7 +360,6 @@ const OpenAi = ({
                 })
             });
         }
-        console.log(searchHistoryActions);
         setSearchHistory(searchHistoryActions);
     } 
     const handleInputSearchHistory = (event) => {
@@ -523,7 +522,7 @@ const OpenAi = ({
             <Group noWrap>
                 <Box style={{ flex: 1 }}>
                     <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
-                        {`${action.title}`}
+                        {`  ${action.title}`}
                     </Highlight>
                     <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
                        {`${action.description}`}

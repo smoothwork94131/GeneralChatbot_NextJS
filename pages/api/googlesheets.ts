@@ -3,7 +3,7 @@ import { sheets as sheets_, auth } from '@googleapis/sheets';
 import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/server/const'
 import { Input, RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
-
+import { getUpdatedBackend, updateData } from './updated_backend';
 
 let roleData:RoleGroup[] = [];
 function mapRowToCustomData(row: string[], headers: string[]): void {
@@ -152,12 +152,31 @@ async function getSheetData(spreadsheetId: string, range: string): Promise<void>
   }
 }
 
+export const removePropmptFromRole = () => {
+  const updated_roleData = roleData.map((r_item) => {
+    const update_group = r_item.utilities_group.map((group_item) => {
+      const update_utilities = group_item.utilities.map((utility) => {
+        delete utility.system_prompt;
+        delete utility.user_prompt;
+        return utility;
+      })
+      group_item.utilities = update_utilities;
+      return group_item; 
+    })
+    r_item.utilities_group = update_group;
+    return r_item;
+  })
+  return updated_roleData;
+}
+
 export default async function handler(req, res){
-  const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-  return res.json(roleData);
+  const convertedRoleData = await getSheets();
+  return res.json(convertedRoleData);
 }
 
 export  async function getSheets(){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-  return roleData;
+  await updateData(roleData);
+  const convertedRoleData = removePropmptFromRole();
+  return convertedRoleData;
 }

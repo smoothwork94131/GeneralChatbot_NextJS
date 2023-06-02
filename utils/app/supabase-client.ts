@@ -86,7 +86,7 @@ export const getUserTimes = async (user: User|null) => {
       }
     }
   }
-
+  console.log("user", user);
   if(user){
     const subscription = await supabase
     .from('subscriptions')

@@ -17,7 +17,8 @@ import {
     rem,
     Loader, 
     Badge,
-    Flex
+    Flex,
+    Highlight
 } from '@mantine/core';
 import { 
     useEffect, 
@@ -25,7 +26,7 @@ import {
     FC,
  } from 'react';
 
-import { SpotlightProvider, SpotlightAction, SpotlightActionProps  } from '@mantine/spotlight';
+import { SpotlightProvider, SpotlightAction, SpotlightActionProps, spotlight  } from '@mantine/spotlight';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
@@ -59,6 +60,9 @@ const OpenAi = ({
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
     const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
     const [selectedRoleIndex, setSelectedRoleIndex] = useState<number>(0);
+    const [spotlightType, setSpotlightType] = useState<string>('history');
+    
+
     const L10nsStrings = {
         prefixAgo: null,
         prefixFromNow: null,
@@ -77,6 +81,7 @@ const OpenAi = ({
         years: '%dyr ago',
         wordSeparator: ' ',
     }
+
     const formatter = buildFormatter(L10nsStrings);
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
@@ -92,7 +97,7 @@ const OpenAi = ({
           ...theme.fn.hover({
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1],
           }),
-      
+          
           '&[data-hovered]': {
             backgroundColor: theme.colors.blue,
             color: theme.colors.white
@@ -116,17 +121,20 @@ const OpenAi = ({
         dispatchServerRoleData(serverRoleData);
     },[]);
 
-    const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
-        const response = await fetch('/api/updated_backend', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(_rolData)
-        });
+    useEffect(()=>{
+        spotlight.open();
+    },[spotlightType]);
 
-        
-        
+    const changeSpotlightType = (type) => {
+        if(type == spotlightType) {
+            spotlight.open();
+        }else {
+            setSpotlightType(type);
+        }
+        setSearchHistory([]);
+    }
+    
+    const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
         if(_rolData) {
             let selectedRolIndex = 0;
             let selectedGroupIndex = 0;
@@ -202,7 +210,7 @@ const OpenAi = ({
             "value":updateConversation
         });
     },[selectedUtility, conversationHistory]);
-    
+
     const handleSelectRole = (index: number) => {
         const updatedRole = roleGroup.filter(
             (r, r_index) => r_index == index
@@ -241,6 +249,7 @@ const OpenAi = ({
     const handleSelectUtility = (utility_key:string) => {
         let updatedUtility: Utility[] = [];
         let updatedRole:RoleGroup ={name:'',utilities_group:[]};
+        let updatedUtilitiesGroup: UtilitiesGroup[] = [];
         for(let r_index = 0; r_index < roleGroup.length; r_index++) {
             for(let k = 0 ; k<roleGroup[r_index].utilities_group.length; k++){
                 updatedUtility = roleGroup[r_index].utilities_group[k].utilities.filter((utility) => utility.key == utility_key);
@@ -249,10 +258,9 @@ const OpenAi = ({
             if(updatedUtility.length > 0) { 
                 updatedRole = roleGroup[r_index];
                 break;
-                
             }
         }
-        
+
         if(updatedUtility && updatedUtility.length > 0) {
             
             let roleGroup_ = roleGroup;
@@ -269,9 +277,11 @@ const OpenAi = ({
                                 roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = false;
                             }
                         }
+                        updatedUtilitiesGroup=roleGroup_[r_index].utilities_group;
                     }
                 }    
             }
+
             dispatch({
                 field: "selectedRole",
                 value: updatedRole
@@ -284,6 +294,10 @@ const OpenAi = ({
                 field: "roleGroup",
                 value: roleGroup_
             })
+            dispatch({
+                field: "selectedUtilityGroup",
+                value: updatedUtilitiesGroup
+            })
         }  
         setOpenedSiebar(false);
     };
@@ -291,7 +305,42 @@ const OpenAi = ({
         if(isMobile)
             setOpenedSiebar(!openedSidebar);
     };
-    const handleInputSearch = (event) => {
+
+    const handleInputSearchUtility = (event) => {
+        const searchKey = event.target.value;
+        let searchHistoryActions:SpotlightAction[] = [];
+        
+        roleGroup.map((r_item) => {
+            const utilitiesGroup = r_item.utilities_group;
+            for(let k=0; k<utilitiesGroup.length;k++){
+                let group_item = utilitiesGroup[k];
+                const filter_utilities = group_item.utilities.filter((u_item) => {
+                    const searchable = u_item.name.toLowerCase() +
+                    ' '+u_item.summary.toLowerCase();
+                    return searchable.includes(searchKey.toLowerCase())
+                })
+                
+                if(filter_utilities.length > 0) {
+                    filter_utilities.map((utility) => {
+                        
+                        
+                        searchHistoryActions.push({
+                            id: utility.key,
+                            description: utility.summary,
+                            groupName: group_item.name,
+                            title: utility.name,
+                            searchKey: searchKey,
+                            onTrigger: () => {
+                                utilityTriggarSearch(utility.key)
+                            },
+                        })
+                    });
+                }
+            }
+        })
+        setSearchHistory(searchHistoryActions);
+    } 
+    const handleInputSearchHistory = (event) => {
         const searchKey = event.target.value;
         const updatedHistoryActions: {
             timestamp: number;
@@ -306,11 +355,13 @@ const OpenAi = ({
             inputs: Input[],
             datetime: string|undefined
         }[] = [];
+
         let searchHistoryActions:SpotlightAction[] = [];
         let preview_length = DESKTOP_SEARCH_PREVIEW_LENGTH;
         if(isMobile) {
             preview_length = MOBILE_SEACH_PREVIEW_LENGTH;
         }
+        
         conversationHistory.map((conversation, conversationIndex) => {
             conversation.messages.map((messages, messagesIndex) => {
                 let flag = false;
@@ -363,7 +414,8 @@ const OpenAi = ({
                     flag = true;
                 })
             })
-        });   
+        });
+        
         updatedHistoryActions.sort((a, b) => b.timestamp-a.timestamp);
         updatedHistoryActions.map((item) => {
             searchHistoryActions.push({
@@ -378,14 +430,17 @@ const OpenAi = ({
                 timestamp: item.timestamp,
                 datetime: item.datetime,
                 onTrigger: () => {
-                    onTriggarSearch(item.utilityKey, item.historyIndex)
+                    historyTriggarSearch(item.utilityKey, item.historyIndex)
                 },
             })
         })
         setSearchHistory(searchHistoryActions);
     }
-    
-    const onTriggarSearch = (utilityKey: string, messagesIndex: number) => {
+
+    const utilityTriggarSearch = (utilityKey: string) => {
+        handleSelectUtility(utilityKey);
+    }
+    const historyTriggarSearch = (utilityKey: string, messagesIndex: number) => {
         const utilityInfo = utilityKey.split("_");
         const searchRoleName:string = utilityInfo[0]; const searchUtilityGroupName:string = utilityInfo[1]; const searchUtilityName:string = utilityInfo[2];
 
@@ -423,7 +478,39 @@ const OpenAi = ({
         });
     }
     
-    function  CustomSplitlightAction({
+    function UtilitySpplitlightAction({
+        action,
+        styles,
+        classNames,
+        hovered,
+        onTrigger,
+        ...others
+    }: SpotlightActionProps) {
+        const { classes } = useStyles(undefined, { styles, classNames, name: 'Spotlight' });
+        return (
+            <UnstyledButton
+                className={classes.action}
+                data-hovered={hovered || undefined}
+                tabIndex={-1}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={onTrigger}
+                {...others}
+            >
+            <Group noWrap>
+                <Box style={{ flex: 1 }}>
+                    <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
+                        {`${action.groupName} > ${action.title}`}
+                    </Highlight>
+                    <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
+                       {`${action.description}`}
+                    </Highlight>
+                </Box>                
+            </Group>
+            </UnstyledButton>
+        );
+    }
+
+    function  HistorySplitlightAction({
         action,
         styles,
         classNames,
@@ -479,6 +566,8 @@ const OpenAi = ({
             </UnstyledButton>
         );
     }
+
+    
     return (
         isMobile!==undefined?
             !updateDataLoader?
@@ -495,8 +584,8 @@ const OpenAi = ({
                     searchPlaceholder="Search..."
                     shortcut="mod + shift + 1"
                     nothingFoundMessage="Nothing found..."
-                    onChange={handleInputSearch}
-                    actionComponent={CustomSplitlightAction}
+                    onChange={ spotlightType == "search"?handleInputSearchHistory:handleInputSearchUtility}
+                    actionComponent={spotlightType == "search"?HistorySplitlightAction:UtilitySpplitlightAction}
                     highlightQuery
                 >
                     <AppShell
@@ -510,7 +599,7 @@ const OpenAi = ({
                                 isMobile={isMobile}
                                 updateServerRoleData={updateServerRoleData}
                                 selectedConversation={selectedConversation}
-                                
+                                changeSpotlightType={changeSpotlightType}
                             />:<></>
                         }
                         navbar={
@@ -522,6 +611,7 @@ const OpenAi = ({
                                         openedSidebar={openedSidebar}
                                         selectedSearch={selectedSearch}
                                         updateServerRoleData={updateServerRoleData}
+                                        changeSpotlightType={changeSpotlightType}
                                     />
                                 </MediaQuery>
                                 <MediaQuery largerThan="sm" styles={{ display: "none" }}>
@@ -531,6 +621,7 @@ const OpenAi = ({
                                         isMobile={isMobile}
                                         selectedSearch={selectedSearch}
                                         updateServerRoleData={updateServerRoleData}
+                                        changeSpotlightType={changeSpotlightType}
                                     />
                                 </MediaQuery>
                             </>
@@ -564,11 +655,13 @@ const DrawerNav: FC<{
     isMobile: boolean;
     selectedSearch: SelectedSearch,
     updateServerRoleData: ()=>void;
+    changeSpotlightType: (type: string)=>void;
 }> = ({
     opened,
     handleShowSidebar,
     selectedSearch,
-    updateServerRoleData
+    updateServerRoleData,
+    changeSpotlightType
   }) => {
     const router = useRouter();
     useEffect(() => {
@@ -592,6 +685,7 @@ const DrawerNav: FC<{
             openedSidebar={opened}
             selectedSearch={selectedSearch}
             updateServerRoleData={updateServerRoleData}
+            changeSpotlightType={changeSpotlightType}
         />
       </Drawer>
     );

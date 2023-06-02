@@ -6,7 +6,8 @@ import {
     UnstyledButton, 
     Text ,
     Group,
-    Box
+    Box,
+    Tabs
 } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import { RoleGroup } from '@/types/role';
@@ -19,16 +20,20 @@ import {
   SortableContext,
   useSortable,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy
+  verticalListSortingStrategy,
+  rectSortingStrategy,
+  
 } from '@dnd-kit/sortable';
 import {
     useSensors,
     KeyboardSensor,
     closestCenter,
+    MouseSensor,
+    TouchSensor,
 } from "@dnd-kit/core";
+
 import { css } from '@emotion/css';
 import { CSS } from '@dnd-kit/utilities';
-import { Tabs } from 'antd';
 import React from 'react';
 import { GripVertical } from "lucide-react";
 import { useMantineColorScheme } from '@mantine/core';
@@ -41,15 +46,24 @@ interface  Props {
 }
 
 interface RoleOrderItem {
-    key: string,
-    label: string,
-    children: string
+    id: string,
+    title: string,
 }
 const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}) => {
 
-    const [roleOrder, setRoleOrder] = useState<RoleOrderItem[]>([]);
+    const getStorageOrder = () => {
+        const roleOrderStr = localStorage.getItem("roleOrder");
+        if(!roleOrderStr) {
+            return [];
+        } else {
+            return JSON.parse(roleOrderStr);
+        }
+    }
+    
+    const [roleOrder, setRoleOrder] = useState<RoleOrderItem[]>(getStorageOrder());
     const [showMenu, setShowMenu] = useState<boolean>(false);
-
+    const [isDragging, setIsDragging] = useState(false);
+    
     useEffect(() => {
         initRoleOrder();
     }, [roleGroup]);
@@ -63,14 +77,15 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         
         if(roleGroup.length == 0) return; 
         localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
-        
-    }, [roleOrder]);
 
+    }, [roleOrder]);
+   
     const [className, setClassName] = useState('');
-    const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } });
+    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
     const initRoleOrder = () => {
         const roleOrderStr:string|null = localStorage.getItem("roleOrder");
+
         if(roleOrderStr) {
             const roleOrder = JSON.parse(roleOrderStr);
             if(roleOrder.length > 0) {            
@@ -79,75 +94,108 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                 let order:RoleOrderItem[] = [];
                 roleGroup.map((item, index) => {
                     order.push({
-                        key: index.toString(),
-                        label: item.name,
-                        children:''
+                        id: index.toString(),
+                        title: item.name,
                     })
                 })
                 setRoleOrder(order);
             }
-        } else {
+        } else {            
             let order:RoleOrderItem[] = [];
             roleGroup.map((item, index) => {
                 order.push({
-                    key: index.toString(),
-                    label: item.name,
-                    children:''
+                    id: index.toString(),
+                    title: item.name,
                 })
             })
             setRoleOrder(order);
         }
-        
     }
-    const onDragEnd = ({ active, over }: DragEndEvent) => {
-        if (active.id !== over?.id) {
-            setRoleOrder((prev) => {
-                const activeIndex = prev.findIndex((i) => i.key === active.id);
-                const overIndex = prev.findIndex((i) => i.key === over?.id);
-                return arrayMove(prev, activeIndex, overIndex);
-            });
-        }
-    };
-
-    const clickDestkopTab = (key: string, event: React.KeyboardEvent<Element> | React.MouseEvent<Element, MouseEvent>) => {
+    
+    const clickDestkopTab = (key: string) => {
         handleSelectRole(Number(key));
     }
     const clickMobileTab = (key: string) => {
         handleSelectRole(Number(key));
         setShowMenu(false);
     }
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-          coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+    
+    function handleDragMove(event) {
+        setIsDragging(true);
+    }
     function handleDragEnd(event) {
+        
         const { active, over } = event;
+        if(!isDragging) {
+            handleSelectRole(active?.id);
+        }
         if (active?.id !== over?.id) {
           setRoleOrder((prev) => {
-            const activeIndex = prev.findIndex((item) => item.key === active?.id);
-            const overIndex = prev.findIndex((item) => item.key === over?.id);
+            const activeIndex = prev.findIndex((item) => item.id === active?.id);
+            const overIndex = prev.findIndex((item) => item.id === over?.id);
             return arrayMove(prev, activeIndex, overIndex);
           });
         }
+        setIsDragging(false);
     }
 
-
-    const mobileRoleOrder = () => {
-        let parse_order = roleOrder.map((item) => {
-            return {
-                id: item.key,
-                title: item.label,
-                description: ''
-            }
-        })
-        return parse_order;
+    
+    function SortableDesktopItem({item}) {
+        const {
+            attributes,
+            listeners,
+            setNodeRef,
+            setActivatorNodeRef,
+            transform,
+            transition,
+          } = useSortable({
+            id: item.id,
+          });
+        
+        const style = {
+            transform: CSS.Transform.toString(transform),
+            transition,
+            cursor: 'move',
+        };
+        
+        return (
+            
+            <Flex 
+                ref={setNodeRef} style={style} {...attributes} {...listeners}
+                onClick={() => {clickDestkopTab(item.id)}}
+                sx={(theme) => ({
+                    padding: theme.spacing.sm,
+                    marginLeft: theme.spacing.sm,   
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    borderBottom: `2px solid ${theme.colors.orange[selectedRole.name == item.title? 8:2]}`,
+                    "&:hover" :{
+                        borderBottom: `2px solid ${theme.colors.orange[8]}`
+                    }
+                })}
+                gap="xs"
+                justify="flex-start"
+                align="center"
+            >
+                <Text 
+                    className={`bg-[#858C94] rounded-full w-[16px] h-[16px]  text-white p-[2px]`}
+                >
+                    <IconCheck size={12}/>
+                </Text>
+                <Text
+                    sx={(theme) =>({
+                    fontSize: theme.fontSizes.md,
+                    })}
+                >
+                    {
+                        item.title
+                    }
+                </Text>
+            </Flex>
+        );
     }
-
     return (
         isMobile?
-        
         <Menu openDelay={100} closeDelay={400} zIndex={1000} opened={showMenu}>
             <Menu.Target>
                 <UnstyledButton
@@ -170,102 +218,58 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                 </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown> 
-                    <Box sx={(theme) =>({
-                        padding: theme.spacing.xs
-                    })}>
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
-                        
+                <Box sx={(theme) =>({
+                    padding: theme.spacing.xs
+                })}>
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={roleOrder}
+                            strategy={verticalListSortingStrategy}
                         >
-                            <SortableContext
-                                items={mobileRoleOrder()}
-                                strategy={verticalListSortingStrategy}
-                            >
-                            <ul>
-                                {mobileRoleOrder().map((item) => (
-                                    <Box key={item.id} onClick={() => {clickMobileTab(item.id)}}>
-                                        <SortableItem key={item.id} item={item} />
-                                    </Box>  
-                                ))}
-                            </ul>
-                            </SortableContext>
-                        </DndContext>
-                    </Box>
+                        <ul>
+                            {roleOrder.map((item) => (
+                                <Box key={item.id} onClick={() => {clickMobileTab(item.id)}}>
+                                    <SortableMobileItem key={item.id} item={item} />
+                                </Box>  
+                            ))}
+                        </ul>
+                        </SortableContext>
+                    </DndContext>
+                </Box>
             </Menu.Dropdown>
         </Menu>
         :
-        <Tabs
-            className={className}
-            items={roleOrder}
-            onTabClick={clickDestkopTab}
-            renderTabBar={(tabBarProps, DefaultTabBar) => (
-                <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
-                    <SortableContext items={roleOrder.map((i) => i.key)} strategy={horizontalListSortingStrategy}>
-                        <DefaultTabBar {...tabBarProps} >
-                            {(node) => (
-                                <DraggableTabNode
-                                    {...node.props}
-                                    key={node.key}
-                                    onActiveBarTransform={setClassName}
-                                >
-                                    {node}
-                                </DraggableTabNode>
-                            )}
-                        </DefaultTabBar>
-                    </SortableContext>
-                </DndContext>
-            )}
-        />
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            onDragMove={handleDragMove}
+        >
+            <SortableContext
+                items={roleOrder.map((i) => i.id)}
+                strategy={horizontalListSortingStrategy}
+            >
+                <Flex>
+                    {roleOrder.map((item) => (
+                        <Box key={item.id} 
+                        >
+                            <SortableDesktopItem key={item.id} item={item} />
+                        </Box>  
+                    ))}
+                </Flex>
+            </SortableContext>
+        </DndContext>
+        
+       
     )
 }
 
-interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
-    'data-node-key': string;
-    onActiveBarTransform: (className: string) => void;
-}
 
-const DraggableTabNode = ({ className, onActiveBarTransform, ...props }: DraggableTabPaneProps) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isSorting } = useSortable({
-      id: props['data-node-key'],
-    });
-    const {colorScheme} = useMantineColorScheme();
-    props.style ={
-        color: colorScheme == 'dark'? '#C1C2C5':'black'
-    }
-    const style: React.CSSProperties = {
-      ...props.style,
-      transform: CSS.Transform.toString(transform),
-      transition,
-      cursor: 'move',
-    };
-
-    useEffect(() => {
-        if (!isSorting) {
-          onActiveBarTransform('');
-        } else if (className?.includes('ant-tabs-tab-active')) {
-          onActiveBarTransform(
-            css`
-              .ant-tabs-ink-bar {
-                transform: ${CSS.Transform.toString(transform)};
-                transition: ${transition} !important;
-              }
-            `,
-          );
-        }
-    }, [className, isSorting, transform]);
-    
-    return React.cloneElement(props.children as React.ReactElement, {
-      ref: setNodeRef,
-      style,
-      ...attributes,
-      ...listeners,
-    });
-};
-
-
-function SortableItem({ item }) {
+function SortableMobileItem({ item }) {
     const {
       attributes,
       listeners,
@@ -281,7 +285,7 @@ function SortableItem({ item }) {
       transition,
     };
     return (
-      <li
+        <li
         ref={setNodeRef}
         style={style}
         {...attributes}
@@ -292,7 +296,6 @@ function SortableItem({ item }) {
         </div>
         <Box
             {...listeners}
-            node={setActivatorNodeRef}
             sx={(theme) =>({
                 cursor: 'cursor-grab',
                 display: 'flex',

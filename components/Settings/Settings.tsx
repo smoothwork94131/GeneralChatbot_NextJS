@@ -13,9 +13,11 @@ import Subscription from '@/components/Account/Subscription';
 interface Props {
     isMobile: boolean;
     updateServerRoleData: () => void;
+    changeSpotlightType: (type:string)=>void;
 }
-const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
+const Settings: FC<Props> = ({ isMobile, updateServerRoleData, changeSpotlightType }) => {
 
+    
     const { user, isSubscriptionActive: isSubscription, isLoading } = useUser();
     const [isModal, setIsModal] = useState(false);
     const [modalType, setModalType] = useState('signin');
@@ -29,12 +31,8 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
     const closeModal = () => {
         setIsModal(false);
     }
+
     useEffect(()=> {
-        // const fetchData = async() => {
-        //     const is_subscription = await chkIsSubscription(user);
-        //     setSubscription(is_subscription);
-        // }
-        // fetchData();
         
         if(modalType == "signup" && user) {
             setModalType('subscription');
@@ -98,9 +96,15 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                         </Menu.Item>
                         <Menu.Item
                             icon={<IconSearch size={14} />}
-                            onClick={() => { spotlight.open() }}
+                            onClick={() => {changeSpotlightType('history')}}
                         >
                             Search History
+                        </Menu.Item>
+                        <Menu.Item
+                            icon={<IconSearch size={14} />}
+                            onClick={() => {changeSpotlightType('utility')}}
+                        >
+                            Search Utility
                         </Menu.Item>
                         <Menu.Item
                             icon={<IconWorld size={14} />}
@@ -166,10 +170,16 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData }) => {
                             onClick={handleColorScheme}
                         />
                         <NavLink
-                            label="Search Hitory"
+                            label="Search History"
                             icon={<IconSearch size="1rem" stroke={1.5} />}
                             variant="subtle"
-                            onClick={() => { spotlight.open() }}
+                            onClick={() => { changeSpotlightType('search') }}
+                        />
+                        <NavLink
+                            label="Search Utility"
+                            icon={<IconSearch size="1rem" stroke={1.5} />}
+                            variant="subtle"
+                            onClick={() => { changeSpotlightType('utility') }}
                         />
                         <NavLink
                             label="Updates & FAQ"

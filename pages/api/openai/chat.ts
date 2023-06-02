@@ -230,9 +230,12 @@ export async function getUtilityInfo(utilityKey){
   if(Global.utilites_group.length == 0) {
     Global.utilites_group = await getUpdatedBackend();
   }
-  
+
+ 
+
   const roleGroup_ = Global.utilites_group;
   let utilityInfo: Utility = UtilityState;
+
   for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
     for(let g_index = 0 ; g_index <roleGroup_[r_index].utilities_group.length; g_index++) {
         for(let u_index = 0 ; u_index < roleGroup_[r_index].utilities_group[g_index].utilities.length; u_index++){
@@ -279,42 +282,48 @@ export default async function handler(req, res) {
     const fingerId = userApi.fingerId;
     const userId = userApi.userId;
     const responseMessages = userApi.response_messages;
-    const inputs = userApi.inputs;
     const utilityInfo = await getUtilityInfo(utilityKey);
-    const message = userApi.message;
+
 
     let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
     
     const today_datetime = new Date().toUTCString();
     let messages: Message[] = [];
-    let index=0;
     
-    inputs.map((input: Input) => {
-      if(input.type == "form" && user_prompt){
-          user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
-          index++;
-      }
-    });
 
-    if(user_prompt) {
-        user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
-    }
     if(system_prompt){
-        system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
-        messages =[{role: 'system', content: system_prompt}];
+      system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+      messages =[{role: 'system', content: system_prompt}];
     }
+  
+    responseMessages.map((message) => {
+      if(message.role == "user") {
+          let new_user_prompt = user_prompt;
+          const content = message.content;
+          const inputs = message.inputs;
+          let index=0;
 
-    responseMessages.map((item) => {
-      messages = [...messages, item];
+          inputs.map((input: Input) => {
+            if(input.type == "form"){
+              new_user_prompt = new_user_prompt?.replaceAll(`{${index}}`, input.value?input.value:'');
+                index++;
+            }
+          });
+
+          if(new_user_prompt) {
+            new_user_prompt = new_user_prompt.replaceAll(`{${index}}`, `${content}`);
+          }
+          message = {
+            role: 'user',
+            content: new_user_prompt
+          }
+          
+      }
+      messages.push(message);
     });
-    let user_message: Message = UserMessageState ;
-    user_message = {...user_message, 
-        content: user_prompt?user_prompt:message, 
-    };
 
-    messages.push(user_message);
-    
+
     let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
     if (!userId && userTimes <= 0) {
       throw new Error("User times have expired.");
@@ -330,7 +339,7 @@ export default async function handler(req, res) {
 
     const [completion,_] :[OpenAIAPI.Chat.CompletionsResponse,any] = await Promise.all([completion_, decreaseUser]);
     // const completion: OpenAIAPI.Chat.CompletionsResponse = await response.json();
-    
+        
     return new NextResponse(JSON.stringify({
       message: completion.choices[0].message,
     }));

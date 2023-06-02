@@ -12,31 +12,27 @@ import {
 import { IconCheck } from '@tabler/icons-react';
 import { RoleGroup } from '@/types/role';
 import { IconChevronDown } from '@tabler/icons-react';
-import type { DragEndEvent } from '@dnd-kit/core';
-import { DndContext, PointerSensor, useSensor } from '@dnd-kit/core';
+
+import { DndContext, useSensor } from '@dnd-kit/core';
 import {
   arrayMove,
   horizontalListSortingStrategy,
   SortableContext,
   useSortable,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  rectSortingStrategy,
   
 } from '@dnd-kit/sortable';
 import {
     useSensors,
-    KeyboardSensor,
     closestCenter,
     MouseSensor,
     TouchSensor,
 } from "@dnd-kit/core";
 
-import { css } from '@emotion/css';
 import { CSS } from '@dnd-kit/utilities';
-import React from 'react';
+
 import { GripVertical } from "lucide-react";
-import { useMantineColorScheme } from '@mantine/core';
+
 
 interface  Props {
     handleSelectRole: (index: number) => void;
@@ -80,7 +76,6 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
 
     }, [roleOrder]);
    
-    const [className, setClassName] = useState('');
     const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
     const initRoleOrder = () => {
@@ -145,7 +140,6 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
             attributes,
             listeners,
             setNodeRef,
-            setActivatorNodeRef,
             transform,
             transition,
           } = useSortable({
@@ -274,7 +268,6 @@ function SortableMobileItem({ item }) {
       attributes,
       listeners,
       setNodeRef,
-      setActivatorNodeRef,
       transform,
       transition,
     } = useSortable({

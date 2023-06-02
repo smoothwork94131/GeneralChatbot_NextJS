@@ -51,7 +51,7 @@ const Chat:FC<Props> = ({isMobile,
         })
     }
     
-    const setMessageIsStreamming = (type: boolean) => {
+    const setMessageIsStreaming = (type: boolean) => {
         openaiDispatch({
             "field":"messageIsStreaming",
             "value":type
@@ -130,7 +130,7 @@ const Chat:FC<Props> = ({isMobile,
                 clearSelectedSearch={clearSelectedSearch}
                 deleteConversation={deleteConversation}
                 messageIsStreaming={messageIsStreaming}
-                setMessageIsStreamming={setMessageIsStreamming}
+                setMessageIsStreaming={setMessageIsStreaming}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

@@ -174,9 +174,18 @@ const OpenAi = ({
     }
 
     const updateServerRoleData = async() => {
-        const response = await fetch("/api/googlesheets");
-        const data = await response.json();
+        const sheetDataResponse = await fetch("/api/googlesheets");
+        const data = await sheetDataResponse.json();
         dispatchServerRoleData(data);
+
+        const updateBackendResponse = await fetch("/api/updated_backend");
+        const updated_status = await updateBackendResponse.json();    
+          
+        if(updated_status.status == "Success") {
+            console.log("updated backend succefully")
+        } else {
+            console.log("updated backend failed")
+        }
     }
 
     useEffect(() => {   
@@ -583,8 +592,8 @@ const OpenAi = ({
                     searchPlaceholder="Search..."
                     shortcut="mod + shift + 1"
                     nothingFoundMessage="Nothing found..."
-                    onChange={ spotlightType == "search"?handleInputSearchHistory:handleInputSearchUtility}
-                    actionComponent={spotlightType == "search"?HistorySplitlightAction:UtilitySpplitlightAction}
+                    onChange={ spotlightType == "history"?handleInputSearchHistory:handleInputSearchUtility}
+                    actionComponent={spotlightType == "history"?HistorySplitlightAction:UtilitySpplitlightAction}
                     highlightQuery
                 >
                     <AppShell

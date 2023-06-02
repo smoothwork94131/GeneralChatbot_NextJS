@@ -170,13 +170,12 @@ export const removePropmptFromRole = () => {
 }
 
 export default async function handler(req, res){
-  const convertedRoleData = await getSheets();
+  const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
+  const convertedRoleData = removePropmptFromRole();
   return res.json(convertedRoleData);
 }
 
-export  async function getSheets(){
+export async function getSheets(){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
-  await updateData(roleData);
-  const convertedRoleData = removePropmptFromRole();
-  return convertedRoleData;
+  return roleData;
 }

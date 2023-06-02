@@ -173,7 +173,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData, changeSpotlightTy
                             label="Search History"
                             icon={<IconSearch size="1rem" stroke={1.5} />}
                             variant="subtle"
-                            onClick={() => { changeSpotlightType('search') }}
+                            onClick={() => { changeSpotlightType('history') }}
                         />
                         <NavLink
                             label="Search Utility"

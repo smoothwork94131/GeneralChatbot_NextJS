@@ -79,7 +79,7 @@ async function checkIfName(name) {
 }
 
 export default async function handler(req, res){
-    const sheetData = getSheets();
+    const sheetData = await getSheets();
     const result = await updateData(sheetData);
     return res.json({status: result});
 }

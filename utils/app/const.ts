@@ -42,7 +42,7 @@ export const OPENAI_ORGANIZATION =
   process.env.OPENAI_ORGANIZATION || '';
 
 export const OPENAI_MODELID =
-  process.env.OPENAI_MODELID || 'gpt-3.5-turbo';
+  process.env.OPENAI_MODELID || "gpt-3.5-turbo-0301";
 
 export const GOOGLE_CLIENT_EMAIL =
   process.env.GOOGLE_CLIENT_EMAIL || '';

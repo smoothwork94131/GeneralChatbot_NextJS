@@ -8,7 +8,7 @@ import {
 
 
 import { getUserTimes } from "@/utils/app/supabase-client";
-import { useEffect, useState, FC } from "react";
+import { useEffect, useState, FC, useContext } from "react";
 import MyModal from "@/components/Account/Modal";
 import {AuthenticationForm} from "@/components/Account/AuthenticationForm";
 import Subscription from "@/components/Account/Subscription";   
@@ -16,6 +16,7 @@ import { Conversation } from "@/types/chat";
 import { PAID_TIMES } from "@/utils/app/const";
 import { useUser } from "@/utils/app/useUser";
 import { useDisclosure } from '@mantine/hooks';
+import OpenaiContext from '@/components/openai/openai.context';
 
 interface Props {
     selectedConversation: Conversation,
@@ -23,7 +24,14 @@ interface Props {
 }
 
 const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
-       
+    const {
+        state: { 
+            messageIsStreaming
+        },
+        handleSelectRole,
+        dispatch: openaiDispatch
+    } = useContext(OpenaiContext);
+
     // const [isSubscription , setSubscription ] = useState<boolean>(true);
     const [times, setTimes] = useState<number>(-1);
     const [isModal, setIsModal] = useState<boolean>(false);
@@ -32,12 +40,14 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
     const { user, isSubscriptionActive: isSubscription, isLoading } = useUser();
     
     useEffect(() => {
+        
         const fetchData = async() => {
             const userTimes = await getUserTimes(user);
             setTimes(userTimes);
         }
         fetchData();
-    }, [selectedConversation, isSubscription, user]);
+
+    }, [ messageIsStreaming, isSubscription, user] );
     
     useEffect(() => {
         if(modalType == "signup" && user) {

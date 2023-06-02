@@ -23,6 +23,7 @@ interface Props {
     className?:string;
     selectedSearch: SelectedSearch;
     updateServerRoleData: () =>void;
+    changeSpotlightType: (type:string)=>void;
 }
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
@@ -43,7 +44,7 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
     }
 );
 
-const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServerRoleData}) =>{
+const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServerRoleData, changeSpotlightType}) =>{
     const {
         state: { selectedUtilityGroup, selectedUtility, roleGroup },
         handleSelectUtility,
@@ -116,7 +117,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
             value: updated_role_Group
         })
     }
-    
+
     const [collapsed, handlers] = useDisclosure(false);
     const { classes, cx } = useStyles({ collapsed });
     return (
@@ -170,6 +171,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
                 <Settings 
                     isMobile={isMobile}
                     updateServerRoleData={updateServerRoleData}
+                    changeSpotlightType={changeSpotlightType}
                 />:<></>
             }
         </Navbar>

@@ -14,7 +14,7 @@ export interface OpenaiInitialState {
     roleGroup: RoleGroup[]
     selectedUtilityGroup: UtilitiesGroup[]; 
     selectedConversation: Conversation;
-    selectedSearch: SelectedSearch
+    selectedSearch: SelectedSearch;
 }
 export const initialState: OpenaiInitialState = {
     apiKey: '',
@@ -30,6 +30,6 @@ export const initialState: OpenaiInitialState = {
     // selectedUtilityGroup: ROLE_GROUP[0].utilities_group,
     selectedUtilityGroup:[],
     selectedConversation: PrompState,
-    selectedSearch: SelectedSearchState
+    selectedSearch: SelectedSearchState,
 };
   

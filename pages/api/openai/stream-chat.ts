@@ -130,57 +130,52 @@ export default async function handler(req, res) {
     console.error(error);
     return new NextResponse(`limited`, { status: 429 });
   }
-
-  try {
-    
+  try{
     const userApi = await req.json();
     const utilityKey = userApi.utilityKey;
     const fingerId = userApi.fingerId;
     const userId = userApi.userId;
     const responseMessages = userApi.response_messages;
-    const inputs = userApi.inputs;
     const utilityInfo = await getUtilityInfo(utilityKey);
-    const message = userApi.message;  
+
 
     let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
     
     const today_datetime = new Date().toUTCString();
     let messages: Message[] = [];
-    let index=0;
     
-    inputs.map((input: Input) => {
-      if(input.type == "form" && user_prompt){
-          user_prompt = user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
-          index++;
-      }
-    });
 
-   
-    if(user_prompt) {
-        user_prompt = user_prompt.replaceAll(`{${index}}`, `${message}`);
-    }
-    
     if(system_prompt){
-        system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
-        messages =[{role: 'system', content: system_prompt}];
+      system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+      messages =[{role: 'system', content: system_prompt}];
     }
 
-    responseMessages.map((item) => {
-      messages = [...messages, item];
+    responseMessages.map((message) => {
+      if(message.role == "user") {
+          let new_user_prompt = user_prompt;
+          const content = message.content;
+          const inputs = message.inputs;
+          let index=0;
+          inputs.map((input: Input) => {
+            if(input.type == "form" && new_user_prompt){
+              new_user_prompt = new_user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
+                index++;
+            }
+          });
+          if(new_user_prompt) {
+            new_user_prompt = new_user_prompt.replaceAll(`{${index}}`, `${content}`);
+          }
+          message = {
+            role: 'user',
+            content: new_user_prompt
+          }
+      }
+      messages.push(message);
     });
 
-    let user_message: Message = UserMessageState ;
-    console.log(user_prompt);
-
-    user_message = {...user_message, 
-        content: user_prompt?user_prompt:message, 
-        // datetime: today_datetime,
-    };
-
-    messages.push(user_message);
     
-
+    console.log(messages);
     let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
     if (!userId && userTimes <= 0) {
       throw new Error("User times have expired.");

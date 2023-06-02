@@ -57,6 +57,7 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
             const {data, error} = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password,
+                
             });
             if(error) {  
                 setErrorMessage(error.message);
@@ -68,10 +69,18 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
                 closeModal();
             }
         }  else if( type == "Sign Up") {
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-            });
+            const { data, error } = await supabase.auth.signUp(
+                {
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                          full_name: form.values.name
+                        },
+                    },
+                }
+                
+            );
             if(error) {  
                 setErrorMessage(error.message);
                 return;

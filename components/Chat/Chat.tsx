@@ -27,6 +27,7 @@ const Chat:FC<Props> = ({isMobile,
             selectedRole, 
             conversationHistory,
             selectedConversation,
+            messageIsStreaming
         },
         handleSelectRole,
         dispatch: openaiDispatch
@@ -47,6 +48,13 @@ const Chat:FC<Props> = ({isMobile,
         openaiDispatch({
             "field": "selectedSearch",
             "value": SelectedSearchState
+        })
+    }
+    
+    const setMessageIsStreamming = (type: boolean) => {
+        openaiDispatch({
+            "field":"messageIsStreaming",
+            "value":type
         })
     }
     const saveSelectConverSation = (conversation: Conversation) => {
@@ -120,6 +128,8 @@ const Chat:FC<Props> = ({isMobile,
                 selectedSearch={selectedSearch}
                 clearSelectedSearch={clearSelectedSearch}
                 deleteConversation={deleteConversation}
+                messageIsStreaming={messageIsStreaming}
+                setMessageIsStreamming={setMessageIsStreamming}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

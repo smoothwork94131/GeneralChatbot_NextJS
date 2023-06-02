@@ -22,6 +22,7 @@ import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
 import MyModal from '@/components/Account/Modal';
 import { getFingerId } from '@/utils/app/FingerPrint';
+import { OPENAI_MODELID } from '@/utils/app/const';
 
 interface Props {
     selectedUtility: Utility;
@@ -33,6 +34,8 @@ interface Props {
     selectedSearch: SelectedSearch,
     clearSelectedSearch: () =>void;
     deleteConversation: (index: number)=>void;
+    messageIsStreaming: boolean;
+    setMessageIsStreamming: (type: boolean)=>void;
 } 
 
 const ChatContent: FC<Props> = ({
@@ -44,11 +47,12 @@ const ChatContent: FC<Props> = ({
         conversationHistory,
         selectedSearch,
         clearSelectedSearch,
-        deleteConversation
+        deleteConversation,
+        messageIsStreaming,
+        setMessageIsStreamming
     }) =>{
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [messageIsStreaming, setMessageIsStreaming] = useState(false);
     const [inputContent,  setInputContent] = useState<string>('');
     const [historyConversation, setHistoryConversation] = useState<Conversation>();
     const [isModal, setIsModal] = useState<boolean>(false);
@@ -84,7 +88,7 @@ const ChatContent: FC<Props> = ({
     
     useEffect(() => {    
         if(messageIsStreaming) {
-            setMessageIsStreaming(false);
+            setMessageIsStreamming(false);
         }
     }, [selectedUtility])
 
@@ -102,12 +106,10 @@ const ChatContent: FC<Props> = ({
         if(selectedConversation) {
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
-            
-            
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
             
-            
+       
             let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = 
             [...selectedMessagesHistory, 
             ...updatedConversation.messages];
@@ -121,33 +123,35 @@ const ChatContent: FC<Props> = ({
             }
             
         
-            setMessageIsStreaming(true);
+            setMessageIsStreamming(true);
             
             const response_messages: Message[] = [];
             
             messages.map((item) => {
                 response_messages.push({
                     role:item.role,
-                    content: item.content
+                    content: item.content,
+                    inputs: item.inputs
                 });
             });
+            
+            response_messages.push({
+                role: 'user',
+                content: message,
+                inputs: inputs
+,           });
 
             const input: {
                 response_messages: Message[],
                 utilityKey: string,
-                message: string,
-                inputs: Input[],
                 fingerId: string,
                 userId: string|null
-            } = {   
+            } = { 
                 response_messages: response_messages.map((item) => {
                     if(item.datetime) delete item?.datetime;
-                    if(item.inputs) delete item?.inputs;
                     return item;
                 }),
                 utilityKey: selectedUtility.key,
-                message: message,
-                inputs: inputs,
                 fingerId: fingerId,
                 userId: user?user.id:null
             };
@@ -162,6 +166,7 @@ const ChatContent: FC<Props> = ({
 
             updatedConversation.messages.push([user_message, AssistantMessageState]);
             saveSelectConverSation(updatedConversation);
+
             const controller = new AbortController();
             const signal = controller.signal;
             let endpoint = 'chat';
@@ -182,16 +187,16 @@ const ChatContent: FC<Props> = ({
                 if(response.status == 401) {
                     setModalType('auth');      
                     setIsModal(true); 
-                    setMessageIsStreaming(false);
+                    setMessageIsStreamming(false);
                     return;
                 } else if(response.status == 402) {
                     setModalType('Subscription');
                     setIsModal(true); 
-                    setMessageIsStreaming(false);
+                    setMessageIsStreamming(false);
                     return;
                 } else if(response.status ==  429) {
                     alert("Too many requests");
-                    setMessageIsStreaming(false);
+                    setMessageIsStreamming(false);
                     return;
                 }
                 console.error('Error from API call: ', response.status, response.statusText);
@@ -217,7 +222,7 @@ const ChatContent: FC<Props> = ({
                         const chunkValue = decoder.decode(value);
                         
                         if (chunkValue) {
-                        text += chunkValue.replace(JSON.stringify({"model":"gpt-3.5-turbo-0301"}), "");
+                        text += chunkValue.replace(JSON.stringify({"model":OPENAI_MODELID}), "");
                         const assistant_message: Message = {role: 'assistant', content: text};
                         const updatedMessages: Message[][] =
                             updatedConversation.messages.map((message, index) => {    
@@ -242,7 +247,6 @@ const ChatContent: FC<Props> = ({
                             };
     
                             saveSelectConverSation(updatedConversation);
-                            setMessageIsStreaming(false);
                         }
                         
                     }
@@ -274,8 +278,8 @@ const ChatContent: FC<Props> = ({
                 };
 
                 saveSelectConverSation(updatedConversation);
-                setMessageIsStreaming(false);
             }
+            setMessageIsStreamming(false);
         }
     }
     

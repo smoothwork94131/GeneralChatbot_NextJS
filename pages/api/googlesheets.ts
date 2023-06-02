@@ -3,7 +3,6 @@ import { sheets as sheets_, auth } from '@googleapis/sheets';
 import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/server/const'
 import { Input, RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
-import { getUpdatedBackend, updateData } from './updated_backend';
 
 let roleData:RoleGroup[] = [];
 function mapRowToCustomData(row: string[], headers: string[]): void {
@@ -179,3 +178,7 @@ export async function getSheets(){
   const result = await getSheetData(SPREAD_SHEET_ID ,SHEET_RANGE)
   return roleData;
 }
+
+export const config = {
+  runtime: 'edge',
+};

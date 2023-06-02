@@ -352,8 +352,6 @@ export default async function handler(req, res) {
     console.log("[Issue]", error);
     return new NextResponse(`[Issue] ${error.message}`, { status: 400 });
   }
-  
-   
 }
 // noinspection JSUnusedGlobalSymbols
 export const config = {

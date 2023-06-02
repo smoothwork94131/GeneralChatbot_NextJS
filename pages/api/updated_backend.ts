@@ -78,12 +78,15 @@ async function checkIfName(name) {
     }
 }
 
+
 export default async function handler(req, res){
     const sheetData = await getSheets();
     const result = await updateData(sheetData);
     return res.json({status: result});
-}
-
+  }
+  export const config = {
+    runtime: 'edge',
+  };
 // export default async function handler(req, res){
 //     const data = req.body;
 //     const result = await getUpdatedBackend();

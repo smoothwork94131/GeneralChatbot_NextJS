@@ -14,7 +14,6 @@ import {
  } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { SelectedSearch, UtilitiesGroup } from '@/types/role';
-import SearchList from '../Utils/SearchList';
 
 interface Props {
     isMobile: boolean
@@ -23,7 +22,7 @@ interface Props {
     className?:string;
     selectedSearch: SelectedSearch;
     updateServerRoleData: () =>void;
-    changeSpotlightType: (type:string)=>void;
+    changeSpotlightType: (type: string)=>void;
 }
 
 const useStyles = createStyles<string, { collapsed?: boolean }>(
@@ -60,37 +59,33 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
     
     useEffect(()=> {
         let updatedUtilityGroup: UtilitiesGroup[] = [];
-        roleGroup.map((r_item) => {
-            const utilitiesGroup = r_item.utilities_group;
-            for(let k=0; k<utilitiesGroup.length;k++){
-                let group_item = utilitiesGroup[k];
-                const filter_utilities = group_item.utilities.filter((u_item) => {
-                    const searchable = u_item.name.toLowerCase() +
-                    ' '+u_item.summary.toLowerCase();
-                    return searchable.includes(searchKeyword.toLowerCase())
-                })
-    
-                if(filter_utilities.length > 0) {
-                    group_item = {
-                        ...group_item,
-                        utilities: filter_utilities,
-                        active: (searchKeyword !="") ||
-                                (group_item.active)? true:false
-                    }
-                    updatedUtilityGroup.push(group_item);
+        for(let k=0; k<selectedUtilityGroup.length;k++){
+            let group_item = selectedUtilityGroup[k];
+            const filter_utilities = group_item.utilities.filter((u_item) => {
+                const searchable = u_item.name.toLowerCase() +
+                ' '+u_item.summary.toLowerCase();
+                return searchable.includes(searchKeyword.toLowerCase())
+            })
+
+            if(filter_utilities.length > 0) {
+                group_item = {
+                    ...group_item,
+                    utilities: filter_utilities,
+                    active: (searchKeyword !="") ||
+                            (group_item.active)? true:false
                 }
+                updatedUtilityGroup.push(group_item);
             }
-        })
-        
+        }
         setFilterUtilityGroup(updatedUtilityGroup);
-    },[searchKeyword])
+    },[searchKeyword, selectedUtilityGroup, roleGroup])
 
     useEffect(()=> {
 
     },[])
 
     const collpaseUtiltyGroup = (group_name: string) => {
-        let updatedUtilityGroup = selectedUtilityGroup;
+        let updatedUtilityGroup = filterUtilityGroup;
         updatedUtilityGroup = updatedUtilityGroup.map((item) =>{
             if(item.name == group_name){
                 item = {
@@ -150,28 +145,19 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
                     onSearchUtility = {onSearchUtility}
                 />
             }
-            
-            {
-                searchKeyword !== ""?
-                <SearchList 
-                    utilityGroup={filterUtilityGroup}
-                    searchKeyword={searchKeyword}
-                    handleSelectUtility={handleSelectUtility}
-                />:
-                <Utils 
-                    selectedUtilityGroup = { selectedUtilityGroup }
-                    handleSelectUtility = {handleSelectUtility}
-                    selectedUtility = {selectedUtility}
-                    collpaseUtiltyGroup = {collpaseUtiltyGroup}
-                />
-            }
-            
+            <Utils 
+                selectedUtilityGroup = { filterUtilityGroup }
+                handleSelectUtility = {handleSelectUtility}
+                selectedUtility = {selectedUtility}
+                collpaseUtiltyGroup = {collpaseUtiltyGroup}
+            />
             {
                 !isMobile?
                 <Settings 
                     isMobile={isMobile}
                     updateServerRoleData={updateServerRoleData}
                     changeSpotlightType={changeSpotlightType}
+
                 />:<></>
             }
         </Navbar>

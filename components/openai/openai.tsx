@@ -29,7 +29,7 @@ import { SpotlightProvider, SpotlightAction, SpotlightActionProps  } from '@mant
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
-import { DESTKTOP_SEACH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH } from '@/utils/app/const';
+import { DESKTOP_SEARCH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation, Role } from '@/types/chat';
 import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } from '@/types/role';
@@ -307,7 +307,7 @@ const OpenAi = ({
             datetime: string|undefined
         }[] = [];
         let searchHistoryActions:SpotlightAction[] = [];
-        let preview_length = DESTKTOP_SEACH_PREVIEW_LENGTH;
+        let preview_length = DESKTOP_SEARCH_PREVIEW_LENGTH;
         if(isMobile) {
             preview_length = MOBILE_SEACH_PREVIEW_LENGTH;
         }

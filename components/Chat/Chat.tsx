@@ -78,7 +78,8 @@ const Chat:FC<Props> = ({isMobile,
         });
     }
     const deleteConversation = (index: number) => {
-        let updatedConversation = JSON.parse(JSON.stringify(selectedConversation));
+        // let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));
+        let updatedConversation:Conversation = {...selectedConversation, messages: selectedConversation.messages.slice()}
         updatedConversation.messages.splice(index, 1);
         saveSelectConverSation(updatedConversation);
     }

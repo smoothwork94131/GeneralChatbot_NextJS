@@ -317,38 +317,54 @@ const OpenAi = ({
     const handleInputSearchUtility = (event) => {
         const searchKey = event.target.value;
         let searchHistoryActions:SpotlightAction[] = [];
-        
+
+        let filter_utilities:{
+            name: string,
+            summary: string,
+            group_name: string,
+            key: string,
+        }[] = [];
+
         roleGroup.map((r_item) => {
             const utilitiesGroup = r_item.utilities_group;
             for(let k=0; k<utilitiesGroup.length;k++){
                 let group_item = utilitiesGroup[k];
-                const filter_utilities = group_item.utilities.filter((u_item) => {
+                const group_name = group_item.name ;
+                group_item.utilities.map((u_item) => {
                     const searchable = u_item.name.toLowerCase() +
+                    ' '+group_name.toLowerCase()+
                     ' '+u_item.summary.toLowerCase();
-                    return searchable.includes(searchKey.toLowerCase())
+                    if(searchable.includes(searchKey.toLowerCase())) {
+                        filter_utilities.push({
+                            name: u_item.name,
+                            group_name: group_name,
+                            summary: u_item.summary,
+                            key: u_item.key
+                        });
+                    }
                 })
-                
-                if(filter_utilities.length > 0) {
-                    filter_utilities.map((utility) => {
-                        
-                        
-                        searchHistoryActions.push({
-                            id: utility.key,
-                            description: utility.summary,
-                            groupName: group_item.name,
-                            title: utility.name,
-                            searchKey: searchKey,
-                            onTrigger: () => {
-                                utilityTriggarSearch(utility.key)
-                            },
-                        })
-                    });
-                }
             }
         })
+        
+        if(filter_utilities.length > 0) {    
+            filter_utilities.map((utility) => {
+                searchHistoryActions.push({
+                    id: utility.key,
+                    description: utility.summary,
+                    groupName: utility.group_name,
+                    title: utility.group_name+" > "+utility.name,
+                    searchKey: searchKey,
+                    onTrigger: () => {
+                        utilityTriggarSearch(utility.key)
+                    },
+                })
+            });
+        }
+        console.log(searchHistoryActions);
         setSearchHistory(searchHistoryActions);
     } 
     const handleInputSearchHistory = (event) => {
+        
         const searchKey = event.target.value;
         const updatedHistoryActions: {
             timestamp: number;
@@ -507,7 +523,7 @@ const OpenAi = ({
             <Group noWrap>
                 <Box style={{ flex: 1 }}>
                     <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
-                        {`${action.groupName} > ${action.title}`}
+                        {`${action.title}`}
                     </Highlight>
                     <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
                        {`${action.description}`}

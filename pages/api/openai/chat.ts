@@ -10,7 +10,6 @@ import { OPENAI_API_KEY } from '@/utils/server/const';
 import { NEXT_PUBLIC_SUPABASE_URL } from '@/utils/app/const';
 import { SUPABASE_SERVICE_ROLE_KEY } from '@/utils/server/const';
 import { Database } from '@/types/types_db';
-import { getUpdatedBackend } from '../updated_backend';
 import { Global } from 'global';
 import { Input, Utility, UtilityState } from '@/types/role';
 import { Message, UserMessageState } from '@/types/chat';
@@ -212,6 +211,23 @@ export async function postToOpenAI<TBody extends object>(api: OpenAIAPI.Configur
   return response;
 }
 
+const getUpdatedBackend = async() => {
+  const { data, error } = await supabaseAdmin
+    .from('updated_backend')
+    .select('*')
+    .eq('name', "default")
+
+  if (error) {
+    return [];
+  } else {
+      if(data.length > 0) {
+          return data[0].json_data;
+      } else {
+          return [];
+      }
+  }
+}
+
 // I/O types for this endpoint
 
 export interface ApiChatInput {
@@ -348,7 +364,7 @@ export default async function handler(req, res) {
       message: completion.choices[0].message,
     }));
 
-  }catch(error: any) {
+  } catch(error: any) {
     console.log("[Issue]", error);
     return new NextResponse(`[Issue] ${error.message}`, { status: 400 });
   }

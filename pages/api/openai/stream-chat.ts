@@ -4,7 +4,6 @@ import { createParser } from 'eventsource-parser';
 import { ApiChatInput, chatCompletionPayload, decreaseUserTimes, extractOpenaiChatInputs, getSubscriptions, getUserTimes, getUtilityInfo, postToOpenAI } from './chat';
 import { OpenAIAPI } from '@/types/openai';
 
-import { getUpdatedBackend } from '../updated_backend';
 import { Global } from 'global';
 import { Input, Utility, UtilityState } from '@/types/role';
 import { Message, UserMessageState } from '@/types/chat';

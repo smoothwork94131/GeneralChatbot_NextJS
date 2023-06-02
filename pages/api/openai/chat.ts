@@ -284,7 +284,6 @@ export default async function handler(req, res) {
     const responseMessages = userApi.response_messages;
     const utilityInfo = await getUtilityInfo(utilityKey);
 
-
     let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
     
@@ -299,7 +298,7 @@ export default async function handler(req, res) {
   
     responseMessages.map((message) => {
       if(message.role == "user") {
-          let new_user_prompt = user_prompt;
+          let new_user_prompt = user_prompt?.slice();
           const content = message.content;
           const inputs = message.inputs;
           let index=0;
@@ -323,6 +322,8 @@ export default async function handler(req, res) {
       messages.push(message);
     });
 
+    console.log(messages)
+
 
     let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
     if (!userId && userTimes <= 0) {
@@ -330,9 +331,12 @@ export default async function handler(req, res) {
     } else if (userTimes <= 0 && !isSubscription) {
       throw new Error("User subscription required.");
     }
+
+
     
     const { api, ...rest } = extractOpenaiChatInputs({messages: messages, model: OPENAI_MODELID});
     const payLoad = chatCompletionPayload(rest, false);
+
     const response_ = postToOpenAI(api, "/v1/chat/completions", payLoad);
     const completion_ = response_.then((res) => res.json());
     const decreaseUser = decreaseUserTimes(userId, fingerId, userTimes);

@@ -170,7 +170,7 @@ const ChatContent: FC<Props> = ({
             const controller = new AbortController();
             const signal = controller.signal;
             let endpoint = 'chat';
-            if(selectedUtility.streamming) {
+            if(selectedUtility.streaming) {
                 endpoint = 'stream-chat';
             }
 
@@ -203,7 +203,7 @@ const ChatContent: FC<Props> = ({
                 return '';
             }
             
-            if(selectedUtility.streamming) {
+            if(selectedUtility.streaming) {
                 let first = true;
                 if(response.body) {
                     const reader = response.body.getReader();

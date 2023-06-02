@@ -13,7 +13,8 @@ export const getUpdatedBackend = async() => {
     const { data, error } = await supabaseAdmin
       .from('updated_backend')
       .select('*')
-      .eq('name', "utilites_group")
+      .eq('name', "default")
+
     if (error) {
       return [];
     } else {
@@ -25,20 +26,15 @@ export const getUpdatedBackend = async() => {
     }
 }
 
-export const deleteData = async() => {
-    const { data, error }   = await supabaseAdmin
-    .from('updated_backend')
-    .delete().eq("name", "utilites_group");
-}
-
-export const updateBackendData = async(json_data) => {    
-
-    if(await checkIfName('utilities_group')) {    
+export const updateData = async(content) => {    
+    // const exist_table = await checkIfTableExists('update_data');
+    // if(exist_table) {
+    if(!(await checkIfName('default'))) {    
         const { data, error } = await supabaseAdmin
         .from('updated_backend')
-        .update([{
-            name: 'utilites_group',
-            json_data: json_data
+        .insert([{
+            name: 'default',
+            json_data: content
         }])
         .eq("name", "utilites_group");
 
@@ -50,10 +46,11 @@ export const updateBackendData = async(json_data) => {
     } else {
         const { data, error } = await supabaseAdmin
         .from('updated_backend')
-        .insert([{
-            name: 'utilites_group',
-            json_data: json_data
-        }]).order("id", { ascending: true });
+        .update([{
+            name: 'default',
+            json_data: content
+        }])
+        .eq("name", "default");
 
         if(error) {
             console.log(error);

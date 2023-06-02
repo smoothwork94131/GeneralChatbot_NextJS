@@ -1,6 +1,6 @@
 import { FC } from "react"
 import { Box, Highlight, NavLink, Group, Text } from '@mantine/core';
-import { UtilitiesGroup, Utility } from "@/types/role";
+import { UtilitiesGroup } from "@/types/role";
 import { IconMistOff } from '@tabler/icons-react';
 
 interface Props {

@@ -13,7 +13,7 @@ import {
     Flex
  } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { SelectedSearch, UtilitiesGroup, Utility } from '@/types/role';
+import { SelectedSearch, UtilitiesGroup } from '@/types/role';
 import SearchList from '../Utils/SearchList';
 
 interface Props {
@@ -50,7 +50,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
         handleSelectUtility,
         dispatch: openAiDispatch
     } = useContext(OpenaiContext);
-    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>([]);
+    const [filterUtilityGroup, setFilterUtilityGroup] = useState<UtilitiesGroup[]>(selectedUtilityGroup);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     
     

@@ -77,7 +77,7 @@ const AccountButtons:FC<Props> = ({selectedConversation, isMobile}) => {
                 
                 <Popover width={190} position="bottom" withArrow shadow="md" opened={opened}>
                     <Popover.Target>
-                        <Text onMouseEnter={open} onMouseLeave={close} size='lg'>
+                        <Text onMouseEnter={open} onMouseLeave={close} size='lg' underline>
                             {times}
                         </Text>
                     </Popover.Target>

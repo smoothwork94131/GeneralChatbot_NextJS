@@ -6,8 +6,7 @@ import { Box,
     Flex,
     Text,
     Tooltip,
-    Badge,
-    Popover
+    Badge
 } from '@mantine/core';
 import ChatMessageList  from '@/components/Chat/ChatMessageList';
 import { Conversation, ConversationState, Message } from '@/types/chat';
@@ -20,7 +19,6 @@ import { IconArrowBackUp,
 
 import { Input, SelectedSearch, Utility } from '@/types/role';
 import { IconCopy } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
 
 interface Props {
     historyConversation: Conversation | undefined;

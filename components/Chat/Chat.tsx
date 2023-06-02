@@ -51,7 +51,7 @@ const Chat:FC<Props> = ({isMobile,
         })
     }
     
-    const setMessageIsStreamming = (type: boolean) => {
+    const setMessageIsStreaming = (type: boolean) => {
         openaiDispatch({
             "field":"messageIsStreaming",
             "value":type
@@ -86,7 +86,8 @@ const Chat:FC<Props> = ({isMobile,
         });
     }
     const deleteConversation = (index: number) => {
-        let updatedConversation = JSON.parse(JSON.stringify(selectedConversation));
+        // let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));
+        let updatedConversation:Conversation = {...selectedConversation, messages: selectedConversation.messages.slice()}
         updatedConversation.messages.splice(index, 1);
         saveSelectConverSation(updatedConversation);
     }
@@ -129,7 +130,7 @@ const Chat:FC<Props> = ({isMobile,
                 clearSelectedSearch={clearSelectedSearch}
                 deleteConversation={deleteConversation}
                 messageIsStreaming={messageIsStreaming}
-                setMessageIsStreamming={setMessageIsStreamming}
+                setMessageIsStreaming={setMessageIsStreaming}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

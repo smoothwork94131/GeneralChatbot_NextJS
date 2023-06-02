@@ -30,9 +30,9 @@ import { SpotlightProvider, SpotlightAction, SpotlightActionProps, spotlight  } 
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
-import { DESTKTOP_SEACH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH } from '@/utils/app/const';
+import { DESKTOP_SEARCH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
-import { Conversation, Role } from '@/types/chat';
+import { Conversation } from '@/types/chat';
 import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } from '@/types/role';
 import { saveSelctedConversation } from '@/utils/app/conversation';
 import { IconSearch } from '@tabler/icons-react';
@@ -112,7 +112,6 @@ const OpenAi = ({
             conversationHistory,
             selectedUtility,
             selectedSearch,
-            selectedUtilityGroup,
             selectedConversation
         },
         dispatch,
@@ -366,7 +365,7 @@ const OpenAi = ({
         }[] = [];
 
         let searchHistoryActions:SpotlightAction[] = [];
-        let preview_length = DESTKTOP_SEACH_PREVIEW_LENGTH;
+        let preview_length = DESKTOP_SEARCH_PREVIEW_LENGTH;
         if(isMobile) {
             preview_length = MOBILE_SEACH_PREVIEW_LENGTH;
         }
@@ -393,7 +392,7 @@ const OpenAi = ({
                         nextText = content.substr((searchIndex + searchKey.length), content.length - (searchIndex + searchKey.length));
                         if(messageIndex == 0) {
                             if(messages[1].content.length > preview_length) {
-                                nextText = nextText+"..."+messages[1].content.substr(0, 25)+"...";
+                                nextText = nextText+"..."+messages[1].content.substr(0, preview_length)+"...";
                             } else {
                                 nextText = nextText+"..."+messages[1].content.substr(0, messages[1].content.length-1);
                             }   

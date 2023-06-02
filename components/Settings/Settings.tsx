@@ -1,7 +1,7 @@
 import { FC, useContext, useEffect, useState } from 'react';
 import { Flex, Menu, NavLink, Group } from '@mantine/core';
-import { IconLogin, IconLogout, IconMoon, IconSearch, IconSettings, IconShoppingBag, IconStar, IconSun, IconTrash, IconUrgent, IconUser, IconWorld } from '@tabler/icons-react';
-import { spotlight } from '@mantine/spotlight';
+import { IconLogin, IconLogout, IconMoon, IconSearch, IconSettings, IconShoppingBag, IconSun, IconUser, IconWorld } from '@tabler/icons-react';
+
 import HomeContext from 'state/index.context';
 import { useUser } from '@/utils/app/useUser';
 import { useRouter } from 'next/router';

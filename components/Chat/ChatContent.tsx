@@ -35,7 +35,7 @@ interface Props {
     clearSelectedSearch: () =>void;
     deleteConversation: (index: number)=>void;
     messageIsStreaming: boolean;
-    setMessageIsStreamming: (type: boolean)=>void;
+    setMessageIsStreaming: (type: boolean)=>void;
 } 
 
 const ChatContent: FC<Props> = ({
@@ -49,7 +49,7 @@ const ChatContent: FC<Props> = ({
         clearSelectedSearch,
         deleteConversation,
         messageIsStreaming,
-        setMessageIsStreamming
+        setMessageIsStreaming
     }) =>{
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -88,7 +88,7 @@ const ChatContent: FC<Props> = ({
     
     useEffect(() => {    
         if(messageIsStreaming) {
-            setMessageIsStreamming(false);
+            setMessageIsStreaming(false);
         }
     }, [selectedUtility])
 
@@ -123,7 +123,7 @@ const ChatContent: FC<Props> = ({
             }
             
         
-            setMessageIsStreamming(true);
+            setMessageIsStreaming(true);
             
             const response_messages: Message[] = [];
             
@@ -187,16 +187,16 @@ const ChatContent: FC<Props> = ({
                 if(response.status == 401) {
                     setModalType('auth');      
                     setIsModal(true); 
-                    setMessageIsStreamming(false);
+                    setMessageIsStreaming(false);
                     return;
                 } else if(response.status == 402) {
                     setModalType('Subscription');
                     setIsModal(true); 
-                    setMessageIsStreamming(false);
+                    setMessageIsStreaming(false);
                     return;
                 } else if(response.status ==  429) {
                     alert("Too many requests");
-                    setMessageIsStreamming(false);
+                    setMessageIsStreaming(false);
                     return;
                 }
                 console.error('Error from API call: ', response.status, response.statusText);
@@ -279,7 +279,7 @@ const ChatContent: FC<Props> = ({
 
                 saveSelectConverSation(updatedConversation);
             }
-            setMessageIsStreamming(false);
+            setMessageIsStreaming(false);
         }
     }
     

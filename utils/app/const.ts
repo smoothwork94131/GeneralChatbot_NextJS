@@ -18,7 +18,7 @@ export const NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'https://api.openai.com';
 
 export const MOBILE_SEACH_PREVIEW_LENGTH = 25;
-export const DESTKTOP_SEACH_PREVIEW_LENGTH = 70;
+export const DESKTOP_SEARCH_PREVIEW_LENGTH = 70;
 
 
 export const DEFAULT_TEMPERATURE = 

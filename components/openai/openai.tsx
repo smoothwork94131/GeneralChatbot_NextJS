@@ -511,7 +511,7 @@ const OpenAi = ({
     const handleInputSearchHistory = (event) => {
         
         const searchKey = event.target.value;
-        const searchHistoryActions:SpotlightAction[] = getConversationHistory(searchKey, 'search');
+        const searchHistoryActions:SpotlightAction[] = getConversationHistory(searchKey);
         setSearchHistory(searchHistoryActions);
 
     }

@@ -607,7 +607,9 @@ const OpenAi = ({
                     <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
                         {`  ${action.title}`}
                     </Highlight>
-                    <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
+                    <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`} sx={(theme) =>({
+                        fontSize: theme.fontSizes.sm
+                    })}>
                        {`${action.description}`}
                     </Highlight>
                 </Box>    

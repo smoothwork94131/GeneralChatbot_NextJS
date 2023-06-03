@@ -33,7 +33,7 @@ import OpenAiHeader from '@/components/Header';
 import { DESKTOP_SEARCH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH, SEARCH_HISTORY_LIMIT_COUNT } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation } from '@/types/chat';
-import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } from '@/types/role';
+import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility, UtilityState } from '@/types/role';
 import { saveSelctedConversation } from '@/utils/app/conversation';
 import { IconSearch } from '@tabler/icons-react';
 import { RoleGroup } from '../../types/role';
@@ -179,9 +179,10 @@ const OpenAi = ({
         let searchHistoryUtilityActions:SpotlightAction[] = [];
         searchConversationActions.map((h_item) => {
             if(searchHistoryUtilityActions.filter(u_item => u_item.id == h_item.utilityKey).length == 0) {
+                const utilityInfo = getUtilityInfoByKey(h_item.utilityKey);
                 searchHistoryUtilityActions.push({
                     id: h_item.utilityKey,
-                    description: h_item.description,
+                    description: utilityInfo.summary,
                     title: h_item.title,
                     searchKey: h_item.searchKey,
                     role_name: h_item.roleName,
@@ -232,6 +233,21 @@ const OpenAi = ({
                 "value": _rolData[selectedRolIndex].utilities_group
             })
         }
+    }
+
+    const getUtilityInfoByKey = (utiltyKey) => {
+        let selectedUtility:Utility = UtilityState;
+        for(let r_index = 0 ; r_index < roleGroup.length ; r_index++) {
+            for(let g_index = 0 ; g_index <roleGroup[r_index].utilities_group.length; g_index++) {
+                for(let u_index = 0 ; u_index < roleGroup[r_index].utilities_group[g_index].utilities.length; u_index++){
+                    if(utiltyKey == roleGroup[r_index].utilities_group[g_index].utilities[u_index].key 
+                        ) {
+                        selectedUtility = roleGroup[r_index].utilities_group[g_index].utilities[u_index];
+                    } 
+                }
+            }
+        }
+        return selectedUtility;
     }
 
     const updateServerRoleData = async() => {

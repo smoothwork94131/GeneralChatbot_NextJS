@@ -1,5 +1,5 @@
 import { getSheets } from "@/utils/server/google_sheets"
-export const removePropmptFromRole = (roleData) => {
+export const removePromptFromRole = (roleData) => {
   const updated_roleData = roleData.map((r_item) => {
     const update_group = r_item.utilities_group.map((group_item) => {
       const update_utilities = group_item.utilities.map((utility) => {
@@ -18,7 +18,7 @@ export const removePropmptFromRole = (roleData) => {
 
 export default async function handler(req, res){
   const result = await getSheets();
-  const convertedRoleData = removePropmptFromRole(result);
+  const convertedRoleData = removePromptFromRole(result);
   return res.json(convertedRoleData);
 }
 

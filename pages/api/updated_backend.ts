@@ -28,9 +28,7 @@ export const getUpdatedBackend = async() => {
 }
 
 export const updateData = async(content) => {    
-    // const exist_table = await checkIfTableExists('update_data');
-    // if(exist_table) {
-    
+
     const { data, error } = await supabaseAdmin
     .from('updated_backend')
     .update([{
@@ -46,23 +44,6 @@ export const updateData = async(content) => {
         return "Success";
     }
     
-}
-
-async function checkIfName(name) {
-    const { data, error } = await supabaseAdmin
-    .from('updated_backend')
-    .select('*')
-    .eq("name", name);
-    console.log(data);
-    if(error) {
-        return false;
-    } else {
-        if(data.length > 0 ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }
 
 export default async function getRoleData(req, res){

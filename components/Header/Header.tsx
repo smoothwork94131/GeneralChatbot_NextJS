@@ -33,15 +33,20 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile, upd
     const {user} = useUser();
     
     const initialName = (full_name) => {
-        const split = full_name.split(" ");
-        let initial_name = "";
-        if(split.length > 1) {
-            initial_name = split[0].substr(0, 1)+split[1].substr(0, 1);
+        if(full_name) {
+            const split = full_name.split(" ");
+            let initial_name = "";
+            if(split.length > 1) {
+                initial_name = split[0].substr(0, 1)+split[1].substr(0, 1);
+            } else {
+                initial_name = split[0].substr(0, 1);
+            }
+            return initial_name;
         } else {
-            initial_name = split[0].substr(0, 1);
+            return "";
         }
-        return initial_name;
     }
+    
     return (
         <Box
             component="header"
@@ -70,7 +75,7 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile, upd
                 <Group>
                     <AccountButtons selectedConversation={selectedConversation} isMobile={true}/>
                     <IconSearch 
-                        onClick={() => spotlight.open()}
+                        onClick={() => changeSpotlightType('history')}
                     />
                     <Menu shadow="md" width={200}>
                         <Menu.Target>

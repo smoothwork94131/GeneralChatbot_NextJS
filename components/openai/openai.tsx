@@ -30,7 +30,7 @@ import { SpotlightProvider, SpotlightAction, SpotlightActionProps, spotlight  } 
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { useRouter } from "next/router";
 import OpenAiHeader from '@/components/Header';
-import { DESKTOP_SEARCH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH } from '@/utils/app/const';
+import { DESKTOP_SEARCH_PREVIEW_LENGTH, MOBILE_LIMIT_WIDTH, MOBILE_SEACH_PREVIEW_LENGTH, SEARCH_HISTORY_LIMIT_COUNT } from '@/utils/app/const';
 import { useMediaQuery } from "@mantine/hooks";
 import { Conversation } from '@/types/chat';
 import {  Input, SelectedSearch, SelectedSearchState, UtilitiesGroup, Utility } from '@/types/role';
@@ -168,9 +168,23 @@ const OpenAi = ({
     }
 
     const initSpotlightUtility = () => {
-        let searchHistoryActions:SpotlightAction[] = getSearchUtility('');
-        
-        setSearchUtility(searchHistoryActions);
+        let searchHistoryUtilityActions:SpotlightAction[] = [];
+        let searchConversationActions:SpotlightAction[] = getConversationHistory('');
+        searchConversationActions.map((h_item) => {
+            if(searchHistoryUtilityActions.filter(u_item => u_item.key == h_item.utilityKey).length == 0) {
+                searchHistoryUtilityActions.push({
+                    id: h_item.utilityKey,
+                    description: h_item.description,
+                    title: h_item.title,
+                    searchKey: h_item.searchKey,
+                    role_name: h_item.roleName,
+                    onTrigger: () => {
+                        utilityTriggarSearch(h_item.utilityKey)
+                    },
+                });
+            }
+        })
+        setSearchUtility(searchHistoryUtilityActions);
     }
     
     const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
@@ -362,7 +376,6 @@ const OpenAi = ({
 
     const getSearchUtility = (searchKey) => {
         let searchHistoryActions:SpotlightAction[] = [];
-    
         let filter_utilities: UtilityActionType[] = [];
         roleGroup.map((r_item) => {
             const utilitiesGroup = r_item.utilities_group;
@@ -385,32 +398,26 @@ const OpenAi = ({
                 })
             }
         })
-
-        if(filter_utilities.length > 0) {    
-            filter_utilities.map((utility) => {
-
-                if(
-                    !(searchKey=="" && searchHistoryActions.filter(item => item.role_name == utility.role_name).length > 0)
-                
-                ) {
-                    searchHistoryActions.push({
-                        id: utility.key,
-                        description: utility.summary,
-                        groupName: utility.group_name,
-                        title: utility.group_name+" > "+utility.name,
-                        searchKey: searchKey,
-                        role_name: utility.role_name,
-                        onTrigger: () => {
-                            utilityTriggarSearch(utility.key)
-                        },
-                    })
-                }
-                
+        
+        if(filter_utilities.length > 0) {
+            filter_utilities.map((utility) => {               
+                searchHistoryActions.push({
+                    id: utility.key,
+                    description: utility.summary,
+                    groupName: utility.group_name,
+                    title: utility.group_name+" > "+utility.name,
+                    searchKey: searchKey,
+                    role_name: utility.role_name,
+                    onTrigger: () => {
+                        utilityTriggarSearch(utility.key)
+                    },
+                })
             });
         }
 
         return searchHistoryActions;
     }
+
     const getConversationHistory = (searchKey) => {
 
         let preview_length = DESKTOP_SEARCH_PREVIEW_LENGTH;
@@ -479,16 +486,13 @@ const OpenAi = ({
         historyActions.sort((a, b) => b.timestamp-a.timestamp);
         let updatedHistoryActions: HistoryActionType[] = [];
         
-        if(searchKey == "") {
-            historyActions.map((history_item) => {
-                if(updatedHistoryActions.filter(updated_item => updated_item.utilityKey == history_item.utilityKey).length == 0) {
-                    updatedHistoryActions.push(history_item);
-                }
-            })
+        if(searchKey == "" && updatedHistoryActions.length > SEARCH_HISTORY_LIMIT_COUNT) {
+            for(let k = 0; k < SEARCH_HISTORY_LIMIT_COUNT; k++) {
+                updatedHistoryActions.push(historyActions[k]);
+            }
         } else {
             updatedHistoryActions = historyActions;
         }
-        
         updatedHistoryActions.map((item) => {
             searchHistoryActions.push({
                 title: item.title,

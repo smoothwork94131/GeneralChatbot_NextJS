@@ -59,7 +59,7 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile, upd
                 <Group>
                     <Burger 
                         opened={openedSidebar} 
-                        onClick={() => {handleShowSidebar}}
+                        onClick={handleShowSidebar}
                         size="sm"
                         sx={(theme) => ({
                             color: theme.colors.gray[7]

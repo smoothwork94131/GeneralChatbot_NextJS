@@ -781,10 +781,14 @@ const DrawerNav: FC<{
     
     const router = useRouter();
     // useEffect(() => {
-    //   router.events.on("routeChangeStart", handleShowSidebar);
-    //   return () => {
-    //     router.events.off("routeChangeStart", handleShowSidebar);
-    //   };
+        
+    //     if(router.push)
+        
+    //     router.events.on("routeChangeStart", handleShowSidebar);
+    //     return () => {
+    //         router.events.off("routeChangeStart", handleShowSidebar);
+    //     };
+
     // }, [handleShowSidebar, router.events]);
     
     return (

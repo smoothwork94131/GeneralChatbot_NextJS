@@ -778,13 +778,14 @@ const DrawerNav: FC<{
     updateServerRoleData,
     changeSpotlightType
   }) => {
+    
     const router = useRouter();
-    useEffect(() => {
-      router.events.on("routeChangeStart", handleShowSidebar);
-      return () => {
-        router.events.off("routeChangeStart", handleShowSidebar);
-      };
-    }, [handleShowSidebar, router.events]);
+    // useEffect(() => {
+    //   router.events.on("routeChangeStart", handleShowSidebar);
+    //   return () => {
+    //     router.events.off("routeChangeStart", handleShowSidebar);
+    //   };
+    // }, [handleShowSidebar, router.events]);
     
     return (
       <Drawer

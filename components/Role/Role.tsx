@@ -118,7 +118,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         setIsDragging(true);
     }
     function handleDragEnd(event) {
-        
+
         const { active, over } = event;
         if(!isDragging) {
             handleSelectRole(active?.id);
@@ -133,7 +133,6 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         setIsDragging(false);
     }
 
-    
     function SortableDesktopItem({item}) {
         const {
             attributes,
@@ -189,7 +188,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
     }
     return (
         isMobile?
-        <Menu openDelay={100} closeDelay={400} zIndex={1000} opened={showMenu}>
+        <Menu openDelay={100} closeDelay={400} zIndex={1000} >
             <Menu.Target>
                 <UnstyledButton
                     onClick={()=>{setShowMenu(!showMenu)}}
@@ -211,13 +210,15 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                 </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown> 
-                <Box sx={(theme) =>({
-                    padding: theme.spacing.xs
-                })}>
+                <Menu.Item
+                   
+                >
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
                         onDragEnd={handleDragEnd}
+                        onDragMove={handleDragMove}
+
                     >
                         <SortableContext
                             items={roleOrder}
@@ -232,7 +233,8 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                         </ul>
                         </SortableContext>
                     </DndContext>
-                </Box>
+                </Menu.Item>
+               
             </Menu.Dropdown>
         </Menu>
         :

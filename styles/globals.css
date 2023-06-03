@@ -32,6 +32,6 @@
     overflow-y: auto !important;
 }
 .mantine-Menu-dropdown {
-    z-index: 1;
+    z-index: 1 !important;
 }
 

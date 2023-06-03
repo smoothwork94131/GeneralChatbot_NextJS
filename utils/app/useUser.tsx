@@ -57,7 +57,7 @@ export const MyUserContextProvider = (props: Props) => {
   let isSubscriptionActive_ = isSubscriptionActive
 
   useEffect(() => {
-    if (user /* &&  *//* !isLoadingData &&  *//* isLoadingData && !userDetails && !subscription */) {
+    if (user &&   !isLoadingData &&  /* isLoadingData && */!userDetails && !subscription ) {
       isLoadingData_ = true
       userDetails_ = null
       subscription_ = null

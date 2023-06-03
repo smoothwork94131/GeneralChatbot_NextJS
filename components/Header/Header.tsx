@@ -12,7 +12,7 @@ import AccountButtons from '@/components/Account/AccountButtons';
 import { Conversation } from '@/types/chat';
 import { IconSearch } from '@tabler/icons-react';
 import { spotlight } from '@mantine/spotlight';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@/utils/app/useUser';
 
 interface Props {
     handleShowSidebar: ()=>void;
@@ -30,7 +30,8 @@ const OpenAiHeader:FC<Props> = ({handleShowSidebar, openedSidebar, isMobile, upd
         handleSelectRole,
     } = useContext(OpenaiContext);
 
-    const user = useUser();
+    const {user} = useUser();
+    
     const initialName = (full_name) => {
         const split = full_name.split(" ");
         let initial_name = "";

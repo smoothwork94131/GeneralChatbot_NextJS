@@ -246,7 +246,9 @@ const ChatMessage: FC<Props> = ({
                                             gap="xs"
                                             align='flex-end'
                                         >
-                                            <Tooltip label={reuse == index? 'Copied to Input':'Re-use'} opened={reuse == index?true:false}>
+                                           
+                                            <Tooltip label={reuse == index? 'Copied to Input':'Re-use'}  
+                                            >
                                                 {
                                                     reuse == index ?
                                                     <IconCheck color='gray' size={isMobile?'15px':'18px'}/>
@@ -257,6 +259,8 @@ const ChatMessage: FC<Props> = ({
                                                     }}/>
                                                 }
                                             </Tooltip>
+                                            
+                                            
                                             <Tooltip label='Delete'>
                                                 {
                                                     <IconTrash color='gray' size={isMobile?'15px':'18px'} onClick={(event) => {

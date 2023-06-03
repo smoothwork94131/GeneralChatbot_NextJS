@@ -58,6 +58,8 @@ const OpenAi = ({
     const [openedSidebar, setOpenedSiebar] = useState(false);
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
+    const [searchUtility, setSearchUtility] = useState<SpotlightAction[]>([]);
+
     const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
     const [selectedRoleIndex, setSelectedRoleIndex] = useState<number>(0);
     const [spotlightType, setSpotlightType] = useState<string>('history');
@@ -86,6 +88,28 @@ const OpenAi = ({
     const contextValue = useCreateReducer<OpenaiInitialState>({
         initialState,
     });
+
+    interface HistoryActionType {
+        timestamp: number;
+        title: string;
+        utilityKey: string;
+        historyIndex: number;
+        searchKey: string;
+        prevText: string;
+        nextText: string;
+        description: string;
+        roleName: string;
+        inputs: Input[],
+        datetime: string|undefined
+    };
+
+    interface UtilityActionType {
+        name: string,
+        summary: string,
+        group_name: string,
+        key: string,
+        role_name: string,
+    }
     
     const useStyles = createStyles((theme) => ({
         action: {
@@ -125,12 +149,28 @@ const OpenAi = ({
     },[spotlightType]);
 
     const changeSpotlightType = (type) => {
-        if(type == spotlightType) {
-            spotlight.open();
-        }else {
-            setSpotlightType(type);
+        if(type == "history") {
+            initSpotlightHistory();
+        } else  {
+            initSpotlightUtility();
         }
-        setSearchHistory([]);
+        
+        if(type == spotlightType) {
+            spotlight.open();            
+        }
+
+        setSpotlightType(type);
+    }
+
+    const initSpotlightHistory = () => {    
+        let searchHistoryActions:SpotlightAction[] = getConversationHistory('');
+        setSearchHistory(searchHistoryActions);
+    }
+
+    const initSpotlightUtility = () => {
+        let searchHistoryActions:SpotlightAction[] = getSearchUtility('');
+        
+        setSearchUtility(searchHistoryActions);
     }
     
     const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
@@ -316,15 +356,14 @@ const OpenAi = ({
 
     const handleInputSearchUtility = (event) => {
         const searchKey = event.target.value;
+        let searchHistoryActions:SpotlightAction[] = getSearchUtility(searchKey)
+        setSearchUtility(searchHistoryActions);
+    }
+
+    const getSearchUtility = (searchKey) => {
         let searchHistoryActions:SpotlightAction[] = [];
-
-        let filter_utilities:{
-            name: string,
-            summary: string,
-            group_name: string,
-            key: string,
-        }[] = [];
-
+    
+        let filter_utilities: UtilityActionType[] = [];
         roleGroup.map((r_item) => {
             const utilitiesGroup = r_item.utilities_group;
             for(let k=0; k<utilitiesGroup.length;k++){
@@ -339,55 +378,51 @@ const OpenAi = ({
                             name: u_item.name,
                             group_name: group_name,
                             summary: u_item.summary,
-                            key: u_item.key
+                            key: u_item.key,
+                            role_name: r_item.name
                         });
                     }
                 })
             }
         })
-        
+
         if(filter_utilities.length > 0) {    
             filter_utilities.map((utility) => {
-                searchHistoryActions.push({
-                    id: utility.key,
-                    description: utility.summary,
-                    groupName: utility.group_name,
-                    title: utility.group_name+" > "+utility.name,
-                    searchKey: searchKey,
-                    onTrigger: () => {
-                        utilityTriggarSearch(utility.key)
-                    },
-                })
+
+                if(
+                    !(searchKey=="" && searchHistoryActions.filter(item => item.role_name == utility.role_name).length > 0)
+                
+                ) {
+                    searchHistoryActions.push({
+                        id: utility.key,
+                        description: utility.summary,
+                        groupName: utility.group_name,
+                        title: utility.group_name+" > "+utility.name,
+                        searchKey: searchKey,
+                        role_name: utility.role_name,
+                        onTrigger: () => {
+                            utilityTriggarSearch(utility.key)
+                        },
+                    })
+                }
+                
             });
         }
-        setSearchHistory(searchHistoryActions);
-    } 
-    const handleInputSearchHistory = (event) => {
-        
-        const searchKey = event.target.value;
-        const updatedHistoryActions: {
-            timestamp: number;
-            title: string;
-            utilityKey: string;
-            historyIndex: number;
-            searchKey: string;
-            prevText: string;
-            nextText: string;
-            description: string;
-            roleName: string;
-            inputs: Input[],
-            datetime: string|undefined
-        }[] = [];
 
-        let searchHistoryActions:SpotlightAction[] = [];
+        return searchHistoryActions;
+    }
+    const getConversationHistory = (searchKey) => {
+
         let preview_length = DESKTOP_SEARCH_PREVIEW_LENGTH;
         if(isMobile) {
             preview_length = MOBILE_SEACH_PREVIEW_LENGTH;
         }
-        
+        let historyActions: HistoryActionType[] = [];
+        let searchHistoryActions:SpotlightAction[] = [];
+
         conversationHistory.map((conversation, conversationIndex) => {
             conversation.messages.map((messages, messagesIndex) => {
-                let flag = false;
+                let flag = false;        
                 messages.map((message, messageIndex) => {
                     const content = message.content;
                     if(!content.toLowerCase().includes(searchKey.toLowerCase()) || flag) {
@@ -421,7 +456,8 @@ const OpenAi = ({
                     }
 
                     const splitKey = conversation.key.split("_");
-                    updatedHistoryActions.push({
+                    
+                    historyActions.push({
                         title: `${splitKey[1]} > ${splitKey[2]}`,
                         roleName: splitKey[0],
                         historyIndex: messagesIndex,
@@ -435,11 +471,24 @@ const OpenAi = ({
                         description: `${nextText}${searchKey}${prevText}`
                     });
                     flag = true;
-                })
+                })  
+                
             })
         });
+
+        historyActions.sort((a, b) => b.timestamp-a.timestamp);
+        let updatedHistoryActions: HistoryActionType[] = [];
         
-        updatedHistoryActions.sort((a, b) => b.timestamp-a.timestamp);
+        if(searchKey == "") {
+            historyActions.map((history_item) => {
+                if(updatedHistoryActions.filter(updated_item => updated_item.utilityKey == history_item.utilityKey).length == 0) {
+                    updatedHistoryActions.push(history_item);
+                }
+            })
+        } else {
+            updatedHistoryActions = historyActions;
+        }
+        
         updatedHistoryActions.map((item) => {
             searchHistoryActions.push({
                 title: item.title,
@@ -457,7 +506,14 @@ const OpenAi = ({
                 },
             })
         })
+        return searchHistoryActions;
+    }
+    const handleInputSearchHistory = (event) => {
+        
+        const searchKey = event.target.value;
+        const searchHistoryActions:SpotlightAction[] = getConversationHistory(searchKey, 'search');
         setSearchHistory(searchHistoryActions);
+
     }
 
     const utilityTriggarSearch = (utilityKey: string) => {
@@ -527,7 +583,14 @@ const OpenAi = ({
                     <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
                        {`${action.description}`}
                     </Highlight>
-                </Box>                
+                </Box>    
+                <Text color={`${hovered?'white':'dimmed'}`}>
+                    {
+                        <Badge size="md" radius="sm">
+                            {action.role_name}
+                        </Badge>
+                    }
+                </Text>            
             </Group>
             </UnstyledButton>
         );
@@ -602,7 +665,7 @@ const OpenAi = ({
                 }}
             >
                 <SpotlightProvider
-                    actions={searchHistory}
+                    actions={spotlightType =="history"?searchHistory:searchUtility}
                     searchIcon={<IconSearch size="1.2rem" />}
                     searchPlaceholder="Search..."
                     shortcut="mod + shift + 1"

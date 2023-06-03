@@ -163,15 +163,22 @@ const OpenAi = ({
     }
 
     const initSpotlightHistory = () => {    
-        let searchHistoryActions:SpotlightAction[] = getConversationHistory('');
+        const searchHistoryActions:SpotlightAction[] = getConversationHistory("");
         setSearchHistory(searchHistoryActions);
     }
 
     const initSpotlightUtility = () => {
+        const searchHistoryUtilityActions:SpotlightAction[] = getRecentUtility();
+
+        setSearchUtility(searchHistoryUtilityActions);
+    }
+
+    const getRecentUtility = () => {
+        const searchConversationActions:SpotlightAction[] = getConversationHistory("");
+        console.log(searchConversationActions);
         let searchHistoryUtilityActions:SpotlightAction[] = [];
-        let searchConversationActions:SpotlightAction[] = getConversationHistory('');
         searchConversationActions.map((h_item) => {
-            if(searchHistoryUtilityActions.filter(u_item => u_item.key == h_item.utilityKey).length == 0) {
+            if(searchHistoryUtilityActions.filter(u_item => u_item.id == h_item.utilityKey).length == 0) {
                 searchHistoryUtilityActions.push({
                     id: h_item.utilityKey,
                     description: h_item.description,
@@ -184,7 +191,7 @@ const OpenAi = ({
                 });
             }
         })
-        setSearchUtility(searchHistoryUtilityActions);
+        return searchHistoryUtilityActions;
     }
     
     const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
@@ -486,7 +493,7 @@ const OpenAi = ({
         historyActions.sort((a, b) => b.timestamp-a.timestamp);
         let updatedHistoryActions: HistoryActionType[] = [];
         
-        if(searchKey == "" && updatedHistoryActions.length > SEARCH_HISTORY_LIMIT_COUNT) {
+        if(searchKey == "" && historyActions.length > SEARCH_HISTORY_LIMIT_COUNT) {
             for(let k = 0; k < SEARCH_HISTORY_LIMIT_COUNT; k++) {
                 updatedHistoryActions.push(historyActions[k]);
             }

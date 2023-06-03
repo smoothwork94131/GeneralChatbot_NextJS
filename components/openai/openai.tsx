@@ -444,7 +444,7 @@ const OpenAi = ({
                             if(messages[1].content.length > preview_length) {
                                 nextText = nextText+"..."+messages[1].content.substr(0, preview_length)+"...";
                             } else {
-                                nextText = nextText+"..."+messages[1].content.substr(0, messages[1].content.length-1);
+                                nextText = nextText+"..."+messages[1].content.substr(0, messages[1].content.length);
                             }   
                         }
                     }

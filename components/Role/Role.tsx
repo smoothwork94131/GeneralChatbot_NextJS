@@ -6,8 +6,7 @@ import {
     UnstyledButton, 
     Text ,
     Group,
-    Box,
-    Tabs
+    Box
 } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import { RoleGroup } from '@/types/role';

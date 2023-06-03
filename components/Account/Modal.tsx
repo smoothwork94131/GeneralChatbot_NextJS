@@ -6,7 +6,7 @@ interface Props {
     title: String
     closeModal: ()=>void;
     size: string;
-    withCloseButton: boolean;
+    withCloseButton?: boolean;
 }
 const MyModal:FC<Props> = ({isModal, child, title, closeModal, size, withCloseButton}) =>{
     return (

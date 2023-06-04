@@ -216,9 +216,7 @@ const ChatMessage: FC<Props> = ({
                                             direction={isMobile?'column-reverse':'row'}
                                             justify="flex-start"
                                             wrap="wrap"
-                                            sx={(theme) =>({
-                                                width: isMobile?'72%':''
-                                            })}
+                                            
                                         >
                                             <Text
                                                 style={{fontSize: '18px'}}
@@ -244,7 +242,12 @@ const ChatMessage: FC<Props> = ({
                                         </Flex>                 
                                         <Flex
                                             gap="xs"
-                                            align='flex-end'
+                                            align='center'
+                                            justify='flex-end'
+                                            sx={(theme)=>({
+                                                width: '140px'
+                                            })}
+                                            
                                         >
                                            
                                             <Tooltip label={reuse == index? 'Copied to Input':'Re-use'}  
@@ -278,7 +281,7 @@ const ChatMessage: FC<Props> = ({
                                                             setTimeAgo(index);
                                                         }
                                                     }
-                                                    p={0}
+                                                    pb= {isMobile?3:2}
                                                 >
                                                     <TimeAgo
                                                         date={selectedMessages[history_count-index-1][1].datetime} 

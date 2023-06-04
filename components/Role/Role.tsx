@@ -159,11 +159,12 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                     padding: theme.spacing.sm,
                     marginLeft: theme.spacing.sm,   
                     textAlign: 'center',
-                    cursor: 'pointer',
                     borderBottom: `2px solid ${theme.colors.orange[selectedRole.name == item.title? 8:2]}`,
                     "&:hover" :{
                         borderBottom: `2px solid ${theme.colors.orange[8]}`
-                    }
+                    },
+                    position: 'relative',
+                    zIndex: 99999
                 })}
                 gap="xs"
                 justify="flex-start"

@@ -43,6 +43,7 @@ interface  Props {
 interface RoleOrderItem {
     id: string,
     title: string,
+    active: boolean
 }
 const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}) => {
 
@@ -71,6 +72,17 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
     useEffect(()=> {
         
         if(roleGroup.length == 0) return; 
+        let updated_roleOrder:RoleOrderItem[] =[];
+        roleOrder.map((item) => {
+            let active = false ;
+            if(item.title == selectedRole.name) {
+                active = true;
+            }
+            item.active = active
+            updated_roleOrder.push(item);
+        })
+        setRoleOrder(updated_roleOrder);
+        
         localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
 
     }, [roleOrder]);
@@ -83,13 +95,20 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         if(roleOrderStr) {
             const roleOrder = JSON.parse(roleOrderStr);
             if(roleOrder.length > 0) {            
+                
                 setRoleOrder(roleOrder);
+
             } else {
                 let order:RoleOrderItem[] = [];
                 roleGroup.map((item, index) => {
+                    let active = false;
+                    if(selectedRole.name == item.name) {
+                        active = true;
+                    }
                     order.push({
                         id: index.toString(),
                         title: item.name,
+                        active: active
                     })
                 })
                 setRoleOrder(order);
@@ -97,9 +116,14 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         } else {            
             let order:RoleOrderItem[] = [];
             roleGroup.map((item, index) => {
+                let active = false;
+                if(selectedRole.name == item.name) {
+                    active = true;
+                }
                 order.push({
                     id: index.toString(),
                     title: item.name,
+                    active: active
                 })
             })
             setRoleOrder(order);

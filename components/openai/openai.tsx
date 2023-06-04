@@ -197,13 +197,13 @@ const OpenAi = ({
     
     const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
         if(_rolData) {
-            let selectedRolIndex = 0;
+            let selectedRoleIndex = 0;
             let selectedGroupIndex = 0;
             let utilityIndex = 0;
 
             _rolData.map((role_item, role_index) => {
                 if(role_item.name == selectedRole.name) {
-                    selectedRolIndex = role_index;
+                    selectedRoleIndex = role_index;
                 }
                 role_item.utilities_group.map((group_item, gropu_index) => {
                     group_item.utilities.map((utility, utility_index) => {
@@ -214,7 +214,22 @@ const OpenAi = ({
                     })
                 })
             })
-            
+         
+            const roleOrderStr = localStorage.getItem("roleOrder");
+            if(roleOrderStr) {
+                const role_order = JSON.parse(roleOrderStr);
+                const activeRoleItem = role_order.filter(item => item.active == true);
+                
+                if(activeRoleItem.length > 0) {
+                    const activeRoleName = activeRoleItem[0]["title"];
+                    _rolData.map((item, index) => {
+                        if(item.name == activeRoleName) {
+                            selectedRoleIndex = index;
+                        }
+                    })    
+                }
+            } 
+
             dispatch({
                 "field": "roleGroup",
                 "value": _rolData
@@ -222,15 +237,15 @@ const OpenAi = ({
             
             dispatch({
                 "field": "selectedRole",
-                "value": _rolData[selectedRolIndex]
+                "value": _rolData[selectedRoleIndex]
             })
             dispatch({
                 "field": "selectedUtility",
-                "value": _rolData[selectedRolIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
+                "value": _rolData[selectedRoleIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
             })
             dispatch({
                 "field": "selectedUtilityGroup",
-                "value": _rolData[selectedRolIndex].utilities_group
+                "value": _rolData[selectedRoleIndex].utilities_group
             })
         }
     }
@@ -312,6 +327,8 @@ const OpenAi = ({
                     }
                 }
             }
+            
+            
             dispatch({
                 field: "selectedRole",
                 value: updatedRole[updatedRole.length - 1]

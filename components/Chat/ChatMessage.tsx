@@ -228,16 +228,16 @@ const ChatMessage: FC<Props> = ({
                                                     marginLeft: isMobile?'-5px':'0px'
                                                 })}
                                             >
-                                                {
-                                                    selectedMessages[history_count-index-1][0].inputs?.map((input, index) =>
-                                                        input.type == "form"?
-                                                        <Badge key={index} ml={5}
-                                                            size="xs"
-                                                            radius="sm"
-                                                            
-                                                        >{input.value}</Badge>:<></>
-                                                    )
-                                                }
+                                            {
+                                                selectedMessages[history_count-index-1][0].inputs?.map((input, index) =>
+                                                    input.type == "form"?
+                                                    <Badge key={index} ml={5}
+                                                        size="xs"
+                                                        radius="sm"
+                                                        
+                                                    >{input.value}</Badge>:<></>
+                                                )
+                                            }
                                             </Box>
                                         </Flex>                 
                                         <Flex
@@ -251,6 +251,7 @@ const ChatMessage: FC<Props> = ({
                                         >
                                            
                                             <Tooltip label={reuse == index? 'Copied to Input':'Re-use'}  
+                                                // opened={reuse == index?true:false}
                                             >
                                                 {
                                                     reuse == index ?

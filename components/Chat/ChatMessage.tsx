@@ -244,10 +244,14 @@ const ChatMessage: FC<Props> = ({
                                         </Flex>                 
                                         <Flex
                                             gap="xs"
-                                            align='flex-end'
+                                            justify='flex-end'
+                                            sx={(theme) =>({
+                                                width: '120px',
+                                            })}
                                         >
                                            
                                             <Tooltip label={reuse == index? 'Copied to Input':'Re-use'}  
+                                                // opened={reuse == index?true:false}
                                             >
                                                 {
                                                     reuse == index ?

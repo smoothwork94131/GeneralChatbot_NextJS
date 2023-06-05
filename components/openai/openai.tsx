@@ -140,6 +140,7 @@ const OpenAi = ({
         },
         dispatch,
     } = contextValue;
+
     useEffect(()=>{
         dispatchServerRoleData(serverRoleData);
     },[]);
@@ -175,7 +176,6 @@ const OpenAi = ({
 
     const getRecentUtility = () => {
         const searchConversationActions:SpotlightAction[] = getConversationHistory("");
-        console.log(searchConversationActions);
         let searchHistoryUtilityActions:SpotlightAction[] = [];
         searchConversationActions.map((h_item) => {
             if(searchHistoryUtilityActions.filter(u_item => u_item.id == h_item.utilityKey).length == 0) {
@@ -205,11 +205,11 @@ const OpenAi = ({
                 if(role_item.name == selectedRole.name) {
                     selectedRoleIndex = role_index;
                 }
-                role_item.utilities_group.map((group_item, gropu_index) => {
+                role_item.utilities_group.map((group_item, group_index) => {
                     group_item.utilities.map((utility, utility_index) => {
                         if(utility.name == selectedUtility.name) {
                             utilityIndex = utility_index;
-                            selectedGroupIndex = gropu_index;
+                            selectedGroupIndex = group_index;
                         }
                     })
                 })
@@ -229,7 +229,6 @@ const OpenAi = ({
                     })    
                 }
             } 
-
             dispatch({
                 "field": "roleGroup",
                 "value": _rolData

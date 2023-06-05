@@ -66,7 +66,7 @@ function mapRowToCustomData(row: string[], headers: string[]): void {
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',
-        streaming: streaming=='TRUE' || streaming=="1"? true:false,
+        streaming: streaming=='TRUE' || streaming=="1"? true:true,
       })
     }
     utilities_group[utilities_group_index].utilities = utilities;

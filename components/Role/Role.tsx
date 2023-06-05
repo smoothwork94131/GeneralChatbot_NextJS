@@ -11,8 +11,6 @@ import {
 import { IconCheck } from '@tabler/icons-react';
 import { RoleGroup } from '@/types/role';
 import { IconChevronDown } from '@tabler/icons-react';
-
-import { DndContext, useSensor } from '@dnd-kit/core';
 import {
   arrayMove,
   horizontalListSortingStrategy,
@@ -21,15 +19,17 @@ import {
   verticalListSortingStrategy,
   
 } from '@dnd-kit/sortable';
+
 import {
     useSensors,
     closestCenter,
     MouseSensor,
     TouchSensor,
+    DndContext,
+    useSensor
 } from "@dnd-kit/core";
 
 import { CSS } from '@dnd-kit/utilities';
-
 import { GripVertical } from "lucide-react";
 
 
@@ -45,20 +45,36 @@ interface RoleOrderItem {
     title: string,
     active: boolean
 }
-const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}) => {
-
+const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobile}) => {
     const getStorageOrder = () => {
         const roleOrderStr = localStorage.getItem("roleOrder");
-        if(!roleOrderStr) {
-            return [];
-        } else {
+        if(roleOrderStr && JSON.parse(roleOrderStr).length > 0) {
             return JSON.parse(roleOrderStr);
+        } else {
+            let order:RoleOrderItem[] = [];
+            roleGroup.map((item, index) => {
+                let active = false;
+                if(selectedRole.name == item.name) {
+                    active = true;
+                }
+                order.push({
+                    id: index.toString(),
+                    title: item.name,
+                    active: active
+                });
+            });
+            console.log('&&&&&&&&&&&&&', order);
+            return order;
         }
     }
-    
-    const [roleOrder, setRoleOrder] = useState<RoleOrderItem[]>(getStorageOrder());
+
+    const temp_order = getStorageOrder();
+    const [roleOrder, setRoleOrder] = useState<RoleOrderItem[]>(temp_order);
+    // const [roleOrder, setRoleOrder] = useState<RoleOrderItem[]>([]);
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState(false);
+
+    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
     
     useEffect(() => {
         initRoleOrder();
@@ -68,10 +84,9 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         initRoleOrder();
     }, []);
     
-    
     useEffect(()=> {
-        
-        if(roleGroup.length == 0) return; 
+        if(roleGroup.length == 0) return;
+
         let updated_roleOrder:RoleOrderItem[] =[];
         roleOrder.map((item) => {
             let active = false ;
@@ -81,23 +96,17 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
             item.active = active
             updated_roleOrder.push(item);
         })
+
         setRoleOrder(updated_roleOrder);
-        
         localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
-
-    }, [roleOrder]);
+    }, [selectedRole]);
    
-    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-
     const initRoleOrder = () => {
         const roleOrderStr:string|null = localStorage.getItem("roleOrder");
-
         if(roleOrderStr) {
             const roleOrder = JSON.parse(roleOrderStr);
             if(roleOrder.length > 0) {            
-                
                 setRoleOrder(roleOrder);
-
             } else {
                 let order:RoleOrderItem[] = [];
                 roleGroup.map((item, index) => {
@@ -109,8 +118,8 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                         id: index.toString(),
                         title: item.name,
                         active: active
-                    })
-                })
+                    });
+                });
                 setRoleOrder(order);
             }
         } else {            
@@ -124,8 +133,8 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                     id: index.toString(),
                     title: item.name,
                     active: active
-                })
-            })
+                });
+            });
             setRoleOrder(order);
         }
     }
@@ -133,6 +142,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
     const clickDestkopTab = (key: string) => {
         handleSelectRole(Number(key));
     }
+
     const clickMobileTab = (key: string) => {
         handleSelectRole(Number(key));
         setShowMenu(false);
@@ -141,8 +151,8 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
     function handleDragMove(event) {
         setIsDragging(true);
     }
-    function handleDragEnd(event) {
 
+    function handleDragEnd(event) {
         const { active, over } = event;
         if(!isDragging) {
             handleSelectRole(active?.id);
@@ -166,6 +176,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
             transition,
           } = useSortable({
             id: item.id,
+            resizeObserverConfig: {}
           });
         
         const style = {
@@ -175,22 +186,24 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
         };
         
         return (
-            
             <Flex 
                 ref={setNodeRef} style={style} {...attributes} {...listeners}
                 onClick={() => {clickDestkopTab(item.id)}}
+                
                 sx={(theme) => ({
                     padding: theme.spacing.sm,
                     marginLeft: theme.spacing.sm,   
                     textAlign: 'center',
-                    cursor: 'pointer',
+                    width: '130px',
                     borderBottom: `2px solid ${theme.colors.orange[selectedRole.name == item.title? 8:2]}`,
                     "&:hover" :{
                         borderBottom: `2px solid ${theme.colors.orange[8]}`
-                    }
+                    },
+                    position: 'relative',
+                    zIndex: 100
                 })}
                 gap="xs"
-                justify="flex-start"
+                justify="center"
                 align="center"
             >
                 <Text 
@@ -210,6 +223,48 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
             </Flex>
         );
     }
+
+    function SortableMobileItem({ item }) {
+        const {
+          attributes,
+          listeners,
+          setNodeRef,
+          transform,
+          transition,
+        } = useSortable({
+          id: item.id,
+          resizeObserverConfig: {}
+        });
+    
+        const style = {
+          transform: CSS.Transform.toString(transform),
+          transition,
+        };
+        return (
+            <li
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            className="p-2 flex gap-3"
+          >
+            <div className="w-full">
+              <Text>{item.title}</Text>
+            </div>
+            <Box
+                {...listeners}
+                sx={(theme) =>({
+                    cursor: 'cursor-grab',
+                    display: 'flex',
+                    padding: theme.spacing.sx,
+                    alignItems: 'center'
+                })}
+            >
+              <GripVertical className="w-4 h-4" />
+            </Box>
+          </li>
+        );
+    }
+
     return (
         isMobile?
         <Menu openDelay={100} closeDelay={400} zIndex={1000} >
@@ -234,22 +289,19 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                 </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown> 
-                <Menu.Item
-                   
-                >
+                <Menu.Item>
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
                         onDragEnd={handleDragEnd}
                         onDragMove={handleDragMove}
-
                     >
                         <SortableContext
                             items={roleOrder}
                             strategy={verticalListSortingStrategy}
                         >
                         <ul>
-                            {roleOrder.map((item) => (
+                            {roleOrder.map((item, index) => (
                                 <Box key={item.id} onClick={() => {clickMobileTab(item.id)}}>
                                     <SortableMobileItem key={item.id} item={item} />
                                 </Box>  
@@ -273,7 +325,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                 strategy={horizontalListSortingStrategy}
             >
                 <Flex>
-                    {roleOrder.map((item) => (
+                    {roleOrder.map((item, index) => (
                         <Box key={item.id} 
                         >
                             <SortableDesktopItem key={item.id} item={item} />
@@ -282,48 +334,7 @@ const RoleHome: FC<Props> = ({handleSelectRole,roleGroup, selectedRole,isMobile}
                 </Flex>
             </SortableContext>
         </DndContext>
-        
-       
     )
 }
 
-
-function SortableMobileItem({ item }) {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-    } = useSortable({
-      id: item.id,
-    });
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    };
-    return (
-        <li
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        className="p-2 flex gap-3"
-      >
-        <div className="w-full">
-          <Text>{item.title}</Text>
-        </div>
-        <Box
-            {...listeners}
-            sx={(theme) =>({
-                cursor: 'cursor-grab',
-                display: 'flex',
-                padding: theme.spacing.sx,
-                alignItems: 'center'
-            })}
-        >
-          <GripVertical className="w-4 h-4" />
-        </Box>
-      </li>
-    );
-  }
 export default RoleHome;

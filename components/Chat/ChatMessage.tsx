@@ -73,7 +73,6 @@ const ChatMessage: FC<Props> = ({
 
     
     useEffect(() => {
-        
         let updatedActive: string[] = [];
         historyConversation?.messages.map((message, index) => {
             if( message[0].active ||
@@ -82,7 +81,6 @@ const ChatMessage: FC<Props> = ({
                     historyConversation.key == selectedSearch.utility_key)
                 )
                 && !collapse)) {
-                    
                 updatedActive.push(`${historyConversation.key}_${index}`);
             } 
         })
@@ -143,6 +141,7 @@ const ChatMessage: FC<Props> = ({
             setCopied(-1);
         }, 1000);
     };
+
     function copyToClipboard(text: string) {
         if (typeof navigator !== 'undefined')
           navigator.clipboard.writeText(text)
@@ -229,12 +228,13 @@ const ChatMessage: FC<Props> = ({
                                                 })}
                                             >
                                             {
-                                                selectedMessages[history_count-index-1][0].inputs?.map((input, index) =>
+                                                selectedMessages[history_count-index-1][0].inputs?.map((input, input_index) =>
                                                     input.type == "form"?
-                                                    <Badge key={index} ml={5}
+                                                    <Badge 
+                                                        key={input_index} 
+                                                        ml={5}
                                                         size="xs"
                                                         radius="sm"
-                                                        
                                                     >{input.value}</Badge>:<></>
                                                 )
                                             }
@@ -249,7 +249,6 @@ const ChatMessage: FC<Props> = ({
                                             })}
                                             
                                         >
-                                           
                                             <Tooltip label={reuse == index? 'Copied to Input':'Re-use'}  
                                                 // opened={reuse == index?true:false}
                                             >

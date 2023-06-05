@@ -115,7 +115,7 @@ const ChatContent: FC<Props> = ({
             ...updatedConversation.messages];
             
             if(selectedUtility.include_prompt_history){
-                selectedMessagesHistory.map((messages_item) => {
+                selectedMessagesHistory.map((messages_item, message_index) => {
                     messages_item.map((message) => {
                         messages = [...messages, message];
                     })
@@ -147,7 +147,7 @@ const ChatContent: FC<Props> = ({
                 fingerId: string,
                 userId: string|null
             } = { 
-                response_messages: response_messages.map((item) => {
+                response_messages: response_messages.map((item, index) => {
                     if(item.datetime) delete item?.datetime;
                     return item;
                 }),

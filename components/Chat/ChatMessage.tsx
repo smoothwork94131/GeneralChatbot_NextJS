@@ -306,7 +306,7 @@ const ChatMessage: FC<Props> = ({
                                         })}
                                         className='copy-assistant'
                                     >
-                                        <Tooltip label={copied == index? 'Copied':'Copy'} opened={copied == index?true:false}>
+                                        <Tooltip label={copied == index? 'Copied':'Copy'} >
                                             {
                                                 copied == index ?
                                                 <IconCheck 

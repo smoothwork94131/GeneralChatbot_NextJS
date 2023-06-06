@@ -170,7 +170,6 @@ const OpenAi = ({
 
     const initSpotlightUtility = () => {
         const searchHistoryUtilityActions:SpotlightAction[] = getRecentUtility();
-
         setSearchUtility(searchHistoryUtilityActions);
     }
 
@@ -409,8 +408,12 @@ const OpenAi = ({
 
     const handleInputSearchUtility = (event) => {
         const searchKey = event.target.value;
-        let searchHistoryActions:SpotlightAction[] = getSearchUtility(searchKey)
-        setSearchUtility(searchHistoryActions);
+        if(searchKey == "") {
+            initSpotlightUtility();
+        } else {
+            let searchHistoryActions:SpotlightAction[] = getSearchUtility(searchKey)
+            setSearchUtility(searchHistoryActions);
+        }   
     }
 
     const getSearchUtility = (searchKey) => {
@@ -609,6 +612,23 @@ const OpenAi = ({
         ...others
     }: SpotlightActionProps) {
         const { classes } = useStyles(undefined, { styles, classNames, name: 'Spotlight' });
+        
+        // const searchIndex = action.description.indexOf(action.searchKey);
+        const description = JSON.parse(JSON.stringify(action.description));
+        
+        let searchIndex = 0;
+        let searchKey = action.searchKey;
+
+        if(description) {
+            searchIndex = description.toLowerCase().indexOf(searchKey.toLowerCase());
+        }
+        let titleIndex = 0;
+        let title = JSON.parse(JSON.stringify(action.title));
+
+        if(title) {
+            titleIndex = title.toLowerCase().indexOf(searchKey.toLowerCase());
+        }
+
         return (
             <UnstyledButton
                 className={classes.action}
@@ -620,14 +640,41 @@ const OpenAi = ({
             >
             <Group noWrap>
                 <Box style={{ flex: 1 }}>
-                    <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`}>
-                        {`  ${action.title}`}
-                    </Highlight>
-                    <Highlight highlight={action.searchKey} color={`${hovered?'white':'dimmed'}`} sx={(theme) =>({
-                        fontSize: theme.fontSizes.sm
-                    })}>
-                       {`${action.description}`}
-                    </Highlight>
+                    {
+                        titleIndex == -1?<Text color={`${hovered?'white':'dimmed'}`} size="dm">{action.title}</Text>:
+                        <Text color={`${hovered?'white':'dimmed'}`} size="dm">
+                            {
+                                action.title?.substr(0, titleIndex)
+                            }
+                            {
+                                <span style={{background: 'orange', color: 'black'}}>
+                                    {action.title.substr(titleIndex, searchKey.length)}
+                                </span>
+                            }
+                            {
+                                action.title?.substr(titleIndex+action.searchKey.length, action.title.length)
+                            }
+                        </Text>
+
+                    }
+                    {
+                        !description?<></>:
+                        searchIndex == -1?<Text color={`${hovered?'white':'dimmed'}`} size="sm">{description}</Text>:
+                        <Text color={`${hovered?'white':'dimmed'}`} size="sm">
+                            {
+                                description?.substr(0, searchIndex)
+                            }
+                            {
+                                searchIndex == -1?<></>:
+                                <span style={{background: 'orange', color: 'black'}}>
+                                    {action?.description?.substr(searchIndex, searchKey.length)}
+                                </span>
+                            }
+                            {
+                                description?.substr(searchIndex+action.searchKey.length, description.length)
+                            }
+                        </Text>
+                    }  
                 </Box>    
                 <Text color={`${hovered?'white':'dimmed'}`}>
                     {

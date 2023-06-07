@@ -50,11 +50,11 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
             <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={() => { }}>
               <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
                 {
-                  [`/`].includes(appProps.router.pathname)?
-                  <Component {...pageProps} />:
+                  [`/user`].includes(appProps.router.pathname)?
                   <Layout childrenSize={[`/signin`].includes(appProps.router.pathname)?'400px':'700px'}>
                     <Component {...pageProps} />
-                  </Layout>
+                  </Layout>:
+                  <Component {...pageProps} />
                 }
                 {/* <Component {...pageProps} /> */}
               </MantineProvider>

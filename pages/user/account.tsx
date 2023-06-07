@@ -36,7 +36,7 @@ const Account = ({ user }: { user: User }) => {
   const router = useRouter();
 
   if(!user) {
-    router.replace('/signin');
+    router.replace('/user/signin');
   }
   const redirectToCustomerPortal = async () => {
     // setLoading(true);
@@ -106,7 +106,7 @@ const Account = ({ user }: { user: User }) => {
                 ) : subscription ? (
                   `${subscriptionPrice}/${subscription?.prices?.interval}`
                 ) : (
-                  <Link href="/pricing" ><Button variant='outline'>Choose your plan</Button></Link>
+                  <Link href="/user/pricing" ><Button variant='outline'>Choose your plan</Button></Link>
                 )}
               </Title>
               <Divider my="sm" variant="dashed" />
@@ -166,7 +166,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   if (!session)
     return {
       redirect: {
-        destination: '/signin',
+        destination: '/user/signin',
         permanent: false
       }
     };

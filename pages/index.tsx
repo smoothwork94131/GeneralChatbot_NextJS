@@ -1,5 +1,4 @@
 
-import { Props } from '../utils/app/useUser';
 import { getSheets } from '@/utils/server/google_sheets';
 import dynamic from 'next/dynamic'
 const OpenAi = dynamic(() => import('@/components/openai/openai'), { ssr: false })

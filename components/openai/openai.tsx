@@ -39,29 +39,22 @@ import { IconSearch } from '@tabler/icons-react';
 import { RoleGroup } from '../../types/role';
 
 interface Props {
-    serverRoleData: RoleGroup[]
+    serverRoleData: RoleGroup[],
+    utilityKey: string
 }
 
-const spotlightProps = {
-    styles: {
-        window: {
-        maxWidth: '1000px',
-        margin: '0 auto'
-      }
-    }
-};
-
 const OpenAi = ({
-    serverRoleData
+    serverRoleData,
+    utilityKey
 }: Props) => {
-
+    
+    const router = useRouter();
     const [openedSidebar, setOpenedSiebar] = useState(false);
     const isMobile = useMediaQuery(`(max-width: ${MOBILE_LIMIT_WIDTH}px)`);
     const [searchHistory, setSearchHistory] = useState<SpotlightAction[]>([]);
     const [searchUtility, setSearchUtility] = useState<SpotlightAction[]>([]);
 
     const [updateDataLoader, setUpdateDataLoader] = useState<boolean>(false);
-    const [selectedRoleIndex, setSelectedRoleIndex] = useState<number>(0);
     const [spotlightType, setSpotlightType] = useState<string>('history');
     
 
@@ -143,8 +136,8 @@ const OpenAi = ({
 
     useEffect(()=>{
         dispatchServerRoleData(serverRoleData);
-    },[]);
-
+    },[serverRoleData, utilityKey]);
+    
     useEffect(()=>{
         spotlight.open();
     },[spotlightType]);
@@ -195,55 +188,98 @@ const OpenAi = ({
     }
     
     const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
+
         if(_rolData) {
             let selectedRoleIndex = 0;
             let selectedGroupIndex = 0;
             let utilityIndex = 0;
+            
+            const utility_active_str = localStorage.getItem("utility_active");
+            let utility_active = {};
+            if(utility_active_str) {
+                utility_active = JSON.parse(utility_active_str);
+            }
 
-            _rolData.map((role_item, role_index) => {
-                if(role_item.name == selectedRole.name) {
-                    selectedRoleIndex = role_index;
-                }
-                role_item.utilities_group.map((group_item, group_index) => {
-                    group_item.utilities.map((utility, utility_index) => {
-                        if(utility.name == selectedUtility.name) {
+            const group_active_str = localStorage.getItem("group_active");
+            let group_active = {};
+            if(group_active_str) {
+                group_active = JSON.parse(group_active_str);
+            }
+            
+            const updated_roleData = _rolData.map((role_item, role_index) => {
+                const utilities_group = role_item.utilities_group.map((group_item, group_index) => {
+
+                    const utilities = group_item.utilities.map((utility, utility_index) => {
+                        if(utility.key == utilityKey) {
                             utilityIndex = utility_index;
                             selectedGroupIndex = group_index;
+                            selectedRoleIndex = role_index;
                         }
+                        if(Object.keys(utility_active).includes(role_item.name)) {
+                            const utilty_name = utility_active[`${role_item.name}`];
+                            if(utilty_name == utility.name) {
+                                utility.active = true;
+                            } else {
+                                utility.active = false;
+                            }
+                        } 
+
+                        return utility;
                     })
+                    
+                    group_item.utilities = utilities;
+                    
+                    if(Object.keys(group_active).includes(role_item.name)) {
+                        const active_array =  group_active[`${role_item.name}`];
+                        if(active_array.filter(item => item == group_item.name).length > 0) {
+                            group_item.active = true;
+                        } else {
+                            group_item.active = false;
+                        }
+                    } 
+
+                    return group_item;
                 })
+
+                role_item['utilities_group'] = utilities_group;
+                return role_item;
             })
-         
+
+            
             const roleOrderStr = localStorage.getItem("roleOrder");
+            
             if(roleOrderStr) {
                 const role_order = JSON.parse(roleOrderStr);
                 const activeRoleItem = role_order.filter(item => item.active == true);
                 
                 if(activeRoleItem.length > 0) {
                     const activeRoleName = activeRoleItem[0]["title"];
-                    _rolData.map((item, index) => {
+                    updated_roleData.map((item, index) => {
                         if(item.name == activeRoleName) {
                             selectedRoleIndex = index;
                         }
-                    })    
+                    }) 
                 }
-            } 
+            }
+
+        
+
             dispatch({
                 "field": "roleGroup",
-                "value": _rolData
+                "value": updated_roleData
             });
             
             dispatch({
                 "field": "selectedRole",
-                "value": _rolData[selectedRoleIndex]
+                "value": updated_roleData[selectedRoleIndex]
             })
             dispatch({
                 "field": "selectedUtility",
-                "value": _rolData[selectedRoleIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
+                "value": updated_roleData[selectedRoleIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
             })
             dispatch({
                 "field": "selectedUtilityGroup",
-                "value": _rolData[selectedRoleIndex].utilities_group
+                "value": updated_roleData[selectedRoleIndex].utilities_group
             })
         }
     }
@@ -314,7 +350,12 @@ const OpenAi = ({
             (r, r_index) => r_index == index
         );
         
-        setSelectedRoleIndex(index);
+        const group_active_str = localStorage.getItem("group_active");
+        let group_active = {};
+        
+        if(group_active_str) {
+            group_active = JSON.parse(group_active_str);
+        }
 
         if(updatedRole.length > 0) {
             let utility;
@@ -323,30 +364,51 @@ const OpenAi = ({
                     if(roleGroup[index].utilities_group[g_index].utilities[u_index].active){
                         utility = roleGroup[index].utilities_group[g_index].utilities[u_index];
                     }
+                    
                 }
             }
             
+            roleGroup.map(role => {
+                let active_arr:string[] = [];
+                role.utilities_group.map(group => {
+                    if(group.active) {
+                        active_arr.push(group.name);
+                    } 
+                })
+                group_active[`${role.name}`] = active_arr;
+            })
+
+            localStorage.setItem("group_active",JSON.stringify(group_active));
+
+            const roleOrderStr = localStorage.getItem("roleOrder");
             
-            dispatch({
-                field: "selectedRole",
-                value: updatedRole[updatedRole.length - 1]
-            });
-            dispatch({
-                field: 'selectedUtilityGroup',
-                value: updatedRole[updatedRole.length - 1].utilities_group
-            });
-            dispatch({
-                field: 'selectedUtility',
-                value: utility
-            });
-            dispatch({
-                field: 'selectedSearch',
-                value: SelectedSearchState
-            });
+            if(roleOrderStr) {
+                let updated_roleOrder = JSON.parse(roleOrderStr);
+                updated_roleOrder = updated_roleOrder.map((item) => {
+                    if(updated_roleOrder.name == updatedRole[0].name) {
+                        item.active = true;
+                    } else {
+                        item.active = false;
+                    }
+                    return item;
+                })
+                localStorage.setItem("roleOrder", JSON.stringify(updated_roleOrder));
+            }
+            
+            handleSelectUtility(utility.key);
+            
         }
     };
 
     const handleSelectUtility = (utility_key:string) => {
+
+
+        const utilty_active_str = localStorage.getItem("utilty_active");
+        let utilty_active = {};
+        if(utilty_active_str) {
+            utilty_active = JSON.parse(utilty_active_str);
+        } 
+
         let updatedUtility: Utility[] = [];
         let updatedRole:RoleGroup ={name:'',utilities_group:[]};
         let updatedUtilitiesGroup: UtilitiesGroup[] = [];
@@ -361,46 +423,50 @@ const OpenAi = ({
             }
         }
 
-        if(updatedUtility && updatedUtility.length > 0) {
-            
-            let roleGroup_ = roleGroup;
-            const updatedUtility_ = updatedUtility[updatedUtility?.length - 1];
+        
 
-            for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
-                if(updatedRole.name == roleGroup_[r_index].name) {            
-                    for(let g_index = 0 ; g_index <roleGroup_[r_index].utilities_group.length; g_index++) {
-                        for(let u_index = 0 ; u_index < roleGroup_[r_index].utilities_group[g_index].utilities.length; u_index++){
-                            if(updatedUtility_.key == roleGroup_[r_index].utilities_group[g_index].utilities[u_index].key 
-                                ) {
-                                roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = true;
-                            } else{
-                                roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = false;
-                            }
+        let roleGroup_ = roleGroup;
+        const updatedUtility_ = updatedUtility[updatedUtility?.length - 1];
+        let role_name = '', group_name='', utility_name='';
+
+        for(let r_index = 0 ; r_index < roleGroup_.length ; r_index++) {
+            if(updatedRole.name == roleGroup_[r_index].name) {            
+                for(let g_index = 0 ; g_index <roleGroup_[r_index].utilities_group.length; g_index++) {
+                    for(let u_index = 0 ; u_index < roleGroup_[r_index].utilities_group[g_index].utilities.length; u_index++){
+                        if(updatedUtility_.key == roleGroup_[r_index].utilities_group[g_index].utilities[u_index].key 
+                            ) {
+                            roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = true;
+                            role_name =  roleGroup_[r_index].name.replaceAll(" ", "-");
+                            group_name =  roleGroup_[r_index].utilities_group[g_index].name.replaceAll(" ","-");
+                            utility_name =  roleGroup_[r_index].utilities_group[g_index].utilities[u_index].name.replaceAll(" ", "-");
+
+                        } else {
+                            roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = false;
                         }
-                        updatedUtilitiesGroup=roleGroup_[r_index].utilities_group;
                     }
-                }    
-            }
+                    updatedUtilitiesGroup=roleGroup_[r_index].utilities_group;
+                }
+            }    
+        }
+        
+        roleGroup_.map((role) => {
+            role.utilities_group.map((group) => {
+                group.utilities.map((utility) => {
+                    if(utility.active) {
+                        utilty_active[`${role.name}`] = utility.name;
+                    }
+                })
+            })
+        })
 
-            dispatch({
-                field: "selectedRole",
-                value: updatedRole
-            });
-            dispatch({
-                field: "selectedUtility",
-                value: updatedUtility_
-            })
-            dispatch({
-                field: "roleGroup",
-                value: roleGroup_
-            })
-            dispatch({
-                field: "selectedUtilityGroup",
-                value: updatedUtilitiesGroup
-            })
-        }  
-        setOpenedSiebar(false);
+        console.log(utilty_active);
+        localStorage.setItem("utility_active", JSON.stringify(utilty_active));
+        goPage(`/${role_name}/${group_name}/${utility_name}`);
     };
+
+    const goPage = (page_url) => {
+        router.replace(page_url);
+    }
     const handleShowSidebar = () => {
         if(isMobile)
             setOpenedSiebar(!openedSidebar);

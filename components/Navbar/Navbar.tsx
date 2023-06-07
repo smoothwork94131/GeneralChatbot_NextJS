@@ -24,10 +24,10 @@ const Navbar = () => {
               <Logo />
             </Link>
             <nav className="space-x-2 ml-6 hidden lg:block">
-              <Link href="/pricing" className={s.link}>
+              <Link href="/user/pricing" className={s.link}>
                 Pricing
               </Link>
-              <Link href="/account" className={s.link}>
+              <Link href="/user/account" className={s.link}>
                 Account
               </Link>
             </nav>
@@ -39,13 +39,13 @@ const Navbar = () => {
                 className={s.link}
                 onClick={async () => {
                   await supabaseClient.auth.signOut();
-                  router.push('/signin');
+                  router.push('/user/signin');
                 }}
               >
                 Sign out
               </span>
             ) : (
-              <Link href="/signin" className={s.link}>
+              <Link href="/user/signin" className={s.link}>
                 Sign in
               </Link>
             )}

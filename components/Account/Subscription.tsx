@@ -46,12 +46,12 @@ const Subscription:FC<Props> = ({closeModal, userData}) => {
     
     const handleCheckout = async (price: Price) => {
         if(!user) {
-            router.replace('/signin');
+            router.replace('/user/signin');
             return;
         }
         
         if(chkProductStatus(price.product_id)) {           
-            return router.replace("/account");
+            return router.replace("/user/account");
         }
         setPriceIdLoading(price.id);
 

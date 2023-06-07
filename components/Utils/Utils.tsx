@@ -55,8 +55,7 @@ const Utils: FC<Props> = ({
                                 label={
                                     utility_item.name
                                 }
-
-                                
+                                                                
                                 onClick={() => handleSelectUtility(utility_item.key)}
                                 active={
                                     selectedUtility.key == utility_item.key 

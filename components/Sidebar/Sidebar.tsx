@@ -61,12 +61,13 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
         let updatedUtilityGroup: UtilitiesGroup[] = [];
         for(let k=0; k<selectedUtilityGroup.length;k++){
             let group_item = selectedUtilityGroup[k];
+
             const filter_utilities = group_item.utilities.filter((u_item) => {
                 const searchable = u_item.name.toLowerCase() +
                 ' '+u_item.summary.toLowerCase();
                 return searchable.includes(searchKeyword.toLowerCase())
             })
-
+            
             if(filter_utilities.length > 0) {
                 group_item = {
                     ...group_item,
@@ -107,6 +108,8 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
             role_item.utilities_group = filter_utility_group;
             return role_item;
         })
+        
+        
         openAiDispatch({
             field: 'roleGroup',
             value: updated_role_Group

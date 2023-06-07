@@ -63,8 +63,8 @@ export const AuthenticationForm:FC<Props> = ({modalType, closeModal}) => {
                 setErrorMessage(error.message);
                 return;
             }   
-            if(window.location.pathname == "/signin") {
-                router.replace("/pricing");
+            if(window.location.pathname == "/user/signin") {
+                router.replace("/user/pricing");
             } else {
                 closeModal();
             }

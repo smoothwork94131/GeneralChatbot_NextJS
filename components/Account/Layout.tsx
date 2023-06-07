@@ -27,7 +27,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
         if(user) {
             await supabase.auth.signOut();
         }   
-        router.replace('/signin');
+        router.replace('/user/signin');
     }
     return (
         <AppShell
@@ -57,7 +57,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                     cursor: 'pointer'
                                 })}
                             />
-                                <Link href='/pricing'>
+                                <Link href='/user/pricing'>
                                     <Text
                                         sx={(theme) => ({
                                             fontWeight: 600,

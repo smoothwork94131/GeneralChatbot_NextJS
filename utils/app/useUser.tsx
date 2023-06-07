@@ -139,7 +139,7 @@ export const getServerUser = async (ctx: GetServerSidePropsContext) => {
   if (!session)
     return {
       redirect: {
-        destination: '/signin',
+        destination: '/user/signin',
         permanent: false
       }
     };

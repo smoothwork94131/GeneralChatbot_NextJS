@@ -13,41 +13,40 @@ const Home = ({
   const [serverRoleData, setServerRoleData] = useState<RoleGroup[]>([]);
   const [utilityKey, setUtilityKey] = useState<string>('');
   const [roleIndex, setRoleIndex] = useState<number>(0);
+  
   useEffect(()=>{
-    const fetch = async() => {
-      const data = await getSheets();
+    async function fetchData() {
+      const sheetDataResponse = await fetch("/api/googlesheets");
+      const data = await sheetDataResponse.json();
+      console.log(data);
       setServerRoleData(data);
     }
-    fetch();
+    fetchData();
+
   }, [])
+
   useEffect(()=>{
     serverRoleData.map((role, role_index) => {
       role.utilities_group.map(group => {
-        group.utilities.map(utility => {
+        group.utilities.map((utility, utility_index) => {
           if(
-            utility.name == utilityName &&
-            role.name == roleName &&
-            group.name == groupName
+            role_index == 0 &&
+            utility_index == 0
           ) {
-            setUtilityKey(utilityKey);
+            setUtilityKey(utility.key);
             setRoleIndex(role_index);
           }
         })
       })
     })
-  }, [setServerRoleData]);
-  return (
-    <OpenAi serverRoleData = {serverRoleData} utilityKey={utilityKey}  propsRoleIndex={roleIndex}/>
-  )
-}
 
-export async function getStaticProps(context) {
-  const data = await getSheets();
-  return {
-      props: {
-        serverRoleData:data
-      }
-  };
+  }, [serverRoleData]);
+  
+  return (
+    serverRoleData.length > 0 && utilityKey != ''?
+    <OpenAi serverRoleData = {serverRoleData} utilityKey={utilityKey}  propsRoleIndex={roleIndex}/>
+    :<>Loading...</>
+  )
 }
 
 export default Home;

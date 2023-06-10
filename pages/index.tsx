@@ -44,7 +44,7 @@ const Home = ({
   
   return (
     serverRoleData.length > 0 && utilityKey != ''?
-    <OpenAi serverRoleData = {serverRoleData} utilityKey={utilityKey}  propsRoleIndex={roleIndex}/>
+    <OpenAi serverRoleData = {serverRoleData} utilityKey={utilityKey}  propsRoleIndex={roleIndex} />
     :<>Loading...</>
   )
 }

@@ -63,7 +63,7 @@ const Utils: FC<Props> = ({
                     {
                         group_item.utilities.length > 0?
                         group_item.utilities.map((utility_item, utility_index) => 
-                            <Link href={getUrls(utility_item.name, group_item.name)} key={utility_index}>
+                            // <Link href={getUrls(utility_item.name, group_item.name)} key={utility_index}>
                                 <NavLink 
                                     key={utility_index}
                                     label={
@@ -78,7 +78,7 @@ const Utils: FC<Props> = ({
                                     
                                 ></NavLink>
                         
-                            </Link>
+                            // </Link>
 
                             
                         )

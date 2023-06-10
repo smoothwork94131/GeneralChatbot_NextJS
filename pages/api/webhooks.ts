@@ -29,6 +29,7 @@ const relevantEvents = new Set([
 ]);
 
 const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log(req);
   if (req.method === 'POST') {
 
     const buf = await buffer(req);

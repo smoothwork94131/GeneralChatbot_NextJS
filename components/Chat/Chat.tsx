@@ -44,6 +44,18 @@ const Chat:FC<Props> = ({isMobile,
             value: t_utility
         });
     };
+    const handleSelectSettings = (setting_index, item_index) => {
+        const updatedUtility:Utility = JSON.parse(JSON.stringify(selectedUtility));
+        
+        if(updatedUtility.settings) {
+            updatedUtility.settings[setting_index].items.map((item) => item.active = false)
+            updatedUtility.settings[setting_index].items[item_index].active = true;
+        }
+        openaiDispatch({
+            "field": "selectedUtility",
+            value: updatedUtility
+        })
+    }
     const clearSelectedSearch = () => {
         openaiDispatch({
             "field": "selectedSearch",
@@ -131,6 +143,7 @@ const Chat:FC<Props> = ({isMobile,
                 deleteConversation={deleteConversation}
                 messageIsStreaming={messageIsStreaming}
                 setMessageIsStreaming={setMessageIsStreaming}
+                handleSelectSettings={handleSelectSettings}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

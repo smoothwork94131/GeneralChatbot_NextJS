@@ -81,7 +81,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData, changeSpotlightTy
     }
 
     return (
-        isLoading ? <div></div> :
+        // isLoading ? <div></div> :
         <Group>
             {
                 isMobile ?

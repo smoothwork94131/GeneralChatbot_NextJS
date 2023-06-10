@@ -1,19 +1,32 @@
 import { FC } from 'react';
-import { UtilitiesGroup, Utility } from '@/types/role';
+import { RoleGroup, UtilitiesGroup, Utility } from '@/types/role';
 import { NavLink,  Box } from '@mantine/core';
 import { IconMistOff } from '@tabler/icons-react';
+import Link from 'next/link';
+
 interface  Props {
     handleSelectUtility: (utility_key:string) => void;
     selectedUtilityGroup: UtilitiesGroup[]
     selectedUtility: Utility,
     collpaseUtiltyGroup: (name: string) =>void;
+    selectedRole: RoleGroup
 }
+
 const Utils: FC<Props> = ({
         handleSelectUtility, 
         selectedUtilityGroup, 
         selectedUtility, 
         collpaseUtiltyGroup,
+        selectedRole
     }) =>{
+    
+    const getUrls = (org_utility_name:string, group_name:string) => {
+        const role_name = selectedRole.name.replace(" ","-");
+        const utility_name = org_utility_name.replace(" ", "-");
+        const formatted_group_name = group_name.replace(" ", "-");
+        return `/${role_name}/${formatted_group_name}/${utility_name}`;
+    };  
+
     return(
         <Box  
             sx={(theme) =>({
@@ -50,20 +63,24 @@ const Utils: FC<Props> = ({
                     {
                         group_item.utilities.length > 0?
                         group_item.utilities.map((utility_item, utility_index) => 
-                            <NavLink 
-                                key={utility_index}
-                                label={
-                                    utility_item.name
-                                }
-                                                                
-                                onClick={() => handleSelectUtility(utility_item.key)}
-                                active={
-                                    selectedUtility.key == utility_item.key 
-                                }
-                                sx={(theme) => ({
-                                    transform: 'none'
-                                })}
-                            ></NavLink>
+                            <Link href={getUrls(utility_item.name, group_item.name)} key={utility_index}>
+                                <NavLink 
+                                    key={utility_index}
+                                    label={
+                                        utility_item.name
+                                    }
+                                    active={
+                                        selectedUtility.key == utility_item.key 
+                                    }
+                                    sx={(theme) => ({
+                                        transform: 'none'
+                                    })}
+                                    
+                                ></NavLink>
+                        
+                            </Link>
+
+                            
                         )
                         :<></>
                     }

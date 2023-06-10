@@ -135,46 +135,68 @@ export default async function handler(req, res) {
     const fingerId = userApi.fingerId;
     const userId = userApi.userId;
     const responseMessages = userApi.response_messages;
+    const settings = userApi.settings;
     const utilityInfo = await getUtilityInfo(utilityKey);
+    const buttonPrompts = userApi.buttonPrompts;
 
-
+    
     let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
+    
+    let button_system_prompt = '';
+    if(buttonPrompts && utilityInfo.buttonGroup) {
+      button_system_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].system_prompt;
+      user_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].user_prompt;
+    }
+
+    system_prompt += ` ${button_system_prompt}`;
     
     const today_datetime = new Date().toUTCString();
     let messages: Message[] = [];
     
-
     if(system_prompt){
       system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+      settings.map(setting => {
+        system_prompt += ` ${setting}`;
+      })
       messages =[{role: 'system', content: system_prompt}];
     }
-
-    responseMessages.map((message) => {
+  
+    responseMessages.map((message, message_index) => {
       if(message.role == "user") {
-          let new_user_prompt = user_prompt;
-          const content = message.content;
+          let new_user_prompt = user_prompt?.slice();
+
+          let content = message.content;
+          if(message_index == responseMessages.length -1 && buttonPrompts) {
+            if(utilityInfo.buttonGroup) {
+              content = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].name;
+            }
+          }
           const inputs = message.inputs;
           let index=0;
+
           inputs.map((input: Input) => {
-            if(input.type == "form" && new_user_prompt){
-              new_user_prompt = new_user_prompt.replaceAll(`{${index}}`, input.value?input.value:'');
+            if(input.type == "form"){
+              new_user_prompt = new_user_prompt?.replaceAll(`{${index}}`, input.value?input.value:'');
                 index++;
             }
           });
+
           if(new_user_prompt) {
             new_user_prompt = new_user_prompt.replaceAll(`{${index}}`, `${content}`);
           }
+        
           message = {
             role: 'user',
             content: new_user_prompt
           }
       }
       messages.push(message);
+    
     });
 
-    
     console.log(messages);
+
     let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
     if (!userId && userTimes <= 0) {
       throw new Error("User times have expired.");

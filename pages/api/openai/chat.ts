@@ -13,6 +13,7 @@ import { Database } from '@/types/types_db';
 import { Global } from 'global';
 import { Input, Utility, UtilityState } from '@/types/role';
 import { Message, UserMessageState } from '@/types/chat';
+import { useFetch } from '@/hooks/useFetch';
 // Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
 // as it has admin priviliges and overwrites RLS policies!
 const supabaseAdmin = createClient<Database>(
@@ -298,10 +299,19 @@ export default async function handler(req, res) {
     const fingerId = userApi.fingerId;
     const userId = userApi.userId;
     const responseMessages = userApi.response_messages;
+    const settings = userApi.settings;
     const utilityInfo = await getUtilityInfo(utilityKey);
+    const buttonPrompts = userApi.buttonPrompts;
 
+    
     let system_prompt = Object.keys(utilityInfo).includes("system_prompt")? utilityInfo.system_prompt:DEFAULT_SYSTEM_PROMPT;
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
+    
+    if(buttonPrompts && utilityInfo.buttonGroup) {
+      system_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].system_prompt;
+      user_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].user_prompt;
+    }
+
     
     const today_datetime = new Date().toUTCString();
     let messages: Message[] = [];
@@ -309,13 +319,22 @@ export default async function handler(req, res) {
 
     if(system_prompt){
       system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+      settings.map(setting => {
+        system_prompt += ` ${setting}`;
+      })
       messages =[{role: 'system', content: system_prompt}];
     }
   
-    responseMessages.map((message) => {
+    responseMessages.map((message, message_index) => {
       if(message.role == "user") {
           let new_user_prompt = user_prompt?.slice();
-          const content = message.content;
+
+          let content = message.content;
+          if(message_index == responseMessages.length -1 && buttonPrompts) {
+            if(utilityInfo.buttonGroup) {
+              content = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].name;
+            }
+          }
           const inputs = message.inputs;
           let index=0;
 
@@ -329,17 +348,17 @@ export default async function handler(req, res) {
           if(new_user_prompt) {
             new_user_prompt = new_user_prompt.replaceAll(`{${index}}`, `${content}`);
           }
+        
           message = {
             role: 'user',
             content: new_user_prompt
           }
-          
       }
       messages.push(message);
+    
     });
 
-    console.log(messages)
-
+    console.log(messages);
 
     let [userTimes, isSubscription] = await Promise.all([getUserTimes(userId, fingerId), getSubscriptions(userId)]);
     if (!userId && userTimes <= 0) {

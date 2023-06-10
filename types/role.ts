@@ -25,8 +25,31 @@ export interface Utility {
     user_prompt?: string;
     include_prompt_history: boolean;
     streaming?: boolean;
+    buttonGroup: ButtonGroup[];
+    settings: Setting[]
 }
-
+export interface Setting {
+    name: string,
+    items: SettingItem[],
+}
+export interface SettingItem {
+    name:string,
+    active:boolean
+}
+export interface Buttons {
+    name: string,
+    user_prompt: string,
+    system_prompt: string,
+}
+export interface ButtonGroup {
+    name: string,
+    buttons: Buttons[]
+}
+export interface ButtonPrompts {
+    group_index: number,
+    button_index: number;
+    
+}
 export const  UtilityState:Utility = {
     key: '',
     name: '',
@@ -34,7 +57,9 @@ export const  UtilityState:Utility = {
     active: false,
     style: '',
     summary:'',
-    include_prompt_history: true
+    include_prompt_history: true,
+    buttonGroup:[],
+    settings:[]
 }
 
 export interface Input {

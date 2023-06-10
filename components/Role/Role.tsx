@@ -31,6 +31,7 @@ import {
 
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from "lucide-react";
+import Link from 'next/link';
 
 
 interface  Props {
@@ -48,8 +49,23 @@ interface RoleOrderItem {
 const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobile}) => {
     const getStorageOrder = () => {
         const roleOrderStr = localStorage.getItem("roleOrder");
-        if(roleOrderStr && JSON.parse(roleOrderStr).length > 0) {
-            return JSON.parse(roleOrderStr);
+        
+        if(roleOrderStr && 
+            JSON.parse(roleOrderStr).length > 0
+        ) {
+            let roleOrder = JSON.parse(roleOrderStr);
+            roleGroup.map((role) => {
+                const select_ = roleOrder.filter(order => role.name == order.title);
+                if(select_.length == 0) {
+                    roleOrder.push({
+                        id: roleOrder.length.toString(),
+                        title: role.name,
+                        active:false
+                    })
+                
+                }
+            });
+            return roleOrder;   
         } else {
             let order:RoleOrderItem[] = [];
             roleGroup.map((item, index) => {
@@ -63,7 +79,6 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
                     active: active
                 });
             });
-            console.log('&&&&&&&&&&&&&', order);
             return order;
         }
     }
@@ -99,14 +114,28 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
 
         setRoleOrder(updated_roleOrder);
         localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
+
     }, [selectedRole]);
    
     const initRoleOrder = () => {
         const roleOrderStr:string|null = localStorage.getItem("roleOrder");
         if(roleOrderStr) {
             const roleOrder = JSON.parse(roleOrderStr);
-            if(roleOrder.length > 0) {            
-                setRoleOrder(roleOrder);
+            if(roleOrder.length > 0) {       
+                roleGroup.map((role) => {
+                    const select_ = roleOrder.filter(order => role.name == order.title);
+                    if(select_.length == 0) {
+                        roleOrder.push({
+                            id: roleOrder.length.toString(),
+                            title: role.name,
+                            active:false
+                        })
+                        setRoleOrder(roleOrder);
+                    }
+                });
+                
+                localStorage.setItem("roleOrder", JSON.stringify(roleOrder));
+
             } else {
                 let order:RoleOrderItem[] = [];
                 roleGroup.map((item, index) => {
@@ -142,10 +171,26 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
     const clickDestkopTab = (key: string) => {
         handleSelectRole(Number(key));
     }
-
+    
     const clickMobileTab = (key: string) => {
         handleSelectRole(Number(key));
         setShowMenu(false);
+    }
+    
+    const getUrl = (role_name) => {
+        let url = '';
+        roleGroup.map((role) => {
+            if(role.name == role_name) {
+                role.utilities_group.map(group => {
+                    group.utilities.map(utility => {
+                        if(utility.active) {
+                            url = `/${role.name}/${group.name}/${utility.name}`;
+                        }
+                    })
+                })
+            }
+        })
+        return url;
     }
     
     function handleDragMove(event) {
@@ -185,42 +230,44 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
             cursor: 'move',
         };
         
+        
         return (
-            <Flex 
-                ref={setNodeRef} style={style} {...attributes} {...listeners}
-                onClick={() => {clickDestkopTab(item.id)}}
-                
-                sx={(theme) => ({
-                    padding: theme.spacing.sm,
-                    marginLeft: theme.spacing.sm,   
-                    textAlign: 'center',
-                    width: '130px',
-                    borderBottom: `2px solid ${theme.colors.orange[selectedRole.name == item.title? 8:2]}`,
-                    "&:hover" :{
-                        borderBottom: `2px solid ${theme.colors.orange[8]}`
-                    },
-                    position: 'relative',
-                    zIndex: 100
-                })}
-                gap="xs"
-                justify="center"
-                align="center"
-            >
-                <Text 
-                    className={`bg-[#858C94] rounded-full w-[16px] h-[16px]  text-white p-[2px]`}
-                >
-                    <IconCheck size={12}/>
-                </Text>
-                <Text
-                    sx={(theme) =>({
-                    fontSize: theme.fontSizes.md,
+            <Link href={getUrl(item.title)}>
+                <Flex 
+                    ref={setNodeRef} style={style} {...attributes} {...listeners}
+                    sx={(theme) => ({
+                        padding: theme.spacing.sm,
+                        marginLeft: theme.spacing.sm,   
+                        textAlign: 'center',
+                        width: '130px',
+                        borderBottom: `2px solid ${theme.colors.orange[selectedRole.name == item.title? 8:2]}`,
+                        "&:hover" :{
+                            borderBottom: `2px solid ${theme.colors.orange[8]}`
+                        },
+                        position: 'relative',
+                        zIndex: 100
                     })}
+                    gap="xs"
+                    justify="center"
+                    align="center"
                 >
-                    {
-                        item.title
-                    }
-                </Text>
-            </Flex>
+                    <Text 
+                        className={`bg-[#858C94] rounded-full w-[16px] h-[16px]  text-white p-[2px]`}
+                    >
+                        <IconCheck size={12}/>
+                    </Text>
+                    <Text
+                        sx={(theme) =>({
+                        fontSize: theme.fontSizes.md,
+                        })}
+                    >
+                        {
+                            item.title
+                        }
+                    </Text>
+                </Flex> 
+            </Link>
+            
         );
     }
 
@@ -265,6 +312,7 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
         );
     }
 
+    console.log(roleOrder);
     return (
         isMobile?
         <Menu openDelay={100} closeDelay={400} zIndex={1000} >
@@ -302,15 +350,14 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
                         >
                         <ul>
                             {roleOrder.map((item, index) => (
-                                <Box key={item.id} onClick={() => {clickMobileTab(item.id)}}>
+                                <Link href={getUrl(item.title)} key={item.id} >
                                     <SortableMobileItem key={item.id} item={item} />
-                                </Box>  
+                                </Link>  
                             ))}
                         </ul>
                         </SortableContext>
                     </DndContext>
                 </Menu.Item>
-               
             </Menu.Dropdown>
         </Menu>
         :

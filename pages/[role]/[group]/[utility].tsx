@@ -1,18 +1,19 @@
-import { Box } from "@mantine/core";
 
+import OpenAi from '@/components/openai/openai';
 import { getSheets } from '@/utils/server/google_sheets';
-import dynamic from 'next/dynamic'
-const OpenAi = dynamic(() => import('@/components/openai/openai'), { ssr: false })
+
 
 const Home = ({
-  serverRoleData,
-  utilityKey
+    serverRoleData,
+    utilityKey,
+    roleIndex
 }) => {
     
   return (
     <OpenAi 
-        serverRoleData = {serverRoleData}
+        serverRoleData={serverRoleData}
         utilityKey={utilityKey}
+        propsRoleIndex={roleIndex}
     />
   )
 }
@@ -27,7 +28,7 @@ export const getStaticPaths = async () => {
     let paths: {
         params: Pathpros
     }[] = [];
-
+    
     const sheetData = await getSheets();
     sheetData.map((role_item) => {
         role_item.utilities_group.map(group => {
@@ -53,8 +54,8 @@ export const getStaticPaths = async () => {
 
 export const getStaticProps = async ({ params }) => {
     const serverRoleData = await getSheets();
-    let utilityKey='';
-    serverRoleData.map((role) => {
+    let utilityKey=''; let roleIndex = 0;
+    serverRoleData.map((role, role_index) => {
         role.utilities_group.map(group => {
             group.utilities.map(utility => {
                 if(
@@ -63,6 +64,7 @@ export const getStaticProps = async ({ params }) => {
                     utility.name == params.utility.replaceAll("-", " ")
                 ) {
                     utilityKey = utility.key
+                    roleIndex=role_index;
                 }
             })
         })
@@ -72,6 +74,7 @@ export const getStaticProps = async ({ params }) => {
       props: {
         serverRoleData: serverRoleData,
         utilityKey: utilityKey,
+        roleIndex:roleIndex
       },
     };
 };

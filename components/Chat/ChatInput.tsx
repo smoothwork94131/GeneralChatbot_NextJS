@@ -17,8 +17,9 @@ interface Props {
     inputContent:string;    
     setInputContent: (content: string)=>void;
     selectedConversation: Conversation;
+    disabled: boolean
 }
-const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent, selectedConversation}) => {
+const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent, selectedConversation, disabled}) => {
     const [textError, setTextError] = useState<string>();
     
     useEffect(() => {
@@ -58,7 +59,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
             gap="xs"
             align='center'
         >  
-            <Image maw={30} radius="sd" src="icons/avatar_user.png" alt="chatgpt avatar" />
+            <Image maw={30} radius="sd" src="/icons/avatar_user.png" alt="chatgpt avatar" />
             <Textarea
                 className='w-full'
                 onChange={handleChange}
@@ -66,6 +67,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                 autosize
                 minRows={2}
                 maxRows={4}
+                
                 rightSection={
                     <Box
                         pr={20}
@@ -77,6 +79,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                         }
                     </Box>
                 }
+                disabled={disabled}
                 value={inputContent}
                 ref={textareaRef}
                 error={textError}

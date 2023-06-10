@@ -8,21 +8,24 @@ import {
     Text,
     Box,
     Group,
-    Button
+    Button,
+    SimpleGrid,
+    Modal,
+    Radio
 } from '@mantine/core';
 import ChatInput from './ChatInput';
-import { Input, SelectedSearch, Utility } from '@/types/role';
+import { ButtonPrompts, Input, SelectedSearch, Setting, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
 import { AssistantMessageState, Conversation, Message,  UserMessageState } from '@/types/chat';
 import { useEffect } from 'react';
 import { getUserTimes } from '@/utils/app/supabase-client';
-import { useRouter } from 'next/router';
 import { useUser } from '@supabase/auth-helpers-react';
 import { AuthenticationForm } from '@/components/Account/AuthenticationForm';
 import Subscription from '@/components/Account/Subscription';
 import MyModal from '@/components/Account/Modal';
 import { getFingerId } from '@/utils/app/FingerPrint';
 import { OPENAI_MODELID } from '@/utils/app/const';
+import { IconMistOff } from '@tabler/icons-react';
 
 interface Props {
     selectedUtility: Utility;
@@ -36,6 +39,8 @@ interface Props {
     deleteConversation: (index: number)=>void;
     messageIsStreaming: boolean;
     setMessageIsStreaming: (type: boolean)=>void;
+    handleSelectSettings: (setting_index: number, item_index: number)=>void;
+    
 } 
 
 const ChatContent: FC<Props> = ({
@@ -49,7 +54,8 @@ const ChatContent: FC<Props> = ({
         clearSelectedSearch,
         deleteConversation,
         messageIsStreaming,
-        setMessageIsStreaming
+        setMessageIsStreaming,
+        handleSelectSettings
     }) =>{
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -57,11 +63,14 @@ const ChatContent: FC<Props> = ({
     const [historyConversation, setHistoryConversation] = useState<Conversation>();
     const [isModal, setIsModal] = useState<boolean>(false);
     const [isLimitModal, setIsLimitModal] = useState<boolean>(false);
-
+    const [settingModal, setSettingModal] = useState(false);
     const [modalType, setModalType] = useState<string>('signin');
     const [isSubscription , setSubscription ] = useState<boolean>(false);
-    
+    const [settingTitle, setSettingTitle] = useState<string>('');
+    const [settingName, setSettingName] = useState<string>('');
+    const [buttonPromts, setButtonPrompts] = useState<ButtonPrompts>()
     const user = useUser();
+    
     
     useEffect(() => {
         const fetchData = async() => {
@@ -78,7 +87,8 @@ const ChatContent: FC<Props> = ({
     useEffect(() => {
         setInputContent("");
     }, [selectedConversation])
-
+    
+    
     useEffect(() => {
         const history = localStorage.getItem("selectedConversation");
         if(history) {
@@ -86,12 +96,22 @@ const ChatContent: FC<Props> = ({
         }
     }, [selectedConversation, selectedUtility, conversationHistory]);
     
+    
     useEffect(() => {    
         if(messageIsStreaming) {
             setMessageIsStreaming(false);
         }
     }, [selectedUtility])
 
+    useEffect(() => {
+        if(selectedUtility.buttonGroup && buttonPromts) {
+            handleSend(
+                selectedUtility.buttonGroup[buttonPromts.group_index].buttons[buttonPromts.button_index].name
+            );
+        }
+        
+    }, [buttonPromts])
+    
     const handleSend = async(message: string) => {
         
         const fingerId = await getFingerId();
@@ -109,7 +129,14 @@ const ChatContent: FC<Props> = ({
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
             
-       
+            let settings:string[] = [];
+            selectedUtility.settings?.map((setting) => {
+                const activeSetting = setting.items.map(item => {
+                    if(item.active) {
+                        settings.push(item.name);
+                    }
+                })
+            })
             let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = 
             [...selectedMessagesHistory, 
             ...updatedConversation.messages];
@@ -122,9 +149,8 @@ const ChatContent: FC<Props> = ({
                 });    
             }
             
-        
             setMessageIsStreaming(true);
-            
+
             const response_messages: Message[] = [];
             
             messages.map((item) => {
@@ -145,7 +171,9 @@ const ChatContent: FC<Props> = ({
                 response_messages: Message[],
                 utilityKey: string,
                 fingerId: string,
-                userId: string|null
+                settings: string[]
+                userId: string|null,
+                buttonPrompts: ButtonPrompts|null|undefined
             } = { 
                 response_messages: response_messages.map((item, index) => {
                     if(item.datetime) delete item?.datetime;
@@ -153,7 +181,9 @@ const ChatContent: FC<Props> = ({
                 }),
                 utilityKey: selectedUtility.key,
                 fingerId: fingerId,
-                userId: user?user.id:null
+                userId: user?user.id:null,
+                settings:settings,
+                buttonPrompts: buttonPromts
             };
 
             const user_message: Message = {    
@@ -281,6 +311,7 @@ const ChatContent: FC<Props> = ({
             }
             setMessageIsStreaming(false);
         }
+        
     }
     
     const componentUtilityInputs = () => {
@@ -326,6 +357,17 @@ const ChatContent: FC<Props> = ({
     const closelimitModal = () => {
         setIsLimitModal(false);
     }
+    const showSettingModal = (modal_title) => {
+        setSettingTitle(modal_title);
+        setSettingModal(true);
+    }
+
+    const handleSelectCustomButtons = (group_index, button_index) => {
+        setButtonPrompts({
+            group_index: group_index,
+            button_index: button_index
+        })
+    }
     return (
         <Box
             sx={(theme) => ({
@@ -367,6 +409,65 @@ const ChatContent: FC<Props> = ({
                     </Flex>
                     :<></>
                 }
+                {
+                    selectedUtility.buttonGroup?.length?
+                    selectedUtility.buttonGroup?.length > 0?
+                    <SimpleGrid cols={isMobile?1:3} verticalSpacing="xl">
+                        {
+                             selectedUtility.buttonGroup?.map((group, group_index) =>
+                             <Box key={group_index}>
+                                <Box
+                                    sx={(theme) =>({
+                                        textAlign: 'center'
+                                    })}
+                                >
+                                    <Button variant="outline"  radius="md" size="md" color='gray'
+                                        sx={(theme) =>({
+                                            position: 'relative',
+                                            top: '20px',
+                                            background: `${theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.colors.gray[1]} !important`,
+                                            color: `${theme.colorScheme == 'dark' ? 'white':'black'}`
+                                        })}
+                                        onClick={() => {showSettingModal(group.name)}}
+                                    >
+                                        {group.name}
+                                    </Button>    
+                                </Box>
+                                <SimpleGrid 
+                                    cols={
+                                        selectedUtility.buttonGroup?
+                                            selectedUtility.buttonGroup[group_index]?.buttons?.length < 3 ? selectedUtility.buttonGroup[group_index]?.buttons?.length:3
+                                        :3
+                                    }
+                                    sx={(theme)=>({
+                                        padding: theme.spacing.md,
+                                        border: `1px solid gray`,
+                                        borderRadius: theme.spacing.lg,
+                                        paddingTop: '40px',
+                                       
+                                    })}
+                                >
+                                {
+                                    selectedUtility.buttonGroup?
+                                    selectedUtility.buttonGroup[group_index]?.buttons.map((button, button_index) => 
+                                        <Button fullWidth variant="outline" key={button_index} color='gray' 
+                                            sx={(theme) =>({
+                                                color: `${theme.colorScheme == 'dark' ? theme.colors.gray[1]: theme.colors.gray[7]}`
+                                            })}
+                                            onClick={() => {handleSelectCustomButtons(group_index, button_index)}}
+                                        >
+                                            {button.name}
+                                        </Button>
+                                    ):<></>
+                                }
+                                </SimpleGrid>
+                             </Box>
+                             
+                            )
+                        }
+                        
+                    </SimpleGrid>:<></>:<></>
+                }     
                 <Space h="md"/>
                 <ChatInput
                     onSend={(message) => handleSend(message)}
@@ -375,6 +476,7 @@ const ChatContent: FC<Props> = ({
                     inputContent={inputContent}
                     setInputContent={(content)=> {setInputContent(content)}}
                     selectedConversation = {selectedConversation}
+                    disabled = { selectedUtility.buttonGroup?.length > 0?true:false}
                 />
                 <Space h="md"/>
                 <ChatMessage 
@@ -400,6 +502,59 @@ const ChatContent: FC<Props> = ({
                 withCloseButton={false}
             />
             
+            <Modal opened={settingModal} onClose={() =>{setSettingModal(false)}} title={<h2>{settingTitle}</h2>}>
+                {
+                    selectedUtility.settings.length > 0 ?
+                    <Box>
+                        <IconMistOff size={30} className="mx-auto mb-3"/>
+                        <text>
+                            No data.
+                        </text>
+                    </Box>
+                    :
+                    selectedUtility.settings?.map((setting, setting_index) => 
+                        <Flex key={setting_index} 
+                            direction="column"
+                            p={15}
+                        >
+                            <Flex
+                                align='center'
+                                sx={(theme) =>({
+                                    border: `1px solid gray`,
+                                    borderRadius: theme.spacing.md,
+                                    padding: theme.spacing.md
+                                })}
+                                
+                            >
+                                <Box
+                                    sx={(theme) =>({
+                                        width: '30%',
+                                        fontSize: '30px',
+                                        textAlign: 'center'
+                                    })}
+                                >
+                                    {setting.name}
+                                </Box>
+                                <Box
+                                    sx={(theme) =>({
+                                        width: '70%'
+                                    })}
+                                >
+                                   
+                                    {
+                                        setting.items.map((item, item_index) => 
+                                        
+                                            <Radio value={item.name} checked={item.active}  key ={item_index} label={item.name} onClick={() => {handleSelectSettings(setting_index, item_index)}} pt="md"/>
+                                        )
+                                    }
+
+                                </Box>
+                            </Flex>
+                        </Flex>
+                    )
+                }
+               
+            </Modal>
             <MyModal
                 size='sm'
                 isModal={isLimitModal}

@@ -13,10 +13,14 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import HomeContext from '@/state/index.context';
 import '@/styles/globals.css';
 import Layout from '@/components/Account/Layout';
+import OpenAi from '@/components/openai/openai';
+import Home from '@/pages/index';
 
 const inter = Inter({ subsets: ['latin'] });
 function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
 
+  console.log("router_query", appProps.router.query);
+  
   const [supabaseClient] = useState(() =>
     createBrowserSupabaseClient<Database>()
   );
@@ -35,7 +39,18 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
       chatInputPadding: '40px'
     }
   };
- 
+  if(Object.entries(appProps.router.query).length != 0) {
+    pageProps = {
+      ...pageProps,
+      query: {
+          roleName: appProps.router.query.role,
+          utilityName: appProps.router.query.utility,
+          groupName: appProps.router.query.group,
+      }
+    };
+  } 
+  
+  
   return (
     <div className={inter.className}>
       <SessionContextProvider supabaseClient={supabaseClient}>
@@ -50,13 +65,18 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
             <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={() => { }}>
               <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
                 {
-                  [`/user`].includes(appProps.router.pathname)?
-                  <Layout childrenSize={[`/signin`].includes(appProps.router.pathname)?'400px':'700px'}>
+                  [`/user/`].includes(appProps.router.pathname)?
+                  <Layout childrenSize={[`/signin`] .includes(appProps.router.pathname)?'400px':'700px'}>
                     <Component {...pageProps} />
                   </Layout>:
                   <Component {...pageProps} />
+                  // <Home 
+                  //   roleName={appProps.router.query.role}
+                  //   utilityName={appProps.router.query.utility}
+                  //   groupName={appProps.router.query.group}
+                  // />
+
                 }
-                {/* <Component {...pageProps} /> */}
               </MantineProvider>
             </ColorSchemeProvider>
           </HomeContext.Provider>
@@ -65,5 +85,7 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
     </div>
   );
 }
+
+
 
 export default appWithTranslation(App);

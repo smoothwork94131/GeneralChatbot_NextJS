@@ -45,7 +45,7 @@ const useStyles = createStyles<string, { collapsed?: boolean }>(
 
 const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServerRoleData, changeSpotlightType}) =>{
     const {
-        state: { selectedUtilityGroup, selectedUtility, roleGroup },
+        state: { selectedUtilityGroup, selectedUtility, roleGroup, selectedRole },
         handleSelectUtility,
         dispatch: openAiDispatch
     } = useContext(OpenaiContext);
@@ -153,6 +153,7 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
                 handleSelectUtility = {handleSelectUtility}
                 selectedUtility = {selectedUtility}
                 collpaseUtiltyGroup = {collpaseUtiltyGroup}
+                selectedRole={selectedRole}
             />
             {
                 !isMobile?
@@ -160,7 +161,6 @@ const Sidebar: FC<Props> = ({isMobile, className, handleShowSidebar, updateServe
                     isMobile={isMobile}
                     updateServerRoleData={updateServerRoleData}
                     changeSpotlightType={changeSpotlightType}
-
                 />:<></>
             }
         </Navbar>

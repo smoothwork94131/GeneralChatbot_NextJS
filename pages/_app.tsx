@@ -17,10 +17,7 @@ import OpenAi from '@/components/openai/openai';
 import Home from '@/pages/index';
 
 const inter = Inter({ subsets: ['latin'] });
-function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
-
-  console.log("router_query", appProps.router.query);
-  
+function App({ Component, pageProps, ...appProps }: AppProps<{}>) {  
   const [supabaseClient] = useState(() =>
     createBrowserSupabaseClient<Database>()
   );

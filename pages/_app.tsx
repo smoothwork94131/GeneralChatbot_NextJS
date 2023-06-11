@@ -13,8 +13,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import HomeContext from '@/state/index.context';
 import '@/styles/globals.css';
 import Layout from '@/components/Account/Layout';
-import OpenAi from '@/components/openai/openai';
-import Home from '@/pages/index';
+import Home from '.';
 
 const inter = Inter({ subsets: ['latin'] });
 function App({ Component, pageProps, ...appProps }: AppProps<{}>) {  
@@ -45,9 +44,8 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
           groupName: appProps.router.query.group,
       }
     };
-  } 
-  
-  
+  }
+  console.log("rerender");
   return (
     <div className={inter.className}>
       <SessionContextProvider supabaseClient={supabaseClient}>
@@ -66,13 +64,11 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
                   <Layout childrenSize={[`/signin`] .includes(appProps.router.pathname)?'400px':'700px'}>
                     <Component {...pageProps} />
                   </Layout>:
-                  <Component {...pageProps} />
-                  // <Home 
-                  //   roleName={appProps.router.query.role}
-                  //   utilityName={appProps.router.query.utility}
-                  //   groupName={appProps.router.query.group}
-                  // />
-
+                  <Home
+                    roleName={appProps.router.query.role}
+                    utilityName={appProps.router.query.utility}
+                    groupName={appProps.router.query.group}
+                  />
                 }
               </MantineProvider>
             </ColorSchemeProvider>

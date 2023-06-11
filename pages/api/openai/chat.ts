@@ -366,8 +366,6 @@ export default async function handler(req, res) {
     } else if (userTimes <= 0 && !isSubscription) {
       throw new Error("User subscription required.");
     }
-
-
     
     const { api, ...rest } = extractOpenaiChatInputs({messages: messages, model: OPENAI_MODELID});
     const payLoad = chatCompletionPayload(rest, false);

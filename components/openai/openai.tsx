@@ -20,6 +20,7 @@ import {
     Badge,
     Flex,
     Highlight
+    
 } from '@mantine/core';
 import { 
     useEffect, 
@@ -144,15 +145,16 @@ const OpenAi = ({
             dispatchServerRoleData(serverRoleData);
         }
     },[serverRoleData, utilityKey, propsRoleIndex]);
-    useEffect(() => {
-        handleSelectUtility(utilityKey);
-    }, [utilityKey]);
+  
     
     useEffect(() => {
         handleSelectRole(propsRoleIndex);
     }, [propsRoleIndex]);
     
-        
+    useEffect(() => {
+        handleSelectUtility(utilityKey);
+    }, [serverRoleData, utilityKey])
+
     useEffect(()=>{
         spotlight.open();
     },[spotlightType]);
@@ -203,7 +205,7 @@ const OpenAi = ({
     }
     
     const dispatchServerRoleData = async(_rolData: RoleGroup[]) => {
-        
+
         if(_rolData) {
             let selectedRoleIndex = 0;
             let selectedGroupIndex = 0;
@@ -215,7 +217,7 @@ const OpenAi = ({
                 }
                 role_item.utilities_group.map((group_item, group_index) => {
                     group_item.utilities.map((utility, utility_index) => {
-                        if(utility.name == selectedUtility.name) {
+                        if(utility.key == utilityKey) {
                             utilityIndex = utility_index;
                             selectedGroupIndex = group_index;
                         }
@@ -385,6 +387,10 @@ const OpenAi = ({
                             } else{
                                 roleGroup_[r_index].utilities_group[g_index].utilities[u_index].active = false;
                             }
+                        }
+                        const active_filter = roleGroup_[r_index].utilities_group[g_index].utilities.filter(utility => utility.active == true);
+                        if(active_filter.length > 0) {
+                            roleGroup_[r_index].utilities_group[g_index].active = true;
                         }
                         updatedUtilitiesGroup=roleGroup_[r_index].utilities_group;
                     }

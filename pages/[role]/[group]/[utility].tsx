@@ -10,11 +10,12 @@ const Home = ({
 }) => {
     
   return (
-    <OpenAi 
-        serverRoleData={serverRoleData}
-        utilityKey={utilityKey}
-        propsRoleIndex={roleIndex}
-    />
+    // <OpenAi 
+    //     serverRoleData={serverRoleData}
+    //     utilityKey={utilityKey}
+    //     propsRoleIndex={roleIndex}
+    // />
+    <></>
   )
 }
 
@@ -73,6 +74,7 @@ export const getStaticProps = async ({ params }) => {
     if(utilityKey == '') {
         utilityKey = `${serverRoleData[0].name}_${serverRoleData[0].utilities_group[0].name}_${serverRoleData[0].utilities_group[0].utilities[0].name}`;
     }
+    
     console.log("utilityKey", utilityKey);
     return {
       props: {

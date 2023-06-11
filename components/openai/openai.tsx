@@ -148,7 +148,7 @@ const OpenAi = ({
   
     
     useEffect(() => {
-        handleSelectRole(propsRoleIndex);
+        // handleSelectRole(propsRoleIndex);
     }, [propsRoleIndex]);
     
     useEffect(() => {
@@ -211,50 +211,95 @@ const OpenAi = ({
             let selectedGroupIndex = 0;
             let utilityIndex = 0;
 
-            _rolData.map((role_item, role_index) => {
-                if(role_item.name == selectedRole.name) {
-                    selectedRoleIndex = role_index;
-                }
-                role_item.utilities_group.map((group_item, group_index) => {
-                    group_item.utilities.map((utility, utility_index) => {
+            const utility_active_str = localStorage.getItem("utility_active");
+            let utility_active = {};
+            if(utility_active_str) {
+                utility_active = JSON.parse(utility_active_str);
+            }
+
+            const group_active_str = localStorage.getItem("group_active");
+            let group_active = {};
+            if(group_active_str) {
+                group_active = JSON.parse(group_active_str);
+            }
+
+            const updated_roleData = _rolData.map((role_item, role_index) => {
+                const utilities_group = role_item.utilities_group.map((group_item, group_index) => {
+
+                    const utilities = group_item.utilities.map((utility, utility_index) => {
                         if(utility.key == utilityKey) {
                             utilityIndex = utility_index;
                             selectedGroupIndex = group_index;
+                            selectedRoleIndex = role_index;
                         }
+                        if(Object.keys(utility_active).includes(role_item.name)) {
+                            const utilty_name = utility_active[`${role_item.name}`];
+                            if(utilty_name == utility.name) {
+                                utility.active = true;
+                            } else {
+                                utility.active = false;
+                            }
+                        } 
+
+                        return utility;
                     })
+
+                    group_item.utilities = utilities;
+
+                    if(Object.keys(group_active).includes(role_item.name)) {
+                        const active_array =  group_active[`${role_item.name}`];
+                        if(active_array.filter(item => item == group_item.name).length > 0) {
+                            group_item.active = true;
+                        } else {
+                            group_item.active = false;
+                        }
+                    } 
+
+                    return group_item;
                 })
+
+                role_item['utilities_group'] = utilities_group;
+                return role_item;
             })
-         
+
             const roleOrderStr = localStorage.getItem("roleOrder");
+
             if(roleOrderStr) {
                 const role_order = JSON.parse(roleOrderStr);
                 const activeRoleItem = role_order.filter(item => item.active == true);
-                
+
                 if(activeRoleItem.length > 0) {
                     const activeRoleName = activeRoleItem[0]["title"];
                     _rolData.map((item, index) => {
+                    updated_roleData.map((item, index) => {
                         if(item.name == activeRoleName) {
-                            selectedRoleIndex = index;
-                        }
-                    })    
+                                selectedRoleIndex = index;
+                            }
+                        })    
+                    }) 
                 }
+                
             }
+            
+            
+
+            
             dispatch({
                 "field": "roleGroup",
-                "value": _rolData
+                "value": updated_roleData
             });
             
             dispatch({
                 "field": "selectedRole",
-                "value": _rolData[selectedRoleIndex]
+                "value": updated_roleData[selectedRoleIndex]
             })
             dispatch({
                 "field": "selectedUtility",
-                "value": _rolData[selectedRoleIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
+                "value": updated_roleData[selectedRoleIndex].utilities_group[selectedGroupIndex].utilities[utilityIndex]
             })
             dispatch({
                 "field": "selectedUtilityGroup",
-                "value": _rolData[selectedRoleIndex].utilities_group
+                "value": updated_roleData[selectedRoleIndex].utilities_group
             })
         }
     }
@@ -326,34 +371,55 @@ const OpenAi = ({
         );
         
         setSelectedRoleIndex(index);
+        
+        const group_active_str = localStorage.getItem("group_active");
+        let group_active = {};
 
+        if(group_active_str) {
+            group_active = JSON.parse(group_active_str);
+        }
+        
         if(updatedRole.length > 0) {
             let utility;
+            let role_name ='', utilty_name='', group_name='';
             for(let g_index = 0; g_index < roleGroup[index].utilities_group.length; g_index++){
                 for(let u_index = 0; u_index < roleGroup[index].utilities_group[g_index].utilities.length; u_index++) {
                     if(roleGroup[index].utilities_group[g_index].utilities[u_index].active){
                         utility = roleGroup[index].utilities_group[g_index].utilities[u_index];
+                        role_name = roleGroup[index].name.replaceAll(" ", "-");
+                        group_name = roleGroup[index].utilities_group[g_index].name.replaceAll(" ", "-");
+                        utilty_name = roleGroup[index].utilities_group[g_index].utilities[u_index].name.replaceAll(" ", "-");
                     }
+
                 }
             }
-            
-            
-            dispatch({
-                field: "selectedRole",
-                value: updatedRole[updatedRole.length - 1]
-            });
-            dispatch({
-                field: 'selectedUtilityGroup',
-                value: updatedRole[updatedRole.length - 1].utilities_group
-            });
-            dispatch({
-                field: 'selectedUtility',
-                value: utility
-            });
-            dispatch({
-                field: 'selectedSearch',
-                value: SelectedSearchState
-            });
+            roleGroup.map(role => {
+                let active_arr:string[] = [];
+                role.utilities_group.map(group => {
+                    if(group.active) {
+                        active_arr.push(group.name);
+                    } 
+                })
+                group_active[`${role.name}`] = active_arr;
+            })
+    
+            localStorage.setItem("group_active",JSON.stringify(group_active));
+    
+            const roleOrderStr = localStorage.getItem("roleOrder");
+    
+            if(roleOrderStr) {
+                let updated_roleOrder = JSON.parse(roleOrderStr);
+                updated_roleOrder = updated_roleOrder.map((item) => {
+                    if(updated_roleOrder.name == updatedRole[0].name) {
+                        item.active = true;
+                    } else {
+                        item.active = false;
+                    }
+                    return item;
+                })
+                localStorage.setItem("roleOrder", JSON.stringify(updated_roleOrder));
+            }
+            router.push(`/${role_name}/${group_name}/${utilty_name}`);
         }
     };
 

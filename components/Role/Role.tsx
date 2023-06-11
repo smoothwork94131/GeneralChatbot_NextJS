@@ -222,7 +222,7 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
           } = useSortable({
             id: item.id,
             resizeObserverConfig: {}
-          });
+        });
         
         const style = {
             transform: CSS.Transform.toString(transform),
@@ -230,11 +230,8 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
             cursor: 'move',
         };
         
-        
         return (
-            <Link href={getUrl(item.title)}>
-                <Flex 
-                    ref={setNodeRef} style={style} {...attributes} {...listeners}
+                <Flex  ref={setNodeRef} style={style} {...attributes} {...listeners}
                     sx={(theme) => ({
                         padding: theme.spacing.sm,
                         marginLeft: theme.spacing.sm,   
@@ -266,8 +263,6 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
                         }
                     </Text>
                 </Flex> 
-            </Link>
-            
         );
     }
 
@@ -348,13 +343,12 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
                             items={roleOrder}
                             strategy={verticalListSortingStrategy}
                         >
-                        <ul>
-                            {roleOrder.map((item, index) => (
-                                <Link href={getUrl(item.title)} key={item.id} >
+                            <ul>
+                                {roleOrder.map((item, index) => (
                                     <SortableMobileItem key={item.id} item={item} />
-                                </Link>  
-                            ))}
-                        </ul>
+                                ))}
+                            </ul>
+                            
                         </SortableContext>
                     </DndContext>
                 </Menu.Item>
@@ -373,8 +367,7 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
             >
                 <Flex>
                     {roleOrder.map((item, index) => (
-                        <Box key={item.id} 
-                        >
+                        <Box key={item.id}>
                             <SortableDesktopItem key={item.id} item={item} />
                         </Box>  
                     ))}

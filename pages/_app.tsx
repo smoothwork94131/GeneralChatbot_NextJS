@@ -45,7 +45,7 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
       }
     };
   }
-  console.log("rerender");
+  
   return (
     <div className={inter.className}>
       <SessionContextProvider supabaseClient={supabaseClient}>

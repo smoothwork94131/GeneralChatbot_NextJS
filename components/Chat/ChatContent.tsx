@@ -505,10 +505,10 @@ const ChatContent: FC<Props> = ({
             <Modal opened={settingModal} onClose={() =>{setSettingModal(false)}} title={<h2>{settingTitle}</h2>}>
                 {
                     selectedUtility.settings.length > 0 ?
-                    <Box>
+                    <Box sx={(theme) =>({textAlign: 'center'})}>
                         <IconMistOff size={30} className="mx-auto mb-3"/>
                         <text>
-                            No data.
+                            No Settings.
                         </text>
                     </Box>
                     :

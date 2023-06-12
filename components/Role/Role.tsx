@@ -307,7 +307,6 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
         );
     }
 
-    console.log(roleOrder);
     return (
         isMobile?
         <Menu openDelay={100} closeDelay={400} zIndex={1000} >
@@ -345,7 +344,7 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
                         >
                             <ul>
                                 {roleOrder.map((item, index) => (
-                                    <SortableMobileItem key={item.id} item={item} />
+                                    <Box key={item.id} onClick={()=>{handleSelectRole(Number(item.id))}}><SortableMobileItem item={item} /></Box>
                                 ))}
                             </ul>
                             

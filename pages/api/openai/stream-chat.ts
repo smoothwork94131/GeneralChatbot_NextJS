@@ -167,11 +167,7 @@ export default async function handler(req, res) {
           let new_user_prompt = user_prompt?.slice();
 
           let content = message.content;
-          if(message_index == responseMessages.length -1 && buttonPrompts) {
-            if(utilityInfo.buttonGroup) {
-              content = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].name;
-            }
-          }
+          
           const inputs = message.inputs;
           let index=0;
 

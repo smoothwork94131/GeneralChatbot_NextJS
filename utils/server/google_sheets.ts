@@ -188,22 +188,25 @@ function getSettings(row, headers) {
       const part = getFieldValue(row, headers, setting);
       const arr_group =  part.replaceAll(" ","").split(";");
       let items:SettingItem[] = [];
-      arr_group.map((group, index) => {
+      let group_index = 0;
+      arr_group.map((group) => {
         const parse_group = group.replaceAll(" ", "_");
         // item.push(getFieldValue(row, headers, `${setting}_${group.}`));
         const field_name = `${setting}_${parse_group}`;
         const item = getFieldValue(row, headers, field_name);
-        let active = false;
+        
+        
         if(item) {
-          if(index == 0) {
-            active = true;
+          let item_active = false;
+          if(group_index == 0) {
+            item_active = true;
           }
-          
+
           items.push({
             name: item,
-            active: active
+            active: item_active
           });
-          
+          group_index++;
         }
       })
       setting_item.items = items;

@@ -11,17 +11,22 @@ import { Textarea } from '@mantine/core';
 import { LoaderIcon } from 'react-hot-toast';
 import { Conversation } from '@/types/chat';
 interface Props {
-    onSend: (message: string) =>void;
+    onSend: () =>void;
     textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
     messageIsStreaming: boolean;
     inputContent:string;    
     setInputContent: (content: string)=>void;
     selectedConversation: Conversation;
-    disabled: boolean
+    disabledEnter: boolean,
+    inputError: string,
 }
-const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent, selectedConversation, disabled}) => {
+const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent, selectedConversation, disabledEnter, inputError}) => {
     const [textError, setTextError] = useState<string>();
-    
+
+    useEffect(() => {
+        setTextError(inputError);
+    }, [inputError]);
+
     useEffect(() => {
         if (textareaRef && textareaRef.current) {
             textareaRef.current.style.height = 'inherit';
@@ -38,7 +43,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
     };
     const handleKeyDown = (e: any) => {
         
-        if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming) {
+        if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming && disabledEnter) {
             e.preventDefault();
             handleSend();
             setInputContent("")
@@ -50,7 +55,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
             return;
         }
         setTextError("");
-        onSend(inputContent);
+        onSend();
     };
     
     return (
@@ -79,7 +84,6 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                         }
                     </Box>
                 }
-                disabled={disabled}
                 value={inputContent}
                 ref={textareaRef}
                 error={textError}

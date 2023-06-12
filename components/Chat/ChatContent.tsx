@@ -68,7 +68,9 @@ const ChatContent: FC<Props> = ({
     const [isSubscription , setSubscription ] = useState<boolean>(false);
     const [settingTitle, setSettingTitle] = useState<string>('');
     const [settingName, setSettingName] = useState<string>('');
-    const [buttonPromts, setButtonPrompts] = useState<ButtonPrompts>()
+    const [buttonPromts, setButtonPrompts] = useState<ButtonPrompts>();
+    const [inputError, setInputError] = useState<string>('');
+
     const user = useUser();
     
     
@@ -103,27 +105,27 @@ const ChatContent: FC<Props> = ({
         }
     }, [selectedUtility])
 
-    useEffect(() => {
-        if(selectedUtility.buttonGroup && buttonPromts) {
-            handleSend(
-                selectedUtility.buttonGroup[buttonPromts.group_index].buttons[buttonPromts.button_index].name
-            );
-        }
-        
-    }, [buttonPromts])
     
-    const handleSend = async(message: string) => {
+    const handleSend = async () => {
         
-        const fingerId = await getFingerId();
+        if(inputContent == "") {
+            setInputError("Please enter a message.");
+            return;
+        }
+        setInputError("");
 
+        const message = inputContent;
+        const fingerId = await getFingerId();
         const userTimes = await getUserTimes(user);
+        
 
         if(userTimes <= 0 ) {
             setIsLimitModal(true);
             return;
         }
-        
+
         if(selectedConversation) {
+
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
             const today_datetime = new Date().toUTCString();
@@ -368,6 +370,11 @@ const ChatContent: FC<Props> = ({
             button_index: button_index
         })
     }
+
+    useEffect(() => {
+        handleSend();
+    }, [buttonPromts])
+
     return (
         <Box
             sx={(theme) => ({
@@ -393,15 +400,6 @@ const ChatContent: FC<Props> = ({
                     {selectedUtility.summary}
                 </Text>
                 <Space h="md"/>
-                <ChatInput
-                    onSend={(message) => handleSend(message)}
-                    textareaRef={textareaRef}
-                    messageIsStreaming={messageIsStreaming}
-                    inputContent={inputContent}
-                    setInputContent={(content)=> {setInputContent(content)}}
-                    selectedConversation = {selectedConversation}
-                    disabled = { selectedUtility.buttonGroup?.length > 0?true:false}
-                />
                 {
                     selectedUtility.inputs.length > 0?
                     <Flex
@@ -418,6 +416,17 @@ const ChatContent: FC<Props> = ({
                     </Flex>
                     :<></>
                 }
+                <Space h="md"/>
+                <ChatInput
+                    onSend={() => {handleSend}}
+                    textareaRef={textareaRef}
+                    messageIsStreaming={messageIsStreaming}
+                    inputContent={inputContent}
+                    setInputContent={(content)=> {setInputContent(content)}}
+                    selectedConversation = {selectedConversation}
+                    disabledEnter = { selectedUtility.buttonGroup.length > 0? false:true }
+                    inputError={inputError}
+                />
                 {
                     selectedUtility.buttonGroup?.length?
                     selectedUtility.buttonGroup?.length > 0?
@@ -492,7 +501,6 @@ const ChatContent: FC<Props> = ({
                     deleteConversation={deleteConversation}
                 />
             </Box>
-            
             <MyModal
                 size={modalType == 'signin' || modalType == 'signup'?'  sm':'sm'}
                 isModal={isModal}
@@ -539,8 +547,7 @@ const ChatContent: FC<Props> = ({
                                     sx={(theme) =>({
                                         width: '70%'
                                     })}
-                                >
-                                   
+                                >  
                                     {
                                         setting.items.map((item, item_index) => 
                                         

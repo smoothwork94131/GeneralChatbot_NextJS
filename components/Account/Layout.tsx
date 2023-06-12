@@ -70,7 +70,7 @@ const Layout: FC<Props> = ({ children, childrenSize }) => {
                                 </Link>
                                 {
                                     user?
-                                    <Link href='/account'>
+                                    <Link href='/user/account'>
                                         <Text
                                             sx={(theme) => ({
                                                 fontWeight: 600,

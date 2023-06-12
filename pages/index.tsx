@@ -1,5 +1,4 @@
 
-import { RoleGroup } from '@/types/role';
 import { getSheets } from '@/utils/server/google_sheets';
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react';
@@ -11,7 +10,7 @@ const Home = ({
   groupName,
   ...props
 }) => {
-  
+
   const [utilityKey, setUtilityKey] = useState<string>('');
   const [roleIndex, setRoleIndex] = useState<number>(0);
   const serverRoleData = props.serverRoleData;
@@ -22,11 +21,11 @@ const Home = ({
     }
   
   }, [roleName, utilityName, groupName])
-  
+
   const setInitUtility = () => {
     let utility_key = '';
     let role_index = 0;
-    if(roleName) {
+    if(roleName && utilityName && groupName) {
       serverRoleData.map((role, role_index) => {
         role.utilities_group.map(group => {
           group.utilities.map((utility, utility_index) => {
@@ -52,20 +51,15 @@ const Home = ({
       }
       role_index = 0;
     }
-
+    
     setUtilityKey(utility_key);
     setRoleIndex(role_index);
     localStorage.setItem("select_utility_key", utility_key);
 
   } 
-  useEffect(()=>{
-    if(serverRoleData.length > 0) {
-      setInitUtility();
-    }
-  }, [props]);
-
+ 
   return (
-    serverRoleData.length > 0 && utilityKey != ''?
+    serverRoleData && utilityKey != ''?
     <OpenAi serverRoleData = {serverRoleData} utilityKey={utilityKey}  propsRoleIndex={roleIndex} />
     :<></>
   )
@@ -77,7 +71,6 @@ export async function getStaticProps(context) {
       props: {
         serverRoleData:data
       },
-      revalidate: 1,
   };
 }
 

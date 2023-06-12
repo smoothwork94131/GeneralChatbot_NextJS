@@ -140,10 +140,8 @@ const OpenAi = ({
 
 
     useEffect(()=>{
-        if(Global.utilites_group.length == 0) {
-            Global.utilites_group = serverRoleData;
-            dispatchServerRoleData(serverRoleData);
-        }
+        Global.utilites_group = serverRoleData;
+        dispatchServerRoleData(serverRoleData);
     },[serverRoleData, utilityKey, propsRoleIndex]);
   
     
@@ -152,7 +150,9 @@ const OpenAi = ({
     }, [propsRoleIndex]);
     
     useEffect(() => {
-        handleSelectUtility(utilityKey);
+        if(roleGroup.length > 0) {
+            handleSelectUtility(utilityKey);
+        } 
     }, [serverRoleData, utilityKey])
 
     useEffect(()=>{
@@ -424,6 +424,7 @@ const OpenAi = ({
     };
 
     const handleSelectUtility = (utility_key:string) => {
+        console.log(utility_key);
         let updatedUtility: Utility[] = [];
         let updatedRole:RoleGroup ={name:'',utilities_group:[]};
         let updatedUtilitiesGroup: UtilitiesGroup[] = [];

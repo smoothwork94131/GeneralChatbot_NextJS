@@ -393,6 +393,15 @@ const ChatContent: FC<Props> = ({
                     {selectedUtility.summary}
                 </Text>
                 <Space h="md"/>
+                <ChatInput
+                    onSend={(message) => handleSend(message)}
+                    textareaRef={textareaRef}
+                    messageIsStreaming={messageIsStreaming}
+                    inputContent={inputContent}
+                    setInputContent={(content)=> {setInputContent(content)}}
+                    selectedConversation = {selectedConversation}
+                    disabled = { selectedUtility.buttonGroup?.length > 0?true:false}
+                />
                 {
                     selectedUtility.inputs.length > 0?
                     <Flex
@@ -468,16 +477,7 @@ const ChatContent: FC<Props> = ({
                         
                     </SimpleGrid>:<></>:<></>
                 }     
-                <Space h="md"/>
-                <ChatInput
-                    onSend={(message) => handleSend(message)}
-                    textareaRef={textareaRef}
-                    messageIsStreaming={messageIsStreaming}
-                    inputContent={inputContent}
-                    setInputContent={(content)=> {setInputContent(content)}}
-                    selectedConversation = {selectedConversation}
-                    disabled = { selectedUtility.buttonGroup?.length > 0?true:false}
-                />
+               
                 <Space h="md"/>
                 <ChatMessage 
                     historyConversation={historyConversation}
@@ -504,7 +504,7 @@ const ChatContent: FC<Props> = ({
             
             <Modal opened={settingModal} onClose={() =>{setSettingModal(false)}} title={<h2>{settingTitle}</h2>}>
                 {
-                    selectedUtility.settings.length > 0 ?
+                    selectedUtility.settings.length == 0 ?
                     <Box sx={(theme) =>({textAlign: 'center'})}>
                         <IconMistOff size={30} className="mx-auto mb-3"/>
                         <text>

@@ -227,7 +227,7 @@ const RoleHome: FC<Props> = ({handleSelectRole, roleGroup, selectedRole, isMobil
         const style = {
             transform: CSS.Transform.toString(transform),
             transition,
-            cursor: 'move',
+            cursor: 'cursor',
         };
         
         return (

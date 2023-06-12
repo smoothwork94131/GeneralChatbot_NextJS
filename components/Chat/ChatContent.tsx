@@ -107,13 +107,13 @@ const ChatContent: FC<Props> = ({
 
     
     const handleSend = async () => {
-        
         if(inputContent == "") {
             setInputError("Please enter a message.");
             return;
         }
-        setInputError("");
 
+        setInputError("");
+        
         const message = inputContent;
         const fingerId = await getFingerId();
         const userTimes = await getUserTimes(user);
@@ -420,7 +420,7 @@ const ChatContent: FC<Props> = ({
                 }
                 <Space h="md"/>
                 <ChatInput
-                    onSend={() => {handleSend}}
+                    onSend={async() => {handleSend();}}
                     textareaRef={textareaRef}
                     messageIsStreaming={messageIsStreaming}
                     inputContent={inputContent}

@@ -45,15 +45,17 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         
         if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming && disabledEnter) {
             e.preventDefault();
+    
             handleSend();
             setInputContent("")
         }
     };
     const handleSend = () => {
-        if (!inputContent) {
+        if (inputContent == "") {
             setTextError("Please enter a message");
             return;
         }
+        
         setTextError("");
         onSend();
     };

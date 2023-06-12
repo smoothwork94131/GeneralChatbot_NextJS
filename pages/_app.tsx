@@ -61,7 +61,7 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
               <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
                 {
                  appProps.router.pathname.indexOf('/user/') > -1?
-                  <Layout childrenSize={appProps.router.pathname.indexOf('/signin') > -1?'400px':'700px'}>
+                  <Layout childrenSize={appProps.router.pathname.indexOf('/signin') > -1 ?'400px':'700px'}>
                     <Component {...pageProps} />
                   </Layout>:
                   <Home

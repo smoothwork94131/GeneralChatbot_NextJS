@@ -68,7 +68,7 @@ const Settings: FC<Props> = ({ isMobile, updateServerRoleData, changeSpotlightTy
 
     const goPortalPage = async () => {
         if (user) {
-            router.push('/account');
+            router.push('/user/account');
         } else {
             setModalType("signin");
             setIsModal(true);

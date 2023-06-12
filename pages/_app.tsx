@@ -68,7 +68,9 @@ function App({ Component, pageProps, ...appProps }: AppProps<{}>) {
                     roleName={appProps.router.query.role}
                     utilityName={appProps.router.query.utility}
                     groupName={appProps.router.query.group}
+                    {...pageProps}
                   />
+                  
                 }
               </MantineProvider>
             </ColorSchemeProvider>

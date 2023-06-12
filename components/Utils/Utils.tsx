@@ -26,6 +26,8 @@ const Utils: FC<Props> = ({
         const formatted_group_name = group_name.replace(" ", "-");
         return `/${role_name}/${formatted_group_name}/${utility_name}`;
     };  
+    
+    console.log(selectedUtility);
 
     return(
         <Box  

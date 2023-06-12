@@ -372,7 +372,9 @@ const ChatContent: FC<Props> = ({
     }
 
     useEffect(() => {
-        handleSend();
+        if(buttonPromts) {
+            handleSend();
+        }   
     }, [buttonPromts])
 
     return (

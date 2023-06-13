@@ -99,14 +99,12 @@ const ChatContent: FC<Props> = ({
     useEffect(()=> {
         setResponseText("");
     }, [selectedUtility.name])
-    
     useEffect(() => {
         const history = localStorage.getItem("selectedConversation");
         if(history) {
             setHistoryConversation(JSON.parse(history));
         }
     }, [selectedConversation, selectedUtility, conversationHistory]);
-     
     useEffect(() => {    
         if(messageIsStreaming) {
             setMessageIsStreaming(false);

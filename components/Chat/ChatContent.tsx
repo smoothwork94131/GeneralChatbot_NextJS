@@ -13,7 +13,7 @@ import {
     Radio,
 } from '@mantine/core';
 import ChatInput from './ChatInput';
-import { ButtonPrompts, Input, SelectedSearch, Setting, Utility } from '@/types/role';
+import { ButtonPrompts, Input, RoleGroup, SelectedSearch, Setting, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
 import { AssistantMessageState, Conversation, Message,  SettingPromptItem,  UserMessageState } from '@/types/chat';
 import { useEffect } from 'react';
@@ -42,6 +42,7 @@ interface Props {
     setMessageIsStreaming: (type: boolean)=>void;
     handleSelectSettings: (setting_index: number, item_index: number)=>void;
     setUpdateUtilty: (utility: Utility) =>void;
+    selectedRole: RoleGroup
 } 
 
 const ChatContent: FC<Props> = ({
@@ -57,7 +58,8 @@ const ChatContent: FC<Props> = ({
         messageIsStreaming,
         setMessageIsStreaming,
         handleSelectSettings,
-        setUpdateUtilty
+        setUpdateUtilty,
+        selectedRole
     }) =>{
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -94,16 +96,17 @@ const ChatContent: FC<Props> = ({
         setInputContent("");
     }, [selectedConversation])
     
+    useEffect(()=> {
+        setResponseText("");
+    }, [selectedUtility.name])
     
     useEffect(() => {
         const history = localStorage.getItem("selectedConversation");
         if(history) {
             setHistoryConversation(JSON.parse(history));
         }
-        setResponseText("");
     }, [selectedConversation, selectedUtility, conversationHistory]);
-    
-    
+     
     useEffect(() => {    
         if(messageIsStreaming) {
             setMessageIsStreaming(false);

@@ -104,7 +104,8 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                             {
                                 messageIsStreaming?
                                 <LoaderIcon style={{width: '20px', height: '20px'}}></LoaderIcon>:
-                                <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={() => {if(selectedUtility.buttonGroup.length == 0) {handleSend();}}} />
+                                selectedUtility.buttonGroup.length == 0?
+                                <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={() => {handleSend()}} />:<></>
                             }
                         </Box>
                     }
@@ -114,7 +115,6 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                 />
             </Flex>
         </Box>
-        
     )
 }
 

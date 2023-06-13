@@ -91,7 +91,6 @@ const ChatContent: FC<Props> = ({
             setIsModal(true);
         }
     },[user]);
-
     useEffect(() => {
         setInputContent("");
     }, [selectedConversation])

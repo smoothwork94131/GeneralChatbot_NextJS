@@ -62,6 +62,16 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         setTextError("");
         onSend();
     };
+
+    const pastClipBoard = () => {
+        navigator.clipboard.readText()
+            .then(text => {
+                setInputContent(text);
+            })
+            .catch(err => {
+            console.error("Failed to read clipboard contents: ", err);
+        });
+    }
     
     return (
         <Box>
@@ -75,6 +85,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                     sx={(theme)=>({
                         cursor: 'pointer'
                     })}
+                    onClick={() => {pastClipBoard()}}
                 >
                     <IconNotes />
                     <Text>

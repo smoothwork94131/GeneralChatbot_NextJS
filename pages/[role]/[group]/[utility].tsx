@@ -1,6 +1,6 @@
 
 import OpenAi from '@/components/openai/openai';
-import { getSheets } from '@/utils/server/google_sheets';
+import { convertedSheetData, getSheets } from '@/utils/server/google_sheets';
 
 
 const Home = ({
@@ -54,7 +54,7 @@ export const getStaticPaths = async () => {
 };
 
 export const getStaticProps = async ({ params }) => {
-    const serverRoleData = await getSheets();
+    const serverRoleData = await convertedSheetData();
     let utilityKey=''; let roleIndex = 0;
     serverRoleData.map((role, role_index) => {
         role.utilities_group.map(group => {
@@ -74,8 +74,7 @@ export const getStaticProps = async ({ params }) => {
     if(utilityKey == '') {
         utilityKey = `${serverRoleData[0].name}_${serverRoleData[0].utilities_group[0].name}_${serverRoleData[0].utilities_group[0].utilities[0].name}`;
     }
-    
-    console.log("utilityKey", utilityKey);
+
     return {
       props: {
         serverRoleData: serverRoleData,

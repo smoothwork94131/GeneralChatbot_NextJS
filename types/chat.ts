@@ -1,5 +1,5 @@
 import { OpenAIModel } from './openai';
-import { Input } from '@/types/role';
+import { ButtonPrompts, Input } from '@/types/role';
 
 export type Role = 'assistant' | 'user' | 'system';
 export interface Message {
@@ -8,6 +8,13 @@ export interface Message {
     datetime?: string;
     inputs?: Input[];
     active?:boolean;
+    button_prompt?: ButtonPrompts,
+    setting_prompt?: SettingPromptItem[]
+}
+
+export interface SettingPromptItem {
+    setting_name: string,
+    item_name: string
 }
 export interface Conversation {
     name: string;

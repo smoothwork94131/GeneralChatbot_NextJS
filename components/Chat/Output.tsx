@@ -4,13 +4,16 @@ import { IconArrowBackUp, IconArrowRight, IconCheck, IconCopy } from "@tabler/ic
 import { FC, useState} from "react";
 
 interface Props {
-    isMobile: boolean
+    isMobile: boolean,
+    responseText: string,
+    handleSend: () =>void
 }
-const Output:FC<Props> = ({isMobile}) => {
+const Output:FC<Props> = ({isMobile, responseText, handleSend}) => {
     const [copied, setCopied] = useState<boolean>(false);
 
     const handleCopyToClipboard = () => {
         setCopied(true);
+        copyToClipboard(responseText);
         setTimeout(function() {
             setCopied(false);
         }, 1000);
@@ -22,7 +25,7 @@ const Output:FC<Props> = ({isMobile}) => {
             .then(() => console.log('Message copied to clipboard'))
             .catch((err) => console.error('Failed to copy message: ', err));    
     }
-    
+        
     return (
         <div>
             {
@@ -38,6 +41,7 @@ const Output:FC<Props> = ({isMobile}) => {
                 >
                     <Group
                         spacing="xs"
+                        onClick={() => {handleSend()}}
                     >
                         <IconArrowBackUp />
                         <Text>
@@ -52,7 +56,6 @@ const Output:FC<Props> = ({isMobile}) => {
                             copied?
                             <IconCheck />:<IconCopy />
                         }
-
                         <Text>
                             {
                                 copied?
@@ -75,6 +78,7 @@ const Output:FC<Props> = ({isMobile}) => {
                     autosize
                     minRows={2}
                     maxRows={4}
+                    value={responseText}
                 />
             </Flex>
             <Space h="md"/>

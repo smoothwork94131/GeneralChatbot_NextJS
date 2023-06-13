@@ -15,7 +15,7 @@ import {
 import ChatInput from './ChatInput';
 import { ButtonPrompts, Input, SelectedSearch, Setting, Utility } from '@/types/role';
 import ChatMessage from '@/components/Chat/ChatMessage';
-import { AssistantMessageState, Conversation, Message,  UserMessageState } from '@/types/chat';
+import { AssistantMessageState, Conversation, Message,  SettingPromptItem,  UserMessageState } from '@/types/chat';
 import { useEffect } from 'react';
 import { getUserTimes } from '@/utils/app/supabase-client';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -41,6 +41,7 @@ interface Props {
     messageIsStreaming: boolean;
     setMessageIsStreaming: (type: boolean)=>void;
     handleSelectSettings: (setting_index: number, item_index: number)=>void;
+    setUpdateUtilty: (utility: Utility) =>void;
 } 
 
 const ChatContent: FC<Props> = ({
@@ -55,7 +56,8 @@ const ChatContent: FC<Props> = ({
         deleteConversation,
         messageIsStreaming,
         setMessageIsStreaming,
-        handleSelectSettings
+        handleSelectSettings,
+        setUpdateUtilty
     }) =>{
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -69,7 +71,9 @@ const ChatContent: FC<Props> = ({
     const [settingTitle, setSettingTitle] = useState<string>('');
     const [settingName, setSettingName] = useState<string>('');
     const [buttonPromts, setButtonPrompts] = useState<ButtonPrompts>();
-    const [inputError, setInputError] = useState<string>('');
+    const [inputError, setInputError] = useState<string>('');   
+    const [responseText, setResponseText] = useState<string>('');
+    const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
 
     const user = useUser();
     
@@ -104,11 +108,15 @@ const ChatContent: FC<Props> = ({
             setMessageIsStreaming(false);
         }
         setInputError("");
-
+        if(isRegenerate) {
+            handleSend();
+            setIsRegenerate(false);
+        }
     }, [selectedUtility])
 
     
     const handleSend = async () => {
+
         if(inputContent == "") {
             setInputError("Please enter a message.");
             return;
@@ -116,12 +124,16 @@ const ChatContent: FC<Props> = ({
         if(messageIsStreaming) {
             return;
         }
+        
+
         setInputError("");
+        setResponseText("");
+
         const message = inputContent;
         const fingerId = await getFingerId();
         const userTimes = await getUserTimes(user);
         
-
+        
         if(userTimes <= 0 ) {
             setIsLimitModal(true);
             return;
@@ -134,10 +146,7 @@ const ChatContent: FC<Props> = ({
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
             
-            let settings: {
-                setting_name: string,
-                item_name: string
-            }[] = [];
+            let settings: SettingPromptItem[] = [];
             
             selectedUtility.settings?.map((setting, setting_index) => {
                 const activeSetting = setting.items.map((item, item_index) => {
@@ -185,7 +194,7 @@ const ChatContent: FC<Props> = ({
                 response_messages: Message[],
                 utilityKey: string,
                 fingerId: string,
-                settings: {item_name: string, setting_name: string}[]
+                settings: SettingPromptItem[]
                 userId: string|null,
                 buttonPrompts: ButtonPrompts|null|undefined
             } = { 
@@ -199,13 +208,15 @@ const ChatContent: FC<Props> = ({
                 settings:settings,
                 buttonPrompts: buttonPromts
             };
-
+            
             const user_message: Message = {    
                 role: 'user',
                 content: message,
                 inputs: inputs,
                 datetime: today_datetime,
-                active: false
+                active: false,
+                setting_prompt: settings,
+                button_prompt: buttonPromts
             };
 
             updatedConversation.messages.push([user_message, AssistantMessageState]);
@@ -267,6 +278,7 @@ const ChatContent: FC<Props> = ({
                         
                         if (chunkValue) {
                         text += chunkValue.replace(JSON.stringify({"model":OPENAI_MODELID}), "");
+                        setResponseText(text);
                         const assistant_message: Message = {role: 'assistant', content: text};
                         const updatedMessages: Message[][] =
                             updatedConversation.messages.map((message, index) => {    
@@ -315,6 +327,7 @@ const ChatContent: FC<Props> = ({
                     }
                     return message;
                 });
+                setResponseText(assistant_message.content);
                 updatedConversation = { 
                     ...updatedConversation,
                     messages: updatedMessages,
@@ -389,6 +402,44 @@ const ChatContent: FC<Props> = ({
         }   
     }, [buttonPromts])
 
+    useEffect(() => {
+        if(isRegenerate) {
+            if(selectedConversation.messages.length > 0) {
+                const messages = selectedConversation.messages;
+                const user_message = messages[messages.length - 1][0];
+                const button_prompt = user_message.button_prompt;
+                const setting_prompt = user_message.setting_prompt;
+                const content = user_message.content;
+                setInputContent(content);
+
+                if(button_prompt) {
+                    setButtonPrompts(buttonPromts);
+                }
+                let  updatedUtilty = JSON.parse(JSON.stringify(selectedUtility));
+                if(setting_prompt){
+                    
+                    updatedUtilty.settings.map(setting=> {
+                        setting.items.map((item) => {
+                            let active = false;
+                            setting_prompt.map(selected => {
+                                if(setting.name == selected.setting_name && item.name == selected.item_name) {
+                                    active = true;
+                                }
+                            })
+                            item.active = active;
+                        })
+                    })   
+                }
+                console.log(selectedUtility);
+                setUpdateUtilty(updatedUtilty);
+            }
+        }
+    },[isRegenerate])
+
+    const regenerate = () => {
+        setIsRegenerate(true);
+    }
+
     return (
         <Box
             sx={(theme) => ({
@@ -454,6 +505,8 @@ const ChatContent: FC<Props> = ({
                     selectedUtility.buttonGroup.length > 0?
                     <Output 
                         isMobile={isMobile}
+                        responseText={responseText}
+                        handleSend={async() => {regenerate()}}
                     />
                     :<></>
                 }

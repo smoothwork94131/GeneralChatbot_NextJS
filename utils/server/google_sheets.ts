@@ -269,7 +269,7 @@ export async function getSheets(){
 }
 
 export async function convertedSheetData() {
-  const sheet_data = getSheets();
+  const sheet_data = await getSheets();
   const converted_data = removePromptFromRole(sheet_data);
   return converted_data;
 }

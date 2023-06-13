@@ -48,8 +48,15 @@ const Chat:FC<Props> = ({isMobile,
         const updatedUtility:Utility = JSON.parse(JSON.stringify(selectedUtility));
         
         if(updatedUtility.settings) {
-            updatedUtility.settings[setting_index].items.map((item) => item.active = false)
-            updatedUtility.settings[setting_index].items[item_index].active = true;
+           
+                updatedUtility.settings[setting_index].items.map((item ,_item_index) => {
+                    if(_item_index == item_index) {
+                        item.active = true;
+                    } else {
+                        item.active = false;
+                    }
+                })
+            
         }
         openaiDispatch({
             "field": "selectedUtility",
@@ -103,6 +110,13 @@ const Chat:FC<Props> = ({isMobile,
         updatedConversation.messages.splice(index, 1);
         saveSelectConverSation(updatedConversation);
     }
+
+    const setUpdateUtilty = (updatedUtilty: Utility) => {
+        openaiDispatch({
+            "field": "selectedUtility",
+            "value": updatedUtilty
+        })
+    }
     return (
         <Box  
             sx={(theme) =>({
@@ -144,6 +158,7 @@ const Chat:FC<Props> = ({isMobile,
                 messageIsStreaming={messageIsStreaming}
                 setMessageIsStreaming={setMessageIsStreaming}
                 handleSelectSettings={handleSelectSettings}
+                setUpdateUtilty={setUpdateUtilty}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

@@ -1,5 +1,5 @@
 
-import { getSheets } from '@/utils/server/google_sheets';
+import { convertedSheetData, getSheets } from '@/utils/server/google_sheets';
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react';
 const OpenAi = dynamic(() => import('@/components/openai/openai'), { ssr: false })
@@ -15,6 +15,8 @@ const Home = ({
   const [roleIndex, setRoleIndex] = useState<number>(0);
   const serverRoleData = props.serverRoleData;
 
+  console.log(serverRoleData);
+
   useEffect(()=>{
     if(serverRoleData) {
       setInitUtility();
@@ -25,6 +27,7 @@ const Home = ({
   const setInitUtility = () => {
     let utility_key = '';
     let role_index = 0;
+    
     if(roleName && utilityName && groupName) {
       serverRoleData.map((role, role_index) => {
         role.utilities_group.map(group => {
@@ -66,7 +69,7 @@ const Home = ({
 }
 
 export async function getStaticProps(context) {
-  const data = await getSheets();
+  const data = await convertedSheetData();
   return {
       props: {
         serverRoleData:data

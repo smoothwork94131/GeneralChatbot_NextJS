@@ -15,7 +15,6 @@ const Home = ({
   const [roleIndex, setRoleIndex] = useState<number>(0);
   const serverRoleData = props.serverRoleData;
 
-  console.log(serverRoleData);
 
   useEffect(()=>{
     if(serverRoleData) {

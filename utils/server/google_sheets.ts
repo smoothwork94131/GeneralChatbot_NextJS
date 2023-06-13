@@ -195,7 +195,6 @@ function getSettings(row, headers) {
         const field_name = `${setting}_${parse_group}`;
         const item = getFieldValue(row, headers, field_name);
         
-        console.log(group);
 
         if(item) {
           let item_active = false;

@@ -76,6 +76,7 @@ const ChatContent: FC<Props> = ({
     const [inputError, setInputError] = useState<string>('');   
     const [responseText, setResponseText] = useState<string>('');
     const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
+    const [utilityName, setUtilityName] = useState<string>('');
 
     const user = useUser();
     
@@ -94,10 +95,7 @@ const ChatContent: FC<Props> = ({
     useEffect(() => {
         setInputContent("");
     }, [selectedConversation])
-    
-    useEffect(()=> {
-        setResponseText("");
-    }, [selectedUtility.name])
+
     useEffect(() => {
         const history = localStorage.getItem("selectedConversation");
         if(history) {
@@ -113,8 +111,13 @@ const ChatContent: FC<Props> = ({
             handleSend();
             setIsRegenerate(false);
         }
+        setUtilityName(selectedUtility.name);
     }, [selectedUtility])
 
+    useEffect(()=> {
+        setResponseText("");
+
+    },[utilityName]);
     
     const handleSend = async () => {
 

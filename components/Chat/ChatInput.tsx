@@ -37,7 +37,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
             textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
           }`;
         }
-      }, []);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -104,7 +104,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                             {
                                 messageIsStreaming?
                                 <LoaderIcon style={{width: '20px', height: '20px'}}></LoaderIcon>:
-                                <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={handleSend}/>
+                                <IconSend size="1rem" className="opacity-[0.5] display-block cursor-pointer" onClick={() => {if(selectedUtility.buttonGroup.length > 0) {handleSend();}}} />
                             }
                         </Box>
                     }

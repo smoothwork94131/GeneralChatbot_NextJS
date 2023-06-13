@@ -98,8 +98,7 @@ const ChatContent: FC<Props> = ({
     
     useEffect(()=> {
         setResponseText("");
-    }, [selectedUtility])
-
+    }, [selectedUtility.name])
     useEffect(() => {
         const history = localStorage.getItem("selectedConversation");
         if(history) {

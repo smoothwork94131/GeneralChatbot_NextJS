@@ -100,6 +100,7 @@ const ChatContent: FC<Props> = ({
         if(history) {
             setHistoryConversation(JSON.parse(history));
         }
+        setResponseText("");
     }, [selectedConversation, selectedUtility, conversationHistory]);
     
     

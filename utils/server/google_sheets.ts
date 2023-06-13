@@ -1,4 +1,5 @@
 import { sheets as sheets_, auth } from '@googleapis/sheets';
+import { removePromptFromRole } from '@/pages/api/googlesheets';
 
 import {SPREAD_SHEET_ID, SHEET_RANGE, GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY} from '@/utils/server/const'
 import { ButtonGroup, Buttons, Input, RoleGroup, Setting, SettingItem, UtilitiesGroup, Utility } from '@/types/role';
@@ -67,7 +68,7 @@ function mapRowToCustomSheetData(row: string[], headers: string[]): void {
         key: `${roleName}_${utilityGroupName}_${utilityName}`,
         inputs: getUtilityInputs(row, headers),
         input_align: input_align?input_align:'horizental',
-        streaming: streaming=='TRUE' || streaming=="1"? true:true,
+        streaming: streaming=='TRUE' || streaming=="1"? true:false,
         buttonGroup:[],
         settings: getSettings(row, headers)
       })
@@ -186,16 +187,16 @@ function getSettings(row, headers) {
         items:[],
       }
       const part = getFieldValue(row, headers, setting);
-      const arr_group =  part.replaceAll(" ","").split(";");
+      const arr_group =  part.split("; ");
       let items:SettingItem[] = [];
       let group_index = 0;
       arr_group.map((group) => {
         const parse_group = group.replaceAll(" ", "_");
-        // item.push(getFieldValue(row, headers, `${setting}_${group.}`));
         const field_name = `${setting}_${parse_group}`;
         const item = getFieldValue(row, headers, field_name);
         
-        
+        console.log(group);
+
         if(item) {
           let item_active = false;
           if(group_index == 0) {
@@ -203,11 +204,13 @@ function getSettings(row, headers) {
           }
 
           items.push({
-            name: item,
+            name: group,
+            prompt: item,
             active: item_active
           });
           group_index++;
         }
+
       })
       setting_item.items = items;
       setting_data.push(setting_item)
@@ -265,3 +268,8 @@ export async function getSheets(){
   return roleData;
 }
 
+export async function convertedSheetData() {
+  const sheet_data = getSheets();
+  const converted_data = removePromptFromRole(sheet_data);
+  return converted_data;
+}

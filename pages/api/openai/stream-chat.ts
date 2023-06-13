@@ -5,7 +5,7 @@ import { ApiChatInput, chatCompletionPayload, decreaseUserTimes, extractOpenaiCh
 import { OpenAIAPI } from '@/types/openai';
 
 import { Global } from 'global';
-import { Input, Utility, UtilityState } from '@/types/role';
+import { Buttons, Input, Utility, UtilityState } from '@/types/role';
 import { Message, UserMessageState } from '@/types/chat';
 import { DEFAULT_SYSTEM_PROMPT, OPENAI_MODELID } from '@/utils/app/const';
 
@@ -144,24 +144,46 @@ export default async function handler(req, res) {
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
     
     let button_system_prompt = '';
+    
     if(buttonPrompts && utilityInfo.buttonGroup) {
-      button_system_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].system_prompt;
-      user_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].user_prompt;
+      let button_info: Buttons = {user_prompt:'', system_prompt:'', name:''};
+
+      utilityInfo.buttonGroup.map((group) => {
+        group.buttons.map(button => {
+          if(group.name == buttonPrompts.group_name && button.name == buttonPrompts.button_name) {
+            button_info = button;
+          }
+        })  
+      })
+
+      system_prompt = button_info.system_prompt;
+      user_prompt = button_info.user_prompt;
     }
 
-    system_prompt += ` ${button_system_prompt}`;
     
     const today_datetime = new Date().toUTCString();
     let messages: Message[] = [];
     
+
     if(system_prompt){
       system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
-      settings.map(setting => {
-        system_prompt += ` ${setting}`;
+      settings.map(selectedSetting => {
+        // const prompt = utilityInfo.settings[setting.setting_index].items[setting.item_index].prompt;
+        let prompt = '';
+        utilityInfo.settings.map((setting) => {
+          setting.items.map((item) => {
+            if(setting.name == selectedSetting.setting_name && item.name == selectedSetting.item_name) {
+              prompt = item.prompt;
+            }
+          })
+        })
+
+        system_prompt += ` ${prompt}`;
       })
+      
       messages =[{role: 'system', content: system_prompt}];
     }
-  
+
     responseMessages.map((message, message_index) => {
       if(message.role == "user") {
           let new_user_prompt = user_prompt?.slice();

@@ -11,7 +11,7 @@ import { NEXT_PUBLIC_SUPABASE_URL } from '@/utils/app/const';
 import { SUPABASE_SERVICE_ROLE_KEY } from '@/utils/server/const';
 import { Database } from '@/types/types_db';
 import { Global } from 'global';
-import { Input, Utility, UtilityState } from '@/types/role';
+import { ButtonPrompts, Buttons, Input, Utility, UtilityState } from '@/types/role';
 import { Message, UserMessageState } from '@/types/chat';
 import { useFetch } from '@/hooks/useFetch';
 // Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
@@ -308,8 +308,18 @@ export default async function handler(req, res) {
     let user_prompt = Object.keys(utilityInfo).includes("user_prompt")? utilityInfo.user_prompt:'';
     
     if(buttonPrompts && utilityInfo.buttonGroup) {
-      system_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].system_prompt;
-      user_prompt = utilityInfo.buttonGroup[buttonPrompts.group_index].buttons[buttonPrompts.button_index].user_prompt;
+      let button_info: Buttons = {user_prompt:'', system_prompt:'', name:''};
+
+      utilityInfo.buttonGroup.map((group) => {
+        group.buttons.map(button => {
+          if(group.name == buttonPrompts.group_name && button.name == buttonPrompts.button_name) {
+            button_info = button;
+          }
+        })
+      })
+
+      system_prompt = button_info.system_prompt;
+      user_prompt = button_info.user_prompt;
     }
 
     
@@ -319,12 +329,23 @@ export default async function handler(req, res) {
 
     if(system_prompt){
       system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
-      settings.map(setting => {
-        system_prompt += ` ${setting}`;
+      settings.map(selectedSetting => {
+        // const prompt = utilityInfo.settings[setting.setting_index].items[setting.item_index].prompt;
+        let prompt = '';
+        utilityInfo.settings.map((setting) => {
+          setting.items.map((item) => {
+            if(setting.name == selectedSetting.setting_name && item.name == selectedSetting.item_name) {
+              prompt = item.prompt;
+            }
+          })
+        })
+
+        system_prompt += ` ${prompt}`;
       })
+      
       messages =[{role: 'system', content: system_prompt}];
     }
-  
+    
     responseMessages.map((message, message_index) => {
       if(message.role == "user") {
           let new_user_prompt = user_prompt?.slice();

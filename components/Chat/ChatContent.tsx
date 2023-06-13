@@ -9,9 +9,8 @@ import {
     Box,
     Group,
     Button,
-    SimpleGrid,
     Modal,
-    Radio
+    Radio,
 } from '@mantine/core';
 import ChatInput from './ChatInput';
 import { ButtonPrompts, Input, SelectedSearch, Setting, Utility } from '@/types/role';
@@ -26,6 +25,8 @@ import MyModal from '@/components/Account/Modal';
 import { getFingerId } from '@/utils/app/FingerPrint';
 import { OPENAI_MODELID } from '@/utils/app/const';
 import { IconMistOff } from '@tabler/icons-react';
+import ButtonGroup from '@/components/Chat/ButtonGroup';
+import Output from '@/components/Chat/Output';
 
 interface Props {
     selectedUtility: Utility;
@@ -40,7 +41,6 @@ interface Props {
     messageIsStreaming: boolean;
     setMessageIsStreaming: (type: boolean)=>void;
     handleSelectSettings: (setting_index: number, item_index: number)=>void;
-    
 } 
 
 const ChatContent: FC<Props> = ({
@@ -103,6 +103,8 @@ const ChatContent: FC<Props> = ({
         if(messageIsStreaming) {
             setMessageIsStreaming(false);
         }
+        setInputError("");
+
     }, [selectedUtility])
 
     
@@ -111,9 +113,10 @@ const ChatContent: FC<Props> = ({
             setInputError("Please enter a message.");
             return;
         }
-
+        if(messageIsStreaming) {
+            return;
+        }
         setInputError("");
-        
         const message = inputContent;
         const fingerId = await getFingerId();
         const userTimes = await getUserTimes(user);
@@ -131,14 +134,23 @@ const ChatContent: FC<Props> = ({
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
             
-            let settings:string[] = [];
-            selectedUtility.settings?.map((setting) => {
-                const activeSetting = setting.items.map(item => {
+            let settings: {
+                setting_name: string,
+                item_name: string
+            }[] = [];
+            
+            selectedUtility.settings?.map((setting, setting_index) => {
+                const activeSetting = setting.items.map((item, item_index) => {
                     if(item.active) {
-                        settings.push(item.name);
+                        settings.push({
+                            setting_name: setting.name,
+                            item_name: item.name
+                        })
                     }
                 })
             })
+            
+            
             let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = 
             [...selectedMessagesHistory, 
             ...updatedConversation.messages];
@@ -167,13 +179,13 @@ const ChatContent: FC<Props> = ({
                 role: 'user',
                 content: message,
                 inputs: inputs
-,           });
+            });
 
             const input: {
                 response_messages: Message[],
                 utilityKey: string,
                 fingerId: string,
-                settings: string[]
+                settings: {item_name: string, setting_name: string}[]
                 userId: string|null,
                 buttonPrompts: ButtonPrompts|null|undefined
             } = { 
@@ -364,10 +376,10 @@ const ChatContent: FC<Props> = ({
         setSettingModal(true);
     }
 
-    const handleSelectCustomButtons = (group_index, button_index) => {
+    const handleSelectCustomButtons = (group_name, button_name) => {
         setButtonPrompts({
-            group_index: group_index,
-            button_index: button_index
+            group_name: group_name,
+            button_name: button_name
         })
     }
 
@@ -428,67 +440,24 @@ const ChatContent: FC<Props> = ({
                     selectedConversation = {selectedConversation}
                     disabledEnter = { selectedUtility.buttonGroup.length > 0? false:true }
                     inputError={inputError}
+                    selectedUtility={selectedUtility}
                 />
+                <Space h="md"/>
+                <ButtonGroup 
+                    selectedUtility={selectedUtility}
+                    handleSelectCustomButtons={handleSelectCustomButtons}
+                    isMobile={isMobile}
+                    showSettingModal={showSettingModal}
+                />
+                <Space h="md" />
                 {
-                    selectedUtility.buttonGroup?.length?
-                    selectedUtility.buttonGroup?.length > 0?
-                    <SimpleGrid cols={isMobile?1:3} verticalSpacing="xl">
-                        {
-                             selectedUtility.buttonGroup?.map((group, group_index) =>
-                             <Box key={group_index}>
-                                <Box
-                                    sx={(theme) =>({
-                                        textAlign: 'center'
-                                    })}
-                                >
-                                    <Button variant="outline"  radius="md" size="md" color='gray'
-                                        sx={(theme) =>({
-                                            position: 'relative',
-                                            top: '20px',
-                                            background: `${theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.colors.gray[1]} !important`,
-                                            color: `${theme.colorScheme == 'dark' ? 'white':'black'}`
-                                        })}
-                                        onClick={() => {showSettingModal(group.name)}}
-                                    >
-                                        {group.name}
-                                    </Button>    
-                                </Box>
-                                <SimpleGrid 
-                                    cols={
-                                        selectedUtility.buttonGroup?
-                                            selectedUtility.buttonGroup[group_index]?.buttons?.length < 3 ? selectedUtility.buttonGroup[group_index]?.buttons?.length:3
-                                        :3
-                                    }
-                                    sx={(theme)=>({
-                                        padding: theme.spacing.md,
-                                        border: `1px solid gray`,
-                                        borderRadius: theme.spacing.lg,
-                                        paddingTop: '40px',
-                                       
-                                    })}
-                                >
-                                {
-                                    selectedUtility.buttonGroup?
-                                    selectedUtility.buttonGroup[group_index]?.buttons.map((button, button_index) => 
-                                        <Button fullWidth variant="outline" key={button_index} color='gray' 
-                                            sx={(theme) =>({
-                                                color: `${theme.colorScheme == 'dark' ? theme.colors.gray[1]: theme.colors.gray[7]}`
-                                            })}
-                                            onClick={() => {handleSelectCustomButtons(group_index, button_index)}}
-                                        >
-                                            {button.name}
-                                        </Button>
-                                    ):<></>
-                                }
-                                </SimpleGrid>
-                             </Box>
-                             
-                            )
-                        }
-                        
-                    </SimpleGrid>:<></>:<></>
-                }     
-               
+                    selectedUtility.buttonGroup.length > 0?
+                    <Output 
+                        isMobile={isMobile}
+                    />
+                    :<></>
+                }
+                
                 <Space h="md"/>
                 <ChatMessage 
                     historyConversation={historyConversation}
@@ -538,7 +507,7 @@ const ChatContent: FC<Props> = ({
                             >
                                 <Box
                                     sx={(theme) =>({
-                                        width: '30%',
+                                        width: '40%',
                                         fontSize: '30px',
                                         textAlign: 'center'
                                     })}
@@ -547,13 +516,13 @@ const ChatContent: FC<Props> = ({
                                 </Box>
                                 <Box
                                     sx={(theme) =>({
-                                        width: '70%'
+                                        width: '60%'
                                     })}
                                 >  
                                     {
                                         setting.items.map((item, item_index) => 
                                         
-                                            <Radio value={item.name} checked={item.active}  key ={item_index} label={item.name} onClick={() => {handleSelectSettings(setting_index, item_index)}} pt="md"/>
+                                            <Radio  color="gray" value={item.name} checked={item.active}  key ={item_index} label={item.name} onClick={() => {handleSelectSettings(setting_index, item_index)}} pt="md"/>
                                         )
                                     }
 

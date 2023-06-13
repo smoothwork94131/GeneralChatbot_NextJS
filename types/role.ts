@@ -34,6 +34,7 @@ export interface Setting {
 }
 export interface SettingItem {
     name:string,
+    prompt: string,
     active:boolean
 }
 export interface Buttons {
@@ -46,8 +47,8 @@ export interface ButtonGroup {
     buttons: Buttons[]
 }
 export interface ButtonPrompts {
-    group_index: number,
-    button_index: number;
+    group_name: string,
+    button_name: string;
     
 }
 export const  UtilityState:Utility = {

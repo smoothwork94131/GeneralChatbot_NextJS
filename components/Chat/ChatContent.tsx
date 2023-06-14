@@ -40,7 +40,7 @@ interface Props {
     deleteConversation: (index: number)=>void;
     messageIsStreaming: boolean;
     setMessageIsStreaming: (type: boolean)=>void;
-    handleSelectSettings: (setting_index: number, item_index: number)=>void;
+    handleSelectSettings: (setting_index: number, item_index: number, setting_title: string)=>void;
     setUpdateUtilty: (utility: Utility) =>void;
     selectedRole: RoleGroup
 } 
@@ -77,6 +77,7 @@ const ChatContent: FC<Props> = ({
     const [responseText, setResponseText] = useState<string>('');
     const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
     const [utilityName, setUtilityName] = useState<string>('');
+    const [selectedSettings, setSelectedSettings] = useState<Setting[]>([]);
 
     const user = useUser();
     
@@ -94,7 +95,9 @@ const ChatContent: FC<Props> = ({
     },[user]);
     
     useEffect(() => {
-        setInputContent("");
+        if(selectedUtility.buttonGroup.length == 0) {
+            setInputContent("");
+        }
     }, [selectedConversation])
 
     useEffect(() => {
@@ -113,11 +116,15 @@ const ChatContent: FC<Props> = ({
             setIsRegenerate(false);
         }
         setUtilityName(selectedUtility.name);
+        selectedUtility.buttonGroup.map((group) => {
+            if(group.name == settingTitle) {
+                setSelectedSettings(group.settings);
+            }
+        })
     }, [selectedUtility])
 
     useEffect(()=> {
         setResponseText("");
-
     },[utilityName]);
     
     const handleSend = async () => {
@@ -129,14 +136,15 @@ const ChatContent: FC<Props> = ({
         if(messageIsStreaming) {
             return;
         }
-
-        console.log(selectedUtility.buttonGroup)
+        
         if(selectedUtility.buttonGroup?.length === 0) {
             console.log('ok');
         }
+        
         setInputError("");
-        setResponseText("");
-
+        
+        // setResponseText("");
+        
         const message = inputContent;
         const fingerId = await getFingerId();
         const userTimes = await getUserTimes(user);
@@ -154,16 +162,20 @@ const ChatContent: FC<Props> = ({
             
             let settings: SettingPromptItem[] = [];
             
-            selectedUtility.settings?.map((setting, setting_index) => {
-                const activeSetting = setting.items.map((item, item_index) => {
-                    if(item.active) {
-                        settings.push({
-                            setting_name: setting.name,
-                            item_name: item.name
-                        })
-                    }
-                })
-            })
+            let selectedButtonGroup = selectedUtility.buttonGroup.filter(group => group.name == buttonPromts?.group_name);
+
+            if(selectedButtonGroup.length > 0) {
+                selectedButtonGroup[0].settings?.map((setting, setting_index) => {
+                    setting.items.map((item, item_index) => {
+                        if(item.active) {
+                            settings.push({
+                                setting_name: setting.name,
+                                item_name: item.name
+                            })
+                        }
+                    })
+                })    
+            }
             
             
             let selectedMessagesHistory:Message[][] = []; selectedMessagesHistory = 
@@ -235,6 +247,7 @@ const ChatContent: FC<Props> = ({
                 endpoint = 'stream-chat';
             }
 
+            
             const response = await fetch('/api/openai/'+endpoint, {
                 method: 'POST',
                 headers: {
@@ -391,6 +404,12 @@ const ChatContent: FC<Props> = ({
     }
     const showSettingModal = (modal_title) => {
         setSettingTitle(modal_title);
+
+        selectedUtility.buttonGroup.map(group => {
+            if(group.name == modal_title){
+                setSelectedSettings(group.settings);
+            }
+        })
         setSettingModal(true);
     }
 
@@ -420,22 +439,25 @@ const ChatContent: FC<Props> = ({
                 if(button_prompt) {
                     setButtonPrompts(buttonPromts);
                 }
-                let  updatedUtilty = JSON.parse(JSON.stringify(selectedUtility));
+                let updatedUtilty:Utility = JSON.parse(JSON.stringify(selectedUtility));
                 if(setting_prompt){
-                    
-                    updatedUtilty.settings.map(setting=> {
-                        setting.items.map((item) => {
-                            let active = false;
-                            setting_prompt.map(selected => {
-                                if(setting.name == selected.setting_name && item.name == selected.item_name) {
-                                    active = true;
-                                }
+                    updatedUtilty.buttonGroup.map(group=> {
+                        if(group.name == button_prompt?.group_name) {
+                            group.settings.map(setting => {
+                                setting.items.map((item) => {
+                                    let active = false;
+                                    setting_prompt.map(selected => {
+                                        if(setting.name == selected.setting_name && item.name == selected.item_name) {
+                                            active = true;
+                                        }
+                                    })
+                                    item.active = active;
+                                })
                             })
-                            item.active = active;
-                        })
+                        }
                     })   
                 }
-                console.log(selectedUtility);
+                console.log(updatedUtilty);
                 setUpdateUtilty(updatedUtilty);
             }
         }
@@ -540,7 +562,7 @@ const ChatContent: FC<Props> = ({
             
             <Modal opened={settingModal} onClose={() =>{setSettingModal(false)}} title={<h2>{settingTitle}</h2>}>
                 {
-                    selectedUtility.settings.length == 0 ?
+                    selectedSettings.length == 0 ?
                     <Box sx={(theme) =>({textAlign: 'center'})}>
                         <IconMistOff size={30} className="mx-auto mb-3"/>
                         <text>
@@ -548,7 +570,7 @@ const ChatContent: FC<Props> = ({
                         </text>
                     </Box>
                     :
-                    selectedUtility.settings?.map((setting, setting_index) => 
+                    selectedSettings?.map((setting, setting_index) => 
                         <Flex key={setting_index} 
                             direction="column"
                             p={15}
@@ -579,10 +601,9 @@ const ChatContent: FC<Props> = ({
                                     {
                                         setting.items.map((item, item_index) => 
                                         
-                                            <Radio  color="gray" value={item.name} checked={item.active}  key ={item_index} label={item.name} onClick={() => {handleSelectSettings(setting_index, item_index)}} pt="md"/>
+                                            <Radio  color="gray" value={item.name} checked={item.active}  key ={item_index} label={item.name} onClick={() => {handleSelectSettings(setting_index, item_index, settingTitle)}} pt="md"/>
                                         )
                                     }
-
                                 </Box>
                             </Flex>
                         </Flex>

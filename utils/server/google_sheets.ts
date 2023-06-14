@@ -52,7 +52,7 @@ function mapRowToCustomSheetData(row: string[], headers: string[]): void {
 
     let utilities = utilities_group[utilities_group_index].utilities;
     let utility_index = chkExistObject(utilities, utilityName);
-    
+    let settings:Setting[] = [];
     if(utility_index == utilities.length) {
       let active = false;
       if(utility_index == 0 && utilities_group_index == 0 ) {
@@ -70,12 +70,16 @@ function mapRowToCustomSheetData(row: string[], headers: string[]): void {
         input_align: input_align?input_align:'horizental',
         streaming: streaming=='TRUE' || streaming=="1"? true:false,
         buttonGroup:[],
-        settings: getSettings(row, headers)
       })
     } else {
-      utilities[utility_index].settings = getSettings(row,headers);
+      settings = getSettings(row, headers);
+      utilities.map(utilty => {
+        utilty.buttonGroup.map(group => {
+          group.settings = settings;
+        })
+      })
     }
-   
+    
     if(roleName == roleData[role_index].name && utilityGroupName == utilities_group[utilities_group_index].name) {
       let button_group: ButtonGroup[] = [];
       
@@ -87,14 +91,18 @@ function mapRowToCustomSheetData(row: string[], headers: string[]): void {
       
       if(groupName) {
         const group_index = chkExistObject(button_group, groupName);
+      
         if(
           group_index == button_group.length
         ) {
+          
           button_group.push({
             name: groupName,
-            buttons:[]
+            buttons:[],
+            settings: settings
           }); 
         }
+
         let buttons:Buttons[] = button_group[group_index].buttons;
         if(groupName == button_group[group_index].name){
           if(buttonName) {
@@ -194,8 +202,7 @@ function getSettings(row, headers) {
         const parse_group = group.replaceAll(" ", "_");
         const field_name = `${setting}_${parse_group}`;
         const item = getFieldValue(row, headers, field_name);
-        
-
+     
         if(item) {
           let item_active = false;
           if(group_index == 0) {
@@ -215,6 +222,7 @@ function getSettings(row, headers) {
       setting_data.push(setting_item)
     }) 
   }
+ 
   return setting_data;
 }
 

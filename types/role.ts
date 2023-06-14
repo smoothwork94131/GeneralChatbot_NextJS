@@ -26,7 +26,6 @@ export interface Utility {
     include_prompt_history: boolean;
     streaming?: boolean;
     buttonGroup: ButtonGroup[];
-    settings: Setting[]
 }
 export interface Setting {
     name: string,
@@ -44,7 +43,8 @@ export interface Buttons {
 }
 export interface ButtonGroup {
     name: string,
-    buttons: Buttons[]
+    buttons: Buttons[],
+    settings: Setting[]
 }
 export interface ButtonPrompts {
     group_name: string,
@@ -60,7 +60,6 @@ export const  UtilityState:Utility = {
     summary:'',
     include_prompt_history: true,
     buttonGroup:[],
-    settings:[]
 }
 
 export interface Input {

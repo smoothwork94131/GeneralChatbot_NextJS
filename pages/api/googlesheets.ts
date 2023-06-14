@@ -1,4 +1,5 @@
 import { getSheets } from "@/utils/server/google_sheets"
+import Settings from '../../components/Settings/Settings';
 export const removePromptFromRole = (roleData) => {
   const updated_roleData = roleData.map((r_item) => {
     const update_group = r_item.utilities_group.map((group_item) => {
@@ -11,18 +12,19 @@ export const removePromptFromRole = (roleData) => {
             delete button.system_prompt
             return button;
           })
+          const settings = group.settings.map((item) => {
+            const items = item.items.map((setting) => {
+              delete setting.prompt;
+              return setting;
+            })
+            item.items = items;
+            return item;
+          })
+          group.settings = settings;
           group.buttons = buttons;
           return group;
         })
-        const settings = utility.settings.map((item) => {
-          const items = item.items.map((setting) => {
-            delete setting.prompt;
-            return setting;
-          })
-          item.items = items;
-          return item;
-        })
-        utility.settings = settings;
+        
         utility.buttonGroup = buttonGroup;
         return utility;
       })

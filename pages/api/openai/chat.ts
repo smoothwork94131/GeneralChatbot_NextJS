@@ -330,16 +330,17 @@ export default async function handler(req, res) {
     if(system_prompt){
       system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
       settings.map(selectedSetting => {
-        // const prompt = utilityInfo.settings[setting.setting_index].items[setting.item_index].prompt;
+        const selectedGroup = utilityInfo.buttonGroup.filter(group =>group.name == buttonPrompts.group_name);
         let prompt = '';
-        utilityInfo.settings.map((setting) => {
-          setting.items.map((item) => {
-            if(setting.name == selectedSetting.setting_name && item.name == selectedSetting.item_name) {
-              prompt = item.prompt;
-            }
+        if(selectedGroup.length > 0) {
+          selectedGroup[0].settings.map((setting) => {
+            setting.items.map((item) => {
+              if(setting.name == selectedSetting.setting_name && item.name == selectedSetting.item_name) {
+                prompt = item.prompt;
+              }
+            })
           })
-        })
-
+        }
         system_prompt += ` ${prompt}`;
       })
       

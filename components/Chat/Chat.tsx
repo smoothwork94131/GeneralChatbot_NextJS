@@ -44,20 +44,26 @@ const Chat:FC<Props> = ({isMobile,
             value: t_utility
         });
     };
-    const handleSelectSettings = (setting_index, item_index) => {
+    const handleSelectSettings = (setting_index, item_index, settingTitle) => {
         const updatedUtility:Utility = JSON.parse(JSON.stringify(selectedUtility));
-        
-        if(updatedUtility.settings) {
-           
-                updatedUtility.settings[setting_index].items.map((item ,_item_index) => {
-                    if(_item_index == item_index) {
-                        item.active = true;
-                    } else {
-                        item.active = false;
-                    }
-                })
+        const updatedButtonGroup = updatedUtility.buttonGroup.filter((group) => group.name == settingTitle);
             
+        if(updatedButtonGroup.length > 0) {
+            updatedButtonGroup[0].settings[setting_index].items.map((item ,_item_index) => {
+                if(_item_index == item_index) {
+                    item.active = true;
+                } else {
+                    item.active = false;
+                }
+            })
+            updatedUtility.buttonGroup.map((group) => {
+                if(group.name == settingTitle){
+                    group = updatedButtonGroup[0]
+                }
+            })
+                    
         }
+        
         openaiDispatch({
             "field": "selectedUtility",
             value: updatedUtility
@@ -159,6 +165,7 @@ const Chat:FC<Props> = ({isMobile,
                 setMessageIsStreaming={setMessageIsStreaming}
                 handleSelectSettings={handleSelectSettings}
                 setUpdateUtilty={setUpdateUtilty}
+                selectedRole={selectedRole}
             />
             {/* <Text ta="center"
                 sx={(theme) => ({

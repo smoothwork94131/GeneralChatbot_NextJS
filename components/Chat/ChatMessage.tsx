@@ -122,7 +122,7 @@ const ChatMessage: FC<Props> = ({
             }
             return message;
         })
-                                                        
+                                                  
         if(messages) {
             updatedConversation = {
                 ...updatedConversation,

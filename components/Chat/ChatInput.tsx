@@ -79,13 +79,12 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                     align='center'
                     gap='xs'
                     mb={15}
-                    sx={(theme)=>({
-                        cursor: 'pointer'
-                    })}
-                    onClick={() => {pastClipBoard()}}
+                    
                 >
-                    <IconNotes />
-                    <Text>
+                    <IconNotes onClick={() => {pastClipBoard()}}/>
+                    <Text  onClick={() => {pastClipBoard()}} sx={(theme)=>({
+                        cursor: 'pointer'
+                    })}>
                         Paste from Clipboard
                     </Text>
                 </Flex>:<></>

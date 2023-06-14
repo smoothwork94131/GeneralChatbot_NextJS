@@ -51,7 +51,7 @@ const ButtonGroup:FC<Props> = ({selectedUtility, isMobile, handleSelectCustomBut
                                                     background: `${theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.colors.gray[0]} !important`,
                                                     color: `${theme.colorScheme == 'dark' ? theme.colors.gray[1]:theme.colors.dark[7]}`
                                                 })}
-                                                onClick={() => { if(selectedUtility.settings.length > 0) { showSettingModal(group.name)}} }
+                                                onClick={() => { if(group.settings.length > 0) { showSettingModal(group.name)}} }
                                             >
                                                 {group.name}
                                             </Button>    

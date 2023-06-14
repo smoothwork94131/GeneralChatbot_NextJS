@@ -44,16 +44,13 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
         setInputContent(value);
     };
     const handleKeyDown = (e: any) => {
-        
         if(e.key == "Enter" && !e.shiftKey && !messageIsStreaming && disabledEnter) {
             e.preventDefault();
-    
             handleSend();
             setInputContent("")
         }
     };
     const handleSend = () => {
-        
         if (inputContent == "") {
             setTextError("Please enter a message");
             return;
@@ -89,7 +86,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                 >
                     <IconNotes />
                     <Text>
-                        Past from Clipboard
+                        Paste from Clipboard
                     </Text>
                 </Flex>:<></>
             }
@@ -107,7 +104,6 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                     autosize
                     minRows={2}
                     maxRows={4}
-                    
                     rightSection={
                         <Box
                             pr={20}

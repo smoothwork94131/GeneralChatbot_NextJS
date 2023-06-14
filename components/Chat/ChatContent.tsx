@@ -92,6 +92,7 @@ const ChatContent: FC<Props> = ({
             setIsModal(true);
         }
     },[user]);
+    
     useEffect(() => {
         setInputContent("");
     }, [selectedConversation])
@@ -120,16 +121,19 @@ const ChatContent: FC<Props> = ({
     },[utilityName]);
     
     const handleSend = async () => {
-
         if(inputContent == "") {
             setInputError("Please enter a message.");
             return;
         }
+
         if(messageIsStreaming) {
             return;
         }
-        
 
+        console.log(selectedUtility.buttonGroup)
+        if(selectedUtility.buttonGroup?.length === 0) {
+            console.log('ok');
+        }
         setInputError("");
         setResponseText("");
 
@@ -137,14 +141,12 @@ const ChatContent: FC<Props> = ({
         const fingerId = await getFingerId();
         const userTimes = await getUserTimes(user);
         
-        
         if(userTimes <= 0 ) {
             setIsLimitModal(true);
             return;
         }
 
         if(selectedConversation) {
-
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
             const today_datetime = new Date().toUTCString();
@@ -342,7 +344,6 @@ const ChatContent: FC<Props> = ({
             }
             setMessageIsStreaming(false);
         }
-        
     }
     
     const componentUtilityInputs = () => {
@@ -468,7 +469,7 @@ const ChatContent: FC<Props> = ({
                 >
                     {selectedUtility.summary}
                 </Text>
-                <Space h="md"/>
+                <Space h="sm"/>
                 {
                     selectedUtility.inputs.length > 0?
                     <Flex
@@ -485,7 +486,6 @@ const ChatContent: FC<Props> = ({
                     </Flex>
                     :<></>
                 }
-                <Space h="md"/>
                 <ChatInput
                     onSend={async() => {handleSend();}}
                     textareaRef={textareaRef}

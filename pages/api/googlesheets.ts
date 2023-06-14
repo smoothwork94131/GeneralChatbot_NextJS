@@ -20,6 +20,7 @@ export const removePromptFromRole = (roleData) => {
             item.items = items;
             return item;
           })
+          
           group.settings = settings;
           group.buttons = buttons;
           return group;

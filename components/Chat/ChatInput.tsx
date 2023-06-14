@@ -77,9 +77,8 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                 <Flex
                     justify='flex-end'
                     align='center'
-                    gap='xs'
                     mb={15}
-                    
+                    gap="10"                    
                 >
                     <IconNotes onClick={() => {pastClipBoard()}}/>
                     <Text  onClick={() => {pastClipBoard()}} sx={(theme)=>({

@@ -508,6 +508,7 @@ const ChatContent: FC<Props> = ({
                     </Flex>
                     :<></>
                 }
+                <Space h="md"/>
                 <ChatInput
                     onSend={async() => {handleSend();}}
                     textareaRef={textareaRef}

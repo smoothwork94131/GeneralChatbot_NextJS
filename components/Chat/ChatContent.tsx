@@ -157,6 +157,8 @@ const ChatContent: FC<Props> = ({
         if(userTimes <= 0 ) {
             setIsLimitModal(true);
             return;
+        } else {
+            setMessageIsStreaming(false);
         }
 
         if(selectedConversation) {
@@ -373,8 +375,6 @@ const ChatContent: FC<Props> = ({
             setMessageIsStreaming(false);
         }
         setMessageIsStreaming(false);
-
-
     }
     
     const componentUtilityInputs = () => {

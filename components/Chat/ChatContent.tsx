@@ -156,11 +156,9 @@ const ChatContent: FC<Props> = ({
         
         if(userTimes <= 0 ) {
             setIsLimitModal(true);
-            return;
-        } else {
             setMessageIsStreaming(false);
-        }
-
+            return;
+        } 
         if(selectedConversation) {
             
             

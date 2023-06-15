@@ -80,7 +80,7 @@ const ChatContent: FC<Props> = ({
     const [utilityName, setUtilityName] = useState<string>('');
     const [selectedSettings, setSelectedSettings] = useState<Setting[]>([]);
     const [isStream, setIsStream] = useState<boolean>(false);
-
+    const [confirmStraming, setConfirmStraming] = useState<boolean>(false);
     const user = useUser();
     
     useEffect(()=>{
@@ -137,7 +137,7 @@ const ChatContent: FC<Props> = ({
         }
         setInputError("");
         
-        if(messageIsStreaming) {
+        if(messageIsStreaming || confirmStraming) {
             return;
         }
         
@@ -148,19 +148,22 @@ const ChatContent: FC<Props> = ({
         
         
         // setResponseText("");
-        setMessageIsStreaming(true);
         
         const message = inputContent;
         const fingerId = await getFingerId();
+        setConfirmStraming(true);
         const userTimes = await getUserTimes(user);
         
         if(userTimes <= 0 ) {
             setIsLimitModal(true);
             setMessageIsStreaming(false);
+            setConfirmStraming(false);
+
             return;
-        } 
+        }
+
         if(selectedConversation) {
-            
+            setMessageIsStreaming(true);
             
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
 

@@ -38,7 +38,7 @@ const Output:FC<Props> = ({isMobile, responseText, handleSend}) => {
                     
                 >
                     <Group
-                        spacing="0.5em"
+                        spacing="0.5rem"
                         sx={(theme)=>({
                             cursor: 'pointer'
                         })}
@@ -49,7 +49,7 @@ const Output:FC<Props> = ({isMobile, responseText, handleSend}) => {
                         </Text>        
                     </Group>
                     <Group
-                        spacing="0.5em"
+                        spacing="0.5rem"
                         sx={(theme)=>({
                             cursor: 'pointer'
                         })}

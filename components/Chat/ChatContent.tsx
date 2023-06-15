@@ -158,7 +158,6 @@ const ChatContent: FC<Props> = ({
             setIsLimitModal(true);
             setMessageIsStreaming(false);
             setConfirmStraming(false);
-
             return;
         }
 
@@ -376,6 +375,7 @@ const ChatContent: FC<Props> = ({
             setMessageIsStreaming(false);
         }
         setMessageIsStreaming(false);
+        setConfirmStraming(false);
     }
     
     const componentUtilityInputs = () => {

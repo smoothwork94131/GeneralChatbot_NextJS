@@ -22,13 +22,18 @@ interface Props {
     inputError: string,
     selectedUtility: Utility
 }
-const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputContent, setInputContent, selectedConversation, disabledEnter, inputError, selectedUtility}) => {
+const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming, inputContent, setInputContent, selectedConversation, disabledEnter, inputError, selectedUtility}) => {
     const [textError, setTextError] = useState<string>();
 
     useEffect(() => {
         setTextError(inputError);   
     }, [inputError]);
+    
 
+    
+    useEffect(() => {
+        setTextError("");
+    },[selectedUtility.name])
     useEffect(() => {
         if (textareaRef && textareaRef.current) {
             textareaRef.current.style.height = 'inherit';
@@ -78,7 +83,7 @@ const ChatInput:FC<Props> = ({ onSend, textareaRef, messageIsStreaming,inputCont
                     justify='flex-end'
                     align='center'
                     mb={15}
-                    gap="10"                    
+                    gap="0.5em"                    
                 >
                     <IconNotes onClick={() => {pastClipBoard()}}/>
                     <Text  onClick={() => {pastClipBoard()}} sx={(theme)=>({

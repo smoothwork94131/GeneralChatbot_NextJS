@@ -35,28 +35,30 @@ const Output:FC<Props> = ({isMobile, responseText, handleSend}) => {
                     align='center'
                     gap='md'
                     mb={15}
-                    sx={(theme)=>({
-                        cursor: 'pointer'
-                    })}
+                    
                 >
                     <Group
-                        spacing="xs"
-                        onClick={() => {handleSend()}}
+                        spacing="0.5em"
+                        sx={(theme)=>({
+                            cursor: 'pointer'
+                        })}
                     >
-                        <IconArrowBackUp />
-                        <Text>
+                        <IconArrowBackUp onClick={() => {handleSend()}}/>
+                        <Text onClick={() => {handleSend()}}>
                             Regenerate
                         </Text>        
                     </Group>
                     <Group
-                        spacing="xs"
-                        onClick={() => {handleCopyToClipboard()}}
+                        spacing="0.5em"
+                        sx={(theme)=>({
+                            cursor: 'pointer'
+                        })}
                     >
                         {
                             copied?
-                            <IconCheck />:<IconCopy />
+                            <IconCheck onClick={() => {handleCopyToClipboard()}} />:<IconCopy />
                         }
-                        <Text>
+                        <Text onClick={() => {handleCopyToClipboard()}}>
                             {
                                 copied?
                                 'Copied ':'Copy '

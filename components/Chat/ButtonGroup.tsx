@@ -13,8 +13,10 @@ interface Props {
     isMobile: boolean,
     handleSelectCustomButtons: (group_name: string, button_name: string) =>void,
     showSettingModal: (modal_title: string)=>void,
+    messageIsStreaming: boolean
+
 }
-const ButtonGroup:FC<Props> = ({selectedUtility, isMobile, handleSelectCustomButtons, showSettingModal}) => {
+const ButtonGroup:FC<Props> = ({selectedUtility, isMobile, handleSelectCustomButtons, showSettingModal, messageIsStreaming}) => {
     return (
         <div>
             {

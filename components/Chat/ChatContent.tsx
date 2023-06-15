@@ -27,6 +27,7 @@ import { OPENAI_MODELID } from '@/utils/app/const';
 import { IconMistOff } from '@tabler/icons-react';
 import ButtonGroup from '@/components/Chat/ButtonGroup';
 import Output from '@/components/Chat/Output';
+import { Global } from 'global';
 
 interface Props {
     selectedUtility: Utility;
@@ -78,10 +79,13 @@ const ChatContent: FC<Props> = ({
     const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
     const [utilityName, setUtilityName] = useState<string>('');
     const [selectedSettings, setSelectedSettings] = useState<Setting[]>([]);
+    const [isStream, setIsStream] = useState<boolean>(false);
 
     const user = useUser();
     
-    
+    useEffect(()=>{
+        setIsStream(messageIsStreaming);
+    },[messageIsStreaming])
     useEffect(() => {
         const fetchData = async() => {
             // const data = await chkIsSubscription(user);
@@ -106,10 +110,8 @@ const ChatContent: FC<Props> = ({
             setHistoryConversation(JSON.parse(history));
         }
     }, [selectedConversation, selectedUtility, conversationHistory]);
-    useEffect(() => {    
-        if(messageIsStreaming) {
-            setMessageIsStreaming(false);
-        }
+    
+    useEffect(() => {
         setInputError("");
         if(isRegenerate) {
             handleSend();
@@ -128,22 +130,25 @@ const ChatContent: FC<Props> = ({
     },[utilityName]);
     
     const handleSend = async () => {
+        
         if(inputContent == "") {
             setInputError("Please enter a message.");
             return;
         }
-
+        setInputError("");
+        
         if(messageIsStreaming) {
             return;
         }
         
-        if(selectedUtility.buttonGroup?.length === 0) {
+
+        if(selectedUtility.buttonGroup?.length === 0 ) {
             console.log('ok');
         }
         
-        setInputError("");
         
         // setResponseText("");
+        setMessageIsStreaming(true);
         
         const message = inputContent;
         const fingerId = await getFingerId();
@@ -155,7 +160,10 @@ const ChatContent: FC<Props> = ({
         }
 
         if(selectedConversation) {
+            
+            
             let updatedConversation:Conversation = JSON.parse(JSON.stringify(selectedConversation));    
+
             const inputs = JSON.parse(JSON.stringify(selectedUtility.inputs));
             const today_datetime = new Date().toUTCString();
             let messages: Message[] = [];
@@ -190,7 +198,6 @@ const ChatContent: FC<Props> = ({
                 });    
             }
             
-            setMessageIsStreaming(true);
 
             const response_messages: Message[] = [];
             
@@ -208,13 +215,15 @@ const ChatContent: FC<Props> = ({
                 inputs: inputs
             });
 
+            
+
             const input: {
                 response_messages: Message[],
                 utilityKey: string,
                 fingerId: string,
                 settings: SettingPromptItem[]
                 userId: string|null,
-                buttonPrompts: ButtonPrompts|null|undefined
+                buttonPrompts?: ButtonPrompts
             } = { 
                 response_messages: response_messages.map((item, index) => {
                     if(item.datetime) delete item?.datetime;
@@ -224,7 +233,6 @@ const ChatContent: FC<Props> = ({
                 fingerId: fingerId,
                 userId: user?user.id:null,
                 settings:settings,
-                buttonPrompts: buttonPromts
             };
             
             const user_message: Message = {    
@@ -234,9 +242,15 @@ const ChatContent: FC<Props> = ({
                 datetime: today_datetime,
                 active: false,
                 setting_prompt: settings,
-                button_prompt: buttonPromts
             };
 
+           
+            if(selectedUtility.buttonGroup.length > 0 && buttonPromts) {
+                user_message.button_prompt = buttonPromts;
+                input.buttonPrompts = buttonPromts;
+            }
+
+           
             updatedConversation.messages.push([user_message, AssistantMessageState]);
             saveSelectConverSation(updatedConversation);
 
@@ -326,6 +340,7 @@ const ChatContent: FC<Props> = ({
                         
                     }
                 }
+                
             } else {
                 const data = await response.json();
                 const assistant_message: Message = data.message;
@@ -357,6 +372,9 @@ const ChatContent: FC<Props> = ({
             }
             setMessageIsStreaming(false);
         }
+        setMessageIsStreaming(false);
+
+
     }
     
     const componentUtilityInputs = () => {
@@ -414,13 +432,16 @@ const ChatContent: FC<Props> = ({
     }
 
     const handleSelectCustomButtons = (group_name, button_name) => {
+
         setButtonPrompts({
             group_name: group_name,
             button_name: button_name
-        })
+        })    
+        
     }
 
     useEffect(() => {
+    
         if(buttonPromts) {
             handleSend();
         }   
@@ -526,6 +547,8 @@ const ChatContent: FC<Props> = ({
                     handleSelectCustomButtons={handleSelectCustomButtons}
                     isMobile={isMobile}
                     showSettingModal={showSettingModal}
+                    messageIsStreaming={isStream}
+                    
                 />
                 <Space h="md" />
                 {

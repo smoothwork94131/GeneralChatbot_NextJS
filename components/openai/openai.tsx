@@ -145,9 +145,9 @@ const OpenAi = ({
     },[serverRoleData, utilityKey, propsRoleIndex]);
   
     
-    useEffect(() => {
-        // handleSelectRole(propsRoleIndex);
-    }, [propsRoleIndex]);
+    // useEffect(() => {
+    //     // handleSelectRole(propsRoleIndex);
+    // }, [propsRoleIndex]);
     
     useEffect(() => {
         if(roleGroup.length > 0) {
@@ -325,7 +325,11 @@ const OpenAi = ({
         dispatchServerRoleData(data);
 
         const updateBackendResponse = await fetch("/api/updated_backend");
-        const updated_status = await updateBackendResponse.json();    
+        const updated_status = await updateBackendResponse.json();   
+        
+        const revalidateResponse = await fetch(`/api/revalidate?secret=${process.env.NEXT_PUBLIC_MY_SECRET_TOKEN}`);
+        const resp = await revalidateResponse.json();
+        console.log("revalidateResponse", revalidateResponse.status, resp)
           
         if(updated_status.status == "Success") {
             console.log("updated backend succefully")
@@ -484,9 +488,7 @@ const OpenAi = ({
         setOpenedSiebar(false);
     };
 
-    const goPage = (page_url) => {
-        router.replace(page_url);
-    }
+
     const handleShowSidebar = () => {
         if(isMobile)
             setOpenedSiebar(!openedSidebar);
@@ -928,7 +930,6 @@ const DrawerNav: FC<{
     changeSpotlightType
   }) => {
     
-    const router = useRouter();
     // useEffect(() => {
         
     //     if(router.push)

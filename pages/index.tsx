@@ -3,6 +3,7 @@ import { convertedSheetData, getSheets } from '@/utils/server/google_sheets';
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react';
 const OpenAi = dynamic(() => import('@/components/openai/openai'), { ssr: false })
+import type { GetStaticProps } from 'next';
 
 const Home = ({
   roleName,
@@ -67,7 +68,7 @@ const Home = ({
   )
 }
 
-export async function getStaticProps(context) {
+export const getStaticProps : GetStaticProps = async (context) => {
   const data = await convertedSheetData();
   return {
       props: {

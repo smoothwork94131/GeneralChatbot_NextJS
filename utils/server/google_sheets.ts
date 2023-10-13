@@ -272,6 +272,7 @@ async function getDataFromGoogleSheet(range: string) {
 
 export async function getSheets(){
   const result = await getData(SHEET_RANGE);
+  console.log(result);
   return roleData;
 }
 

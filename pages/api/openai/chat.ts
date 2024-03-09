@@ -329,6 +329,9 @@ export default async function handler(req, res) {
 
     if(system_prompt){
       system_prompt = system_prompt.replaceAll("{{Today}}", today_datetime);
+      console.log('***************************')
+      console.log(settings);
+      console.log('************************')
       settings.map(selectedSetting => {
         const selectedGroup = utilityInfo.buttonGroup.filter(group =>group.name == buttonPrompts.group_name);
         let prompt = '';
@@ -341,6 +344,9 @@ export default async function handler(req, res) {
             })
           })
         }
+        console.log('***************************')
+        console.log(prompt);
+        console.log('************************')
         system_prompt += ` ${prompt}`;
       })
       

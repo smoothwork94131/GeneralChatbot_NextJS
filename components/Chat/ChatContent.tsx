@@ -171,7 +171,9 @@ const ChatContent: FC<Props> = ({
             let messages: Message[] = [];
             
             let settings: SettingPromptItem[] = [];
-            
+            console.log('-------------------')
+            console.log(selectedUtility)
+            console.log('---------------')
             let selectedButtonGroup = selectedUtility.buttonGroup.filter(group => group.name == buttonPromts?.group_name);
 
             if(selectedButtonGroup.length > 0) {

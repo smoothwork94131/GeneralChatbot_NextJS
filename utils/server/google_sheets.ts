@@ -227,7 +227,6 @@ function getSettings(row, headers) {
 }
 
 async function getSheetData(range: string) {
-
   const sheet_data = await getDataFromGoogleSheet(range);
   const rows = sheet_data.data.values;
   if (!rows) throw new Error('No data found in the sheet');
@@ -260,10 +259,7 @@ async function getDataFromGoogleSheet(range: string) {
       range: range 
     });
     
-
-
     return response;
-   
   } catch (error) {
     console.error('Error fetching data from Google Sheets:', error);
     throw error;
@@ -272,7 +268,6 @@ async function getDataFromGoogleSheet(range: string) {
 
 export async function getSheets(){
   const result = await getData(SHEET_RANGE);
-  console.log(result);
   return roleData;
 }
 

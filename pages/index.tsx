@@ -70,6 +70,9 @@ const Home = ({
 
 export const getStaticProps : GetStaticProps = async (context) => {
   const data = await convertedSheetData();
+  console.log('---------------------Role Data');
+  console.log(data);
+  console.log('---------------------Role Data');
   return {
       props: {
         serverRoleData:data
